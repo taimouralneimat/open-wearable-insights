@@ -1,0 +1,39 @@
+# Open Wearable Insights — local development stack
+# All services bind to 127.0.0.1 (loopback) only.
+# No health data leaves the machine.
+
+services:
+  postgres:
+    image: timescale/timescaledb:2.17.2-pg16
+    container_name: open-wearable-insights-postgres
+    environment:
+      POSTGRES_USER: owi
+      POSTGRES_PASSWORD: owi-dev-only-local
+      POSTGRES_DB: owi
+      # TimescaleDB extension is loaded via init SQL; the image includes it.
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data
+      - ./init-timescaledb.sql:/docker-entrypoint-initdb.d/00-init-timescaledb.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U owi -d owi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:0.5.1
+    container_name: open-wearable-insights-ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ./volumes/ollama:/root/.ollama
+    restart: unless-stopped
+    # The app works fully without Ollama. This service is optional.
+    profiles:
+      - llm
+
+# Volumes are gitignored (see .gitignore). They live outside the repo conceptually
+# but Docker requires a relative path; the .gitignore excludes ./volumes/.

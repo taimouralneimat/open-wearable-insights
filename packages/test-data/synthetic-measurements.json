@@ -1,0 +1,8642 @@
+[
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 133.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 53.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 85.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 79.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 93.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 87.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 109.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 28.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 55.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 45.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 50.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 57.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 530.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 3976.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 12997.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 10898.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1940.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2678.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3118.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1513.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 80.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 69.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 34.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 15.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 90.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-19T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 119.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 176.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 99.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 121.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 102.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 81.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 106.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 77.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 62.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 46.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 50.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 52.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 1595.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 4655.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 2020.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5559.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2771.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2229.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2240.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1919.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 26.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 93.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 64.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 60.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 24.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-18T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 159.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 150.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 79.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 54.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 51.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 46.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 41.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 114.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 66.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 52.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 61.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 54.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 18291.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9177.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5297.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 4932.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2622.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2025.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2669.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3295.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 39.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 21.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 99.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 51.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 90.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 90.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.1,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 21.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 11.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 15.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-17T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 179.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 118.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 176.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 161.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 21.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 92.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 88.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 73.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 61.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 47.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 55.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9074.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 19076.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17517.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5267.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2501.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1857.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3325.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3241.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 29.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 63.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 60.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 15.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 10.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 10.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-16T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 164.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 158.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 90.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 57.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 107.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 114.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 28.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 68.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 46.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 64.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 64.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 48.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9505.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 10996.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5301.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17448.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2346.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1923.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2578.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2959.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 20.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 31.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 99.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 65.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 15.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 13.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 13.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-15T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 59.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 132.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 79.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 167.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 106.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 27.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 43.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 86.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 50.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 48.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 68.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 59.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9453.4,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 15692.4,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 16149.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 3808.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1693.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2362.1,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2347.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2434.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 72.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 67.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 98.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 9.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 12.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-14T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 82.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 170.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 107.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 162.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 75.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 25.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 119.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 103.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 69.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 68.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 66.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 49.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9712.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 4274.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 8020.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 1172.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2257.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3470.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2030.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3068.1,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 45.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 42.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 95.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 99.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 24.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 21.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-13T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 57.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 125.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 115.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 160.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 35.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 116.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 28.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 38.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 59.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 61.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 50.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 48.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17805.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 4924.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 11890.4,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 12387.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2338.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2667.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2545.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3369.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 20.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 71.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 23.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 39.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 11.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 25.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 24.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-12T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 59.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 77.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 84.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 171.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 108.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 107.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 57.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 35.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 65.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 62.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 60.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 69.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 13079.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 156.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 16342.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5987.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2826.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3377.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1768.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1730.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 10.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 55.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 27.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 60.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 17.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 11.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-11T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 105.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 86.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 50.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 150.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 83.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 46.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 94.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 75.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 55.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 45.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 46.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 67.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 18078.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 10911.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 16691.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 11650.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1796.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1754.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2116.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3298.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 79.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 86.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 89.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 21.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 12.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-10T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 162.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 176.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 155.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 164.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 22.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 93.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 53.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 113.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 65.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 66.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 65.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 15747.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 2161.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17443.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17171.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1944.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3133.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2420.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2110.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 79.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 22.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 2.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 19.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 24.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-09T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 172.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 65.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 176.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 73.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 116.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 46.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 30.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 63.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 63.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 52.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 60.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 57.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 7703.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 11531.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5094.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 14175.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1503.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3351.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2576.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2938.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 74.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 67.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 36.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 7.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.1,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-08T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 102.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 88.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 66.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 104.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 114.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 87.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 110.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 81.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 52.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 58.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 45.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 52.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 8597.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 11599.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 13094.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9299.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2384.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1927.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2446.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3302.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 79.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 17.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 8.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 51.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 13.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 13.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 10.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-07T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 81.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 111.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 160.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 59.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 61.4,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 83.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 39.4,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 89.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 57.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 61.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 45.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 15019.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 15400.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 2131.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 8502.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1851.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3415.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2535.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1600.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 24.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 84.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 45.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 80.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 17.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-06T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 158.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 121.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 166.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 146.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 67.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 45.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 44.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 83.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 64.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 58.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 60.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 1549.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5714.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5434.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 6394.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2580.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1776.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1962.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2887.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 70.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 6.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 40.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 54.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.1,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 21.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-05T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 99.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 50.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 95.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 148.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 105.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 115.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 61.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 94.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 58.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 60.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 50.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 50.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 8716.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 580.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 6722.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 13582.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2308.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1830.1,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2434.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1755.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 62.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 2.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 39.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 56.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 90.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 10.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 15.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 13.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-04T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 149.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 99.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 147.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 158.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 45.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 28.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 21.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 73.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 70.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 53.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 61.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 64.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 13035.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 15084.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 18992.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 3987.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1540.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1804.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1752.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2838.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 56.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 21.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 69.9,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 76.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.1,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.1,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 24.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 11.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 10.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-03T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 90.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 138.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 174.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 101.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 91.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 27.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 89.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 82.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 47.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 64.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 66.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 60.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 2421.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 19676.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 15652.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 6944.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2356.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2241.1,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2511.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2182.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 85.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 82.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 10.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 96.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.1,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 21.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 24.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-02T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 120.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 112.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 106.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 145.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 46.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 105.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 103.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 28.7,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 67.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 56.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 60.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 7579.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 574.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17019.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 3636.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1924.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3095.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2180.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3260.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 70.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 27.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 1.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 94.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 90.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 17.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 21.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-07-01T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 62.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 78.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 139.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 89.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 78.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 67.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 73.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 62.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 63.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 53.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 62.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5028.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 2413.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 3851.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 2391.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2571.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3024.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1870.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1932.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 48.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 72.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 97.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 52.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 12.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 10.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-30T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 176.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 121.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 140.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 66.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 106.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 69.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 107.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 77.4,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 56.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 56.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 49.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 46.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 18821.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9554.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 16442.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 8014.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1648.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2758.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1607.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1798.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 56.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 30.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 99.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 11.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.1,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 17.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-29T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 178.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 89.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 130.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 129.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 94.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 114.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 40.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 41.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 61.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 48.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 49.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 46.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 53.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9010.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 11876.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5825.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1963.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2913.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2906.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2408.1,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 68.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 92.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 78.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 62.5,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 11.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-28T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 71.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 90.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 147.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 124.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 48.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 32.4,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 88.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 90.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 68.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 57.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 57.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 47.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 797.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 8640.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 6446.4,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 5007.4,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1682.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3423.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3171.9,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2650.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 95.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 100.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 67.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 27.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 90.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 12.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-27T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 113.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 61.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 95.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 93.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 87.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 105.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 53.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 89.4,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 52.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 68.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 65.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 58.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9096.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 6290.3,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 6465.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 19403.7,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2308.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2529.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3476.2,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2815.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 54.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 41.3,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 18.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 36.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.5,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-26T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 65.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 176.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 129.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 81.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 35.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 75.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 75.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 29.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 69.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 67.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 56.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 47.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 16642.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9967.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 14332.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 10177.4,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2046.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3169.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3460.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1987.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 55.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 38.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 92.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 50.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 92.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 24.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 17.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.3,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-25T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 86.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 88.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 126.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 179.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 69.0,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 34.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 73.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 54.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 58.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 58.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 56.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 53.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 3773.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 13950.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 11436.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 4671.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3051.1,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1587.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2989.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2910.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 81.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 38.6,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 66.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 82.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.8,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 90.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.9,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-24T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 118.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 109.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 143.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 103.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 85.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 35.4,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 66.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 116.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 53.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 62.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 61.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 66.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17046.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 17186.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 7600.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 6333.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2937.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3018.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3244.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1571.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 6.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 63.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 92.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 99.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 91.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.4,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 23.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-23T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 56.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 153.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 88.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 98.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 34.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 73.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 76.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 99.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 49.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 47.0,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 66.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 60.5,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 4816.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 18256.6,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 2862.4,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9223.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2008.0,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2010.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1518.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3109.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 90.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 67.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 15.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 44.2,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.5,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 95.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 94.2,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 13.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 22.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 13.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 15.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-22T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 112.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 80.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 124.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 124.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 119.3,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 49.5,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 117.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 85.8,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.9,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 59.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 62.1,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 63.6,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 980.9,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 12128.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9934.5,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 18083.1,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2072.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3097.7,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2714.1,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2204.6,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 63.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 62.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 67.8,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 72.1,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.6,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.4,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 96.3,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 19.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 14.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.6,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.7,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-21T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 145.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 61.7,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 88.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hr",
+    "value": 147.2,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 37.6,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 33.2,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 73.9,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "hrv",
+    "value": 117.1,
+    "unit": "ms",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 58.3,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 67.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 65.8,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "rhr",
+    "value": 51.4,
+    "unit": "bpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 16493.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 9637.0,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 16129.8,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "steps",
+    "value": 14931.2,
+    "unit": "count",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 2177.4,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1730.3,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 3425.8,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "calories",
+    "value": 1781.5,
+    "unit": "kcal",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 96.7,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 86.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 72.4,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "stress",
+    "value": 98.0,
+    "unit": "score",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 99.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 98.0,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 93.7,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "spo2",
+    "value": 97.9,
+    "unit": "percent",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T04:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 10.2,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T10:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 18.0,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T16:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 16.8,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T22:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "respiration",
+    "value": 20.1,
+    "unit": "brpm",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 0.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 1.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 2.0,
+    "unit": "stage",
+    "source": "synthetic"
+  },
+  {
+    "time": "2026-06-20T06:14:11.350533+00:00",
+    "source_tz": "UTC",
+    "metric_type": "sleep_stage",
+    "value": 3.0,
+    "unit": "stage",
+    "source": "synthetic"
+  }
+]
