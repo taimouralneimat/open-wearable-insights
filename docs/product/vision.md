@@ -7,7 +7,7 @@ interpretation layer — recovery, strain, sleep, coaching, and behavioral
 insights — is often locked behind proprietary scores, cloud dependencies, or
 opaque algorithms. Users who value privacy, transparency, and ownership of
 their own data have no serious option that combines detailed Garmin-grade data
-capture with WHOOP-grade interpretation, locally.
+capture with recovery-band-grade interpretation, locally.
 
 **Open Wearable Insights** exists to close that gap.
 
@@ -22,7 +22,7 @@ later.
 ## Target user (first customer)
 
 The first customer is the developer: a Garmin watch user (likely Forerunner
-family) who previously used WHOOP and wants deeper, more transparent, and more
+family) who previously used a recovery band and wants deeper, more transparent, and more
 private analytics than either vendor offers. The first deployment runs privately
 and locally on a personal computer.
 

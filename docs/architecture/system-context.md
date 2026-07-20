@@ -38,7 +38,7 @@ graph TB
 - **In scope**: local ingestion, normalization, storage, analytics, insights,
   coaching, Flutter client, local LLM integration.
 - **Out of scope (Phase 0–1)**: official Garmin Health/Activity/Training APIs,
-  WHOOP API, Apple HealthKit, Android Health Connect, Connect IQ app, hosted
+  competitor API, Apple HealthKit, Android Health Connect, Connect IQ app, hosted
   multi-user deployment. These have interface seams but are not implemented.
 - **Never in scope**: unofficial Garmin Connect password scraping; medical
   diagnosis; copying proprietary formulas/UI.

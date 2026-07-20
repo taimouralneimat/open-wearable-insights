@@ -3,7 +3,7 @@
 ## Primary persona — "Taimour, the privacy-conscious athlete"
 
 - **Device**: Garmin Forerunner-family watch.
-- **History**: Previously used WHOOP; familiar with recovery/strain concepts.
+- **History**: Previously used a recovery band; familiar with recovery/strain concepts.
 - **Goals**: Understand recovery and training load from Garmin data with
   transparency; keep data local; get coaching grounded in real metrics.
 - **Frustrations**: Opaque proprietary scores; cloud dependency; no easy way to

@@ -22,7 +22,7 @@ and produces **transparent, versioned, explainable** recovery, sleep, training-l
 and coaching insights.
 
 The goal is to pair Garmin's rich data capture with the clarity of interpretation,
-coaching, and recovery guidance associated with products like WHOOP — **without**
+coaching, and recovery guidance associated with recovery-band products — **without**
 copying any vendor's proprietary formula, score, or visual design, and **without**
 sending any health data to a cloud.
 
