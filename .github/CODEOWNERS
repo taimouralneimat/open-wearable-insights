@@ -1,0 +1,32 @@
+# CODEOWNERS for Open Wearable Insights
+# The authenticated repository owner is the human approval authority.
+# Virtual-role reviews (QA, Security, Architecture) are represented as
+# versioned review artifacts and CI checks, not fabricated GitHub approvals.
+
+# Default owner
+* @taimour-dev
+
+# Architecture-sensitive paths — require ADR awareness
+/docs/architecture/          @taimour-dev
+/docs/architecture/adr/      @taimour-dev
+/.clinerules/                @taimour-dev
+
+# Security- and privacy-sensitive paths
+/SECURITY.md                 @taimour-dev
+/docs/security/              @taimour-dev
+/.github/                    @taimour-dev
+
+# Backend
+/services/api/               @taimour-dev
+
+# Flutter client
+/apps/flutter/               @taimour-dev
+
+# Garmin Connect IQ
+/apps/garmin-connect-iq/     @taimour-dev
+
+# Shared packages
+/packages/                   @taimour-dev
+
+# Infrastructure
+/infrastructure/             @taimour-dev

@@ -1,0 +1,183 @@
+# =============================================================================
+# Open Wearable Insights — .gitignore
+# CRITICAL: Real health data, credentials, and local state must never be committed.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Health data & user exports (NEVER commit real health data)
+# -----------------------------------------------------------------------------
+# FIT files from real devices — only synthetic fixtures under packages/test-data are allowed
+*.fit
+!packages/test-data/**/synthetic*.fit
+!apps/garmin-connect-iq/**/*.fit
+# Garmin Connect exports
+/imports/
+/exports/
+**/garmin-export/
+**/health-export/
+**/whoop-export/
+# CSV/JSON/TCX/GPX from real devices
+*.tcx
+*.gpx
+*.hr
+*.slp
+*.wgt
+# Real screenshots & images that may contain health data
+/screenshots/
+**/screenshots-real/
+# Exception: synthetic test fixtures and docs diagrams
+!packages/test-data/**
+!docs/**/*.png
+!docs/**/*.svg
+
+# -----------------------------------------------------------------------------
+# Local application data directory
+# -----------------------------------------------------------------------------
+.data/
+.local-data/
+app-data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# -----------------------------------------------------------------------------
+# Secrets, tokens, credentials
+# -----------------------------------------------------------------------------
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+.env
+.env.*
+!.env.example
+!.env.sample
+secrets.yml
+secrets.yaml
+**/application-local.yml
+**/application-secret.yml
+**/application-secret.properties
+oauth-tokens.json
+refresh-tokens.json
+
+# -----------------------------------------------------------------------------
+# Garmin developer keys & signing material
+# -----------------------------------------------------------------------------
+*.garmin-dev-key
+garmin-developer.key
+**/garmin-keys/
+**/connect-iq-keys/
+*.sig
+*.gpg
+
+# -----------------------------------------------------------------------------
+# Mobile signing & keystore files
+# -----------------------------------------------------------------------------
+*.keystore
+*.keystore.jks
+android/key.properties
+ios/Runner/GoogleService-Info.plist
+ios/Runner/*.mobileprovision
+ios/Certificates/
+**/Signing/
+
+# -----------------------------------------------------------------------------
+# IDE & editor secrets
+# -----------------------------------------------------------------------------
+.idea/
+*.iml
+.vscode/
+!.vscode/settings.json.example
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.settings/
+.factorypath
+
+# -----------------------------------------------------------------------------
+# Build outputs
+# -----------------------------------------------------------------------------
+# Java / Gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.gradle/
+out/
+target/
+*.class
+generated/
+bin/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+flutter_*.png
+!docs/**/flutter_*.png
+
+# Node (for any JS tooling, SBOM generation, etc.)
+node_modules/
+dist/
+.npm
+
+# Ollama models (local model blobs — never commit)
+.ollama/
+models/
+*.gguf
+
+# -----------------------------------------------------------------------------
+# Docker volumes & local infra state
+# -----------------------------------------------------------------------------
+docker/volumes/
+infrastructure/docker/volumes/
+**/pgdata/
+**/postgres-data/
+*.log.gz
+
+# -----------------------------------------------------------------------------
+# Logs
+# -----------------------------------------------------------------------------
+*.log
+logs/
+log/
+!docs/**/log/**
+
+# -----------------------------------------------------------------------------
+# Test & coverage reports
+# -----------------------------------------------------------------------------
+coverage/
+*.lcov
+.coverage
+htmlcov/
+.pytest_cache/
+reports/
+!docs/qa/release-report.md
+
+# -----------------------------------------------------------------------------
+# CycloneDX / SBOM generated artifacts (regenerated in CI)
+# -----------------------------------------------------------------------------
+**/cyclonedx-*.json
+**/bom-*.json
+**/*.bom.json
+sbom/
+
+# -----------------------------------------------------------------------------
+# OS-specific
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -----------------------------------------------------------------------------
+# Claude / Cline local working files (not project rules)
+# -----------------------------------------------------------------------------
+.cline/
+.cline-cache/

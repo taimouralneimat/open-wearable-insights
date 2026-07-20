@@ -1,0 +1,65 @@
+version: 2
+updates:
+  # Backend — Gradle (Java/Spring Boot)
+  - package-ecosystem: "gradle"
+    directory: "/services/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "java"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      spring:
+        patterns:
+          - "org.springframework.boot:*"
+          - "org.springframework:*"
+          - "io.spring.gradle:*"
+      test:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.assertj:*"
+          - "org.mockito:*"
+          - "org.testcontainers:*"
+
+  # Flutter client — pub
+  - package-ecosystem: "pub"
+    directory: "/apps/flutter"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "flutter"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # Docker base images
+  - package-ecosystem: "docker"
+    directory: "/infrastructure/docker"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(deps)"

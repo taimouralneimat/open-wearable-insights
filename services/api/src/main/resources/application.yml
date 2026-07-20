@@ -1,0 +1,62 @@
+# Open Wearable Insights — application configuration
+# Local-first: all services bind to 127.0.0.1 only.
+
+server:
+  address: 127.0.0.1
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/owi
+    username: owi
+    password: owi-dev-only-local
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  ai:
+    ollama:
+      base-url: http://127.0.0.1:11434
+      chat:
+        model: ${OWI_LLM_MODEL:qwen3:8b}
+        # The app works fully without Ollama. LLM is optional.
+        enabled: ${OWI_LLM_ENABLED:false}
+
+# Local app-data directory for raw imported files (OUTSIDE the repo).
+owi:
+  import-dir: ${OWI_IMPORT_DIR:~/.open-wearable-insights/imports}
+  llm:
+    enabled: ${OWI_LLM_ENABLED:false}
+    model: ${OWI_LLM_MODEL:qwen3:8b}
+
+# Actuator — local only
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging — redact sensitive fields; no request-body logging for health endpoints
+logging:
+  level:
+    com.openwearableinsights: INFO
+    org.hibernate.SQL: WARN
+    org.flywaydb: INFO
+
+# OpenAPI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
