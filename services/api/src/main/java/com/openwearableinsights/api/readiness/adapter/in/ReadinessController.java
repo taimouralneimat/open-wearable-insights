@@ -5,6 +5,11 @@ import com.openwearableinsights.api.readiness.domain.ReadinessInputs;
 import com.openwearableinsights.api.readiness.domain.ReadinessScore;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -28,7 +33,7 @@ public class ReadinessController {
 
     @PostMapping("/calculate")
     @Operation(summary = "Calculate readiness from inputs", description = "Deterministic, versioned. The LLM never computes this.")
-    public ReadinessScore calculate(@RequestBody ReadinessRequest request) {
+    public ReadinessScore calculate(@Valid @RequestBody ReadinessRequest request) {
         ReadinessInputs inputs = new ReadinessInputs(
                 Optional.ofNullable(request.hrvDeviationMs()),
                 Optional.ofNullable(request.rhrDeviationBpm()),
@@ -69,7 +74,7 @@ public class ReadinessController {
             Double acuteLoad,
             Double chronicLoad,
             Double stressScore,
-            double dataCompleteness,
-            int baselineDays
+            @NotNull @DecimalMin("0.0") @DecimalMax("1.0") double dataCompleteness,
+            @Min(0) int baselineDays
     ) {}
 }
