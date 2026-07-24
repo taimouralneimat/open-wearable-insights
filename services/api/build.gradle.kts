@@ -1,6 +1,7 @@
 import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
+    java
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.cyclonedx)
@@ -63,8 +64,6 @@ tasks.withType<Test> {
 // Generate SBOM (CycloneDX)
 tasks.cyclonedxBom {
     setOutputFormat("json")
-    setIncludeBomJson(true)
-    setIncludeBomXml(false)
 }
 
 // Allow --load-synthetic arg for the synthetic data loader

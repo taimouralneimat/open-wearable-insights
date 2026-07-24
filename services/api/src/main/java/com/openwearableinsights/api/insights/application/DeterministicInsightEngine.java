@@ -109,7 +109,7 @@ public class DeterministicInsightEngine {
         return List.of(
                 "v0.1 weights are initial estimates, not empirically tuned.",
                 "Does not reproduce any vendor's proprietary formula.",
-                "Not a medical device; does not diagnose or treat."
+                "Not a medical device; does not identify or manage medical conditions."
         );
     }
 

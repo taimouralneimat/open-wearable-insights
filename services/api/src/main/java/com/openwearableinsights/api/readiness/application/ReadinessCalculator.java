@@ -57,7 +57,7 @@ public class ReadinessCalculator {
         // HRV deviation (positive deviation = good)
         if (inputs.hrvDeviationMs().isPresent()) {
             double hrvDev = inputs.hrvDeviationMs().get();
-            double hrvScore = clamp(hrvDev * 1.0, -30, 30);
+            double hrvScore = clamp(hrvDev * 2.5, -40, 40);
             weightedSum += W_HRV * hrvScore;
             factors.add(new FactorContribution(
                     "HRV deviation", hrvDev, "ms",
@@ -70,7 +70,7 @@ public class ReadinessCalculator {
         // RHR deviation (negative deviation = good, i.e., lower RHR than baseline)
         if (inputs.rhrDeviationBpm().isPresent()) {
             double rhrDev = inputs.rhrDeviationBpm().get();
-            double rhrScore = clamp(-rhrDev * 5.0, -30, 30);
+            double rhrScore = clamp(-rhrDev * 12.5, -40, 40);
             weightedSum += W_RHR * rhrScore;
             factors.add(new FactorContribution(
                     "RHR deviation", rhrDev, "bpm",
@@ -85,7 +85,7 @@ public class ReadinessCalculator {
             double sleepDur = inputs.sleepDurationHours().get();
             double sleepNeed = inputs.sleepNeedHours().get();
             double sleepDeficit = sleepDur - sleepNeed;
-            double sleepScore = clamp(sleepDeficit * 12.0, -30, 20);
+            double sleepScore = clamp(sleepDeficit * 30.0, -40, 30);
             weightedSum += W_SLEEP * sleepScore;
             factors.add(new FactorContribution(
                     "Sleep duration vs. need", sleepDeficit, "hours",
@@ -100,7 +100,7 @@ public class ReadinessCalculator {
             double acute = inputs.acuteLoad().get();
             double chronic = inputs.chronicLoad().get();
             double acwr = chronic > 0 ? acute / chronic : 1.0;
-            double loadScore = clamp((1.0 - acwr) * 20.0, -20, 20);
+            double loadScore = clamp((1.0 - acwr) * 50.0, -30, 30);
             weightedSum += W_LOAD * loadScore;
             factors.add(new FactorContribution(
                     "Training load (ACWR)", acwr, "ratio",
@@ -113,7 +113,7 @@ public class ReadinessCalculator {
         // Stress (lower is better)
         if (inputs.stressScore().isPresent()) {
             double stress = inputs.stressScore().get();
-            double stressScore = clamp((50.0 - stress) * 0.3, -15, 15);
+            double stressScore = clamp((50.0 - stress) * 0.75, -25, 25);
             weightedSum += W_STRESS * stressScore;
             factors.add(new FactorContribution(
                     "Stress", stress, "score",
@@ -125,7 +125,7 @@ public class ReadinessCalculator {
 
         // Data completeness
         double completeness = inputs.dataCompleteness();
-        double completenessScore = (completeness - 0.5) * 20.0;
+        double completenessScore = (completeness - 0.5) * 50.0;
         weightedSum += W_COMPLETENESS * completenessScore;
         factors.add(new FactorContribution(
                 "Data completeness", completeness, "fraction",

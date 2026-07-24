@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'features/readiness/dashboard_page.dart';
+import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
 
 /// Open Wearable Insights — app shell with routing.
 ///
