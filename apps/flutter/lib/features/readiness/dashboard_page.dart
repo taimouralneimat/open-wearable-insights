@@ -166,6 +166,7 @@ class _ReadinessCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
                 Text('${readiness.score}',
                     style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: color)),
@@ -281,7 +282,7 @@ class _FactorRow extends StatelessWidget {
           Icon(icon, color: color, size: 16),
           const SizedBox(width: 8),
           Expanded(child: Text(factor.name)),
-          Text('${factor.contribution.toStringAsFixed(1)}',
+          Text(factor.contribution.toStringAsFixed(1),
               style: TextStyle(color: color, fontWeight: FontWeight.w500)),
         ],
       ),
