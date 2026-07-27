@@ -88,3 +88,17 @@ catches every one of them immediately.
   default `README`) uncustomized if they reference symbols that don't
   exist in the actual project — either wire them to the real code or
   remove them.
+- **Never write file contents via a shell heredoc** (`cmd << 'EOF' ... EOF`,
+  especially through a tool-driven terminal). This caused multiple
+  multi-hour deadlocks during Phase 2: the file's own content contained
+  quotes that could desync the heredoc terminator, leaving the shell
+  waiting forever for a closing marker that never arrived byte-for-byte,
+  while the calling process waited forever for output that would never
+  come — neither side times out, so it hangs indefinitely with no error.
+  Diagnosed by finding an orphaned child shell process still holding the
+  target directory as its cwd, doing zero CPU work, with no subprocess
+  (e.g. no `python3`) actually running under it — proof the shell never
+  got past reading the heredoc body. Use the dedicated file-write tool
+  for file contents instead. If a one-off shell edit is unavoidable, use
+  a single-line command (`sed`, or `python3 -c '...'` with a carefully
+  escaped one-liner) — never a multi-line heredoc.
