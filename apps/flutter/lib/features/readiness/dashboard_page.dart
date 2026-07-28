@@ -309,12 +309,44 @@ class _ReadinessCard extends StatelessWidget {
   }
 }
 
-class _CoachCard extends StatelessWidget {
+class _CoachCard extends StatefulWidget {
   final InsightResponse insight;
   const _CoachCard({required this.insight});
 
   @override
+  State<_CoachCard> createState() => _CoachCardState();
+}
+
+class _CoachCardState extends State<_CoachCard> {
+  final _apiClient = ApiClient();
+  WhyAnswerResponse? _why;
+  bool _whyLoading = false;
+  String? _whyError;
+  bool _expanded = false;
+
+  Future<void> _askWhy() async {
+    setState(() {
+      _expanded = true;
+      _whyLoading = true;
+      _whyError = null;
+    });
+    try {
+      final why = await _apiClient.getWhyAnswer();
+      setState(() {
+        _why = why;
+        _whyLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _whyError = e.toString();
+        _whyLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final insight = widget.insight;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -329,6 +361,11 @@ class _CoachCard extends StatelessWidget {
                   child: Text(insight.headline,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
+                TextButton.icon(
+                  onPressed: _expanded ? null : _askWhy,
+                  icon: const Icon(Icons.help_outline, size: 16),
+                  label: const Text('Why?'),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -341,9 +378,51 @@ class _CoachCard extends StatelessWidget {
               const Text('Cautions:', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.orange)),
               ...insight.cautions.map((c) => Text('- $c', style: const TextStyle(color: Colors.grey))),
             ],
+            if (_expanded) ...[
+              const Divider(height: 24),
+              if (_whyLoading) const Center(child: CircularProgressIndicator()),
+              if (_whyError != null)
+                Text('Could not load explanation: $_whyError',
+                    style: const TextStyle(color: Colors.red, fontSize: 12)),
+              if (_why != null) _WhyAnswerSection(why: _why!),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class _WhyAnswerSection extends StatelessWidget {
+  final WhyAnswerResponse why;
+  const _WhyAnswerSection({required this.why});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(why.answer, style: const TextStyle(fontStyle: FontStyle.italic)),
+        const SizedBox(height: 12),
+        const Text('Cited metrics:', style: TextStyle(fontWeight: FontWeight.w500)),
+        const SizedBox(height: 4),
+        ...why.citedMetrics.map((m) {
+          final color = m.direction == 'positive'
+              ? Colors.green
+              : m.direction == 'negative'
+                  ? Colors.red
+                  : Colors.grey;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              children: [
+                Expanded(child: Text('${m.name}: ${m.value}')),
+                Text(m.contribution, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 }

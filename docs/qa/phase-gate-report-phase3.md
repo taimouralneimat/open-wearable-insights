@@ -2,7 +2,7 @@
 
 - **Phase**: 3 — Insight intelligence
 - **Date**: 2026-07-29
-- **Status**: EC1/EC2 PASS (after bug fixes and end-to-end verification). EC3-EC7 not started.
+- **Status**: EC1/EC2/EC3 PASS (after bug fixes and end-to-end verification). EC4-EC7 not started.
 - **Version**: 0.3.0-SNAPSHOT
 
 ## Context
@@ -100,13 +100,40 @@ pass. Replaced every one with `log.warn(...)` including the exception.
 - `ScoreDiffServiceTest` (4 tests, updated for the new `comparedAgainst`
   parameter).
 
-### EC3-EC7 — not started
-Per docs/product/release-plan.md: local coach "why" answering,
-confidence/limitation displays on all surfaces, real sleep/training-load
-insights, expanded journal/behaviors, exploratory correlations.
+### EC3: Local coach answering "why" questions with cited metrics — PASS
+- Found and fixed an additional gap while implementing this: `CoachController
+  .getInsight()` was still using Phase 1's hardcoded synthetic
+  `ReadinessInputs` (never upgraded when EC1 added real personalized
+  baselines) — answering "why" questions grounded in fake data would have
+  defeated the point. Now uses `BaselineService` + `CurrentMetricsService`
+  like the readiness endpoints.
+- New `DeterministicInsightEngine.explainReadiness(ReadinessScore,
+  Optional<ScoreDiff>)` — cites the actual ranked factor contributions
+  (not generic advice), notes when the score is provisional, and when a
+  real prior day exists, explains what changed and why; otherwise says so
+  explicitly rather than fabricating a comparison.
+- New `GET /api/v1/coach/why` endpoint. Works fully via the deterministic
+  fallback — no LLM required, per core principle #1.
+- **Flutter**: "Why?" button on the coach card, expands to show the
+  answer and a ranked list of cited metrics with their contributions.
+- **Tests**: 4 new tests on `DeterministicInsightEngineTest` — cited
+  metrics correspond to real factors, no-prior-data case says so
+  explicitly, with-prior-data case cites the actual change, metrics
+  sorted by absolute impact.
+- **Verified end-to-end**: called `/coach/insight` — confirmed it now
+  reflects the same real score as `/latest` (57/100, Training load
+  present) instead of the old hardcoded synthetic score. Called
+  `/coach/why` — confirmed it cited real ranked factors and correctly
+  referenced the actual persisted "yesterday" score from the EC2
+  verification (improved by 5 points, mainly thanks to RHR deviation).
+
+### EC4-EC7 — not started
+Per docs/product/release-plan.md: confidence/limitation displays on all
+surfaces, real sleep/training-load insights, expanded journal/behaviors,
+exploratory correlations.
 
 ## Final verification
-- `./gradlew build` — BUILD SUCCESSFUL, 38 tests pass.
+- `./gradlew build` — BUILD SUCCESSFUL, 42 tests pass.
 - `flutter analyze` — No issues found.
 - `flutter test` — All tests passed.
 - `flutter build web` — ✓ Built build/web.

@@ -120,6 +120,20 @@ for releases after 1.0.0. Pre-1.0 development versions use `0.<phase>.<increment
 - **Tests**: `PersonalBaselineTest` (5 tests), `ScoreDiffServiceTest`
   (4 tests).
 
+### Added — Phase 3: Local coach "why" answering (EC3)
+- `DeterministicInsightEngine.explainReadiness()` cites the actual ranked
+  factor contributions behind the score — never generic advice — and
+  explains what changed vs. a real prior day when one exists, or says so
+  explicitly when it doesn't. Works fully via the deterministic fallback,
+  no LLM required.
+- New `GET /api/v1/coach/why` endpoint. Flutter: "Why?" button on the
+  coach card expands to show the answer and cited metrics.
+- Fixed an additional gap found while implementing this: `CoachController
+  .getInsight()` was still using Phase 1's hardcoded synthetic inputs,
+  never upgraded when EC1 added real personalized baselines — now uses
+  the same real baseline/current-metrics pipeline as `/latest`.
+- **Tests**: 4 new tests on `DeterministicInsightEngineTest`.
+
 ### Fixed — Phase 3 bugs found during quality gate review
 - **Bug 1 (training load silently broken)**: `CurrentMetricsService
   .fetchStepsSum()` had leftover dead code — a query using

@@ -3,9 +3,11 @@ package com.openwearableinsights.api.insights.application;
 import com.openwearableinsights.api.readiness.domain.FactorContribution;
 import com.openwearableinsights.api.readiness.domain.FactorContribution.Direction;
 import com.openwearableinsights.api.readiness.domain.ReadinessScore;
+import com.openwearableinsights.api.readiness.domain.ScoreDiff;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -112,6 +114,90 @@ public class DeterministicInsightEngine {
                 "Not a medical device; does not identify or manage medical conditions."
         );
     }
+
+    /**
+     * Answer "why is my readiness what it is" and, when available, "why did
+     * it change" — always grounded in the actual computed factors, never
+     * generic advice. Works fully without an LLM; this IS the deterministic
+     * fallback the LLM's answer (when enabled) must match or beat.
+     *
+     * @param diff the score-diff vs. a prior day, if one has been computed
+     *             (see ScoreDiffService) — omit if not available
+     */
+    public WhyAnswer explainReadiness(ReadinessScore score, Optional<ScoreDiff> diff) {
+        StringBuilder answer = new StringBuilder();
+        answer.append("Your readiness is ").append(score.score()).append("/100. ");
+
+        List<FactorContribution> rankedFactors = score.factors().stream()
+                .sorted(Comparator.comparingDouble((FactorContribution f) -> Math.abs(f.contribution())).reversed())
+                .toList();
+
+        rankedFactors.stream().findFirst().ifPresent(top -> {
+            String verb = top.direction() == Direction.POSITIVE ? "helping most" : "hurting most";
+            answer.append(top.name()).append(" is ").append(verb)
+                    .append(" (").append(formatValue(top)).append("). ");
+        });
+
+        if (score.provisional()) {
+            answer.append("This is still provisional — your baseline (")
+                    .append(score.baselinePeriod()).append(") needs more days of data " +
+                            "before this is fully reliable. ");
+        }
+
+        if (diff.isPresent() && "yesterday".equals(diff.get().comparedAgainst())) {
+            ScoreDiff d = diff.get();
+            if (d.scoreDelta() != 0) {
+                answer.append("Compared to yesterday, your score ")
+                        .append(d.scoreDelta() > 0 ? "improved" : "dropped")
+                        .append(" by ").append(Math.abs(d.scoreDelta())).append(" points");
+                if (d.biggestNegative() != null && d.scoreDelta() < 0) {
+                    answer.append(", mainly because of ").append(d.biggestNegative());
+                } else if (d.biggestPositive() != null && d.scoreDelta() > 0) {
+                    answer.append(", mainly thanks to ").append(d.biggestPositive());
+                }
+                answer.append(". ");
+            } else {
+                answer.append("That's unchanged from yesterday. ");
+            }
+        } else {
+            answer.append("No prior day's score is recorded yet, so a day-over-day " +
+                    "comparison isn't available. ");
+        }
+
+        List<CitedMetric> citedMetrics = rankedFactors.stream()
+                .map(f -> new CitedMetric(f.name(), formatValue(f),
+                        String.format("%.1f", f.contribution()), f.direction().name().toLowerCase()))
+                .toList();
+
+        return new WhyAnswer(
+                answer.toString().trim(),
+                citedMetrics,
+                score.confidence(),
+                buildLimitations(score)
+        );
+    }
+
+    private String formatValue(FactorContribution f) {
+        return String.format("%.1f %s", f.value(), f.unit());
+    }
+
+    /**
+     * A grounded answer to a "why" question, citing the actual factors that
+     * produced it. Never generic advice.
+     */
+    public record WhyAnswer(
+            String answer,
+            List<CitedMetric> citedMetrics,
+            String confidence,
+            List<String> limitations
+    ) {}
+
+    public record CitedMetric(
+            String name,
+            String value,
+            String contribution,
+            String direction
+    ) {}
 
     public record Insight(
             String headline,

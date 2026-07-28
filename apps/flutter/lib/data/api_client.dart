@@ -31,6 +31,12 @@ class ApiClient {
     return LlmStatus.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Ask the coach why the readiness score is what it is.
+  Future<WhyAnswerResponse> getWhyAnswer() async {
+    final response = await _dio.get('/api/v1/coach/why');
+    return WhyAnswerResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Scan the local import directory for importable files.
   Future<ImportScanResult> scanImportDirectory() async {
     final response = await _dio.get('/api/v1/ingestion/scan');
@@ -210,6 +216,56 @@ class InsightResponse {
       cautions: (json['cautions'] as List).cast<String>(),
       dataLimitations: (json['dataLimitations'] as List).cast<String>(),
       fallbackUsed: json['fallbackUsed'] as bool,
+    );
+  }
+}
+
+/// A grounded answer to "why is my readiness what it is", citing the
+/// actual computed factors — never generic advice.
+class WhyAnswerResponse {
+  final String answer;
+  final List<CitedMetricResponse> citedMetrics;
+  final String confidence;
+  final List<String> limitations;
+
+  WhyAnswerResponse({
+    required this.answer,
+    required this.citedMetrics,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory WhyAnswerResponse.fromJson(Map<String, dynamic> json) {
+    return WhyAnswerResponse(
+      answer: json['answer'] as String,
+      citedMetrics: (json['citedMetrics'] as List)
+          .map((e) => CitedMetricResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      confidence: json['confidence'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+class CitedMetricResponse {
+  final String name;
+  final String value;
+  final String contribution;
+  final String direction;
+
+  CitedMetricResponse({
+    required this.name,
+    required this.value,
+    required this.contribution,
+    required this.direction,
+  });
+
+  factory CitedMetricResponse.fromJson(Map<String, dynamic> json) {
+    return CitedMetricResponse(
+      name: json['name'] as String,
+      value: json['value'] as String,
+      contribution: json['contribution'] as String,
+      direction: json['direction'] as String,
     );
   }
 }
