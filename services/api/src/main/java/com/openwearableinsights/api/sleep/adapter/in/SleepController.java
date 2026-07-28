@@ -20,9 +20,18 @@ import java.util.List;
 @Tag(name = "Sleep", description = "Sleep summaries and stage breakdowns")
 public class SleepController {
 
+    // Not derived from any real computation — see PLACEHOLDER_LIMITATIONS.
+    private static final String PLACEHOLDER_CONFIDENCE = "none";
+    private static final List<String> PLACEHOLDER_LIMITATIONS = List.of(
+            "This is placeholder/synthetic data, not computed from your real " +
+            "sleep sessions — the full normalization pipeline has not been " +
+            "wired yet (Phase 2 known limitation, see docs/qa/phase-gate-report-phase2.md).",
+            "Do not treat these values as reflective of actual sleep quality."
+    );
+
     @GetMapping("/summary")
     @Operation(summary = "Get latest sleep summary",
-            description = "Returns last night's sleep summary with stage breakdown.")
+            description = "Returns last night's sleep summary with stage breakdown. Currently placeholder data — see limitations field.")
     public SleepSummary getSummary() {
         return new SleepSummary(
                 7.2, // total hours
@@ -40,7 +49,9 @@ public class SleepController {
                         new SleepStagePoint("04:00", "rem"),
                         new SleepStagePoint("05:00", "light"),
                         new SleepStagePoint("06:00", "awake")
-                )
+                ),
+                PLACEHOLDER_CONFIDENCE,
+                PLACEHOLDER_LIMITATIONS
         );
     }
 
@@ -66,7 +77,9 @@ public class SleepController {
             double lightHours,
             double awakeHours,
             int sleepScore,
-            List<SleepStagePoint> stages
+            List<SleepStagePoint> stages,
+            String confidence,
+            List<String> limitations
     ) {}
 
     public record SleepStagePoint(

@@ -569,6 +569,8 @@ class SleepSummary {
   final double awakeHours;
   final int sleepScore;
   final List<SleepStagePoint> stages;
+  final String confidence;
+  final List<String> limitations;
 
   SleepSummary({
     required this.totalHours,
@@ -578,6 +580,8 @@ class SleepSummary {
     required this.awakeHours,
     required this.sleepScore,
     required this.stages,
+    required this.confidence,
+    required this.limitations,
   });
 
   factory SleepSummary.fromJson(Map<String, dynamic> json) {
@@ -591,6 +595,8 @@ class SleepSummary {
       stages: (json['stages'] as List)
           .map((e) => SleepStagePoint.fromJson(e as Map<String, dynamic>))
           .toList(),
+      confidence: json['confidence'] as String? ?? 'none',
+      limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
     );
   }
 }
@@ -648,6 +654,8 @@ class ActivitySummary {
   final int activeMinutes;
   final int activeZoneMinutes;
   final String timestamp;
+  final String confidence;
+  final List<String> limitations;
 
   ActivitySummary({
     required this.steps,
@@ -655,6 +663,8 @@ class ActivitySummary {
     required this.activeMinutes,
     required this.activeZoneMinutes,
     required this.timestamp,
+    required this.confidence,
+    required this.limitations,
   });
 
   factory ActivitySummary.fromJson(Map<String, dynamic> json) {
@@ -664,6 +674,8 @@ class ActivitySummary {
       activeMinutes: json['activeMinutes'] as int,
       activeZoneMinutes: json['activeZoneMinutes'] as int,
       timestamp: json['timestamp'] as String,
+      confidence: json['confidence'] as String? ?? 'none',
+      limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
     );
   }
 }
@@ -701,6 +713,8 @@ class DataQualitySummary {
   final List<MetricQuality> metrics;
   final List<String> issues;
   final String algorithmVersion;
+  final String confidence;
+  final List<String> limitations;
 
   DataQualitySummary({
     required this.completeness,
@@ -710,6 +724,8 @@ class DataQualitySummary {
     required this.metrics,
     required this.issues,
     required this.algorithmVersion,
+    required this.confidence,
+    required this.limitations,
   });
 
   factory DataQualitySummary.fromJson(Map<String, dynamic> json) {
@@ -723,6 +739,8 @@ class DataQualitySummary {
           .toList(),
       issues: (json['issues'] as List).cast<String>(),
       algorithmVersion: json['algorithmVersion'] as String,
+      confidence: json['confidence'] as String? ?? 'none',
+      limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
     );
   }
 }
@@ -761,6 +779,7 @@ class ScoreDiffResponse {
   final String? biggestPositive;
   final String? biggestNegative;
   final String comparedAgainst;
+  final String confidence;
 
   ScoreDiffResponse({
     required this.todayScore,
@@ -771,6 +790,7 @@ class ScoreDiffResponse {
     this.biggestPositive,
     this.biggestNegative,
     required this.comparedAgainst,
+    required this.confidence,
   });
 
   bool get hasPriorData => comparedAgainst == 'yesterday';
@@ -787,6 +807,7 @@ class ScoreDiffResponse {
       biggestPositive: json['biggestPositive'] as String?,
       biggestNegative: json['biggestNegative'] as String?,
       comparedAgainst: json['comparedAgainst'] as String? ?? 'no_prior_data',
+      confidence: json['confidence'] as String? ?? 'low',
     );
   }
 }

@@ -124,7 +124,8 @@ public class ScoreDiffService {
                 summary,
                 biggestPositive,
                 biggestNegative,
-                comparedAgainst
+                comparedAgainst,
+                today.confidence()
         );
     }
 

@@ -2,7 +2,7 @@
 
 - **Phase**: 3 — Insight intelligence
 - **Date**: 2026-07-29
-- **Status**: EC1/EC2/EC3 PASS (after bug fixes and end-to-end verification). EC4-EC7 not started.
+- **Status**: EC1/EC2/EC3/EC4 PASS (after bug fixes and end-to-end verification). EC5-EC7 not started.
 - **Version**: 0.3.0-SNAPSHOT
 
 ## Context
@@ -127,9 +127,33 @@ pass. Replaced every one with `log.warn(...)` including the exception.
   referenced the actual persisted "yesterday" score from the EC2
   verification (improved by 5 points, mainly thanks to RHR deviation).
 
-### EC4-EC7 — not started
-Per docs/product/release-plan.md: confidence/limitation displays on all
-surfaces, real sleep/training-load insights, expanded journal/behaviors,
+### EC4: Confidence & limitation displays on all surfaces — PASS
+- Audit found `SleepController`, `ActivitiesController`, and
+  `DataQualityController` had **zero** confidence/limitation disclosure —
+  100% hardcoded placeholder data presented with no warning at all. A
+  user could easily read "85 sleep score" or a "data quality" dashboard
+  as real. Added explicit `confidence`/`limitations` fields to all three
+  (`confidence: "none"`, limitations explaining this is placeholder data
+  pending the normalization pipeline, per Phase 2's own disclosed
+  limitation).
+- `ScoreDiff` had no confidence field at all — added one (inherits
+  today's score confidence, since a diff carries the same uncertainty as
+  the score it's built from).
+- **Flutter**: new shared `ConfidenceBanner` widget (`lib/widgets/`) —
+  renders nothing when there's nothing to disclose, otherwise shows the
+  confidence level and every limitation. Wired into the Sleep, Activities,
+  and Data Quality pages, so the disclosure actually reaches the user
+  instead of sitting unused in an API response field.
+- **Verified end-to-end**: called all four endpoints — confirmed
+  `sleep/summary` and `activities/summary` return `confidence: "none"`
+  with clear placeholder-data limitations; `data-quality/summary`
+  explicitly discloses that its own quality figures are placeholder;
+  `readiness/diff` now carries a real `confidence` value.
+
+### EC5-EC7 — not started
+Per docs/product/release-plan.md: real sleep/training-load insights
+(would also let EC4's sleep/activities placeholder disclosures be
+replaced with real confidence once wired), expanded journal/behaviors,
 exploratory correlations.
 
 ## Final verification

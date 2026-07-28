@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/api_client.dart';
+import '../../widgets/confidence_banner.dart';
 
 /// Data-quality dashboard page — shows completeness, coverage, and issues.
 class DataQualityPage extends StatefulWidget {
@@ -114,6 +115,7 @@ class _DataQualityPageState extends State<DataQualityPage> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ConfidenceBanner(confidence: s.confidence, limitations: s.limitations),
           _OverallQualityCard(summary: s),
           const SizedBox(height: 16),
           _MetricCoverageCard(summary: s),

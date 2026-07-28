@@ -134,6 +134,17 @@ for releases after 1.0.0. Pre-1.0 development versions use `0.<phase>.<increment
   the same real baseline/current-metrics pipeline as `/latest`.
 - **Tests**: 4 new tests on `DeterministicInsightEngineTest`.
 
+### Added — Phase 3: Confidence & limitation displays on all surfaces (EC4)
+- Audit found `SleepController`, `ActivitiesController`, and
+  `DataQualityController` had zero confidence/limitation disclosure —
+  100% hardcoded placeholder data with no warning it wasn't real. Added
+  explicit `confidence`/`limitations` fields to all three, and to
+  `ScoreDiff` (which previously had no confidence field at all).
+- **Flutter**: new shared `ConfidenceBanner` widget
+  (`lib/widgets/confidence_banner.dart`) wired into the Sleep, Activities,
+  and Data Quality pages, so the disclosure is actually visible to users
+  instead of sitting unused in an API response.
+
 ### Fixed — Phase 3 bugs found during quality gate review
 - **Bug 1 (training load silently broken)**: `CurrentMetricsService
   .fetchStepsSum()` had leftover dead code — a query using

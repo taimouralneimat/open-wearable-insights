@@ -22,7 +22,7 @@ public class DataQualityController {
 
     @GetMapping("/summary")
     @Operation(summary = "Get data-quality summary",
-            description = "Returns overall data-quality metrics: completeness, freshness, coverage, issues.")
+            description = "Returns overall data-quality metrics: completeness, freshness, coverage, issues. Currently placeholder data — see limitations field.")
     public DataQualitySummary getSummary() {
         return new DataQualitySummary(
                 0.78, // completeness fraction
@@ -44,7 +44,15 @@ public class DataQualityController {
                         "Stress coverage is fair (60%) — consider enabling all-day stress tracking.",
                         "Sleep data has a 2-day gap in the last 7 days."
                 ),
-                "v0.1"
+                "v0.1",
+                "none",
+                List.of(
+                        "This entire dashboard is placeholder/synthetic data, including these " +
+                        "quality figures themselves — the full normalization pipeline has not " +
+                        "been wired yet (Phase 2 known limitation, see " +
+                        "docs/qa/phase-gate-report-phase2.md).",
+                        "Do not make data-import decisions based on these numbers yet."
+                )
         );
     }
 
@@ -55,7 +63,9 @@ public class DataQualityController {
             int totalSources,
             List<MetricQuality> metrics,
             List<String> issues,
-            String algorithmVersion
+            String algorithmVersion,
+            String confidence,
+            List<String> limitations
     ) {}
 
     public record MetricQuality(

@@ -21,12 +21,22 @@ import java.util.List;
 @Tag(name = "Activities", description = "Activity summaries and trends")
 public class ActivitiesController {
 
+    // Not derived from any real computation — see PLACEHOLDER_LIMITATIONS.
+    private static final String PLACEHOLDER_CONFIDENCE = "none";
+    private static final List<String> PLACEHOLDER_LIMITATIONS = List.of(
+            "This is placeholder/synthetic data, not computed from your real " +
+            "activity history — the full normalization pipeline has not been " +
+            "wired yet (Phase 2 known limitation, see docs/qa/phase-gate-report-phase2.md).",
+            "Do not treat these values as reflective of actual activity."
+    );
+
     @GetMapping("/summary")
     @Operation(summary = "Get activity summary",
-            description = "Returns daily activity summary (steps, calories, active minutes).")
+            description = "Returns daily activity summary (steps, calories, active minutes). Currently placeholder data — see limitations field.")
     public ActivitySummary getSummary() {
         return new ActivitySummary(
-                8420, 2340, 67, 5, Instant.now().toString()
+                8420, 2340, 67, 5, Instant.now().toString(),
+                PLACEHOLDER_CONFIDENCE, PLACEHOLDER_LIMITATIONS
         );
     }
 
@@ -50,7 +60,9 @@ public class ActivitiesController {
             int calories,
             int activeMinutes,
             int activeZoneMinutes,
-            String timestamp
+            String timestamp,
+            String confidence,
+            List<String> limitations
     ) {}
 
     public record ActivityTrendPoint(

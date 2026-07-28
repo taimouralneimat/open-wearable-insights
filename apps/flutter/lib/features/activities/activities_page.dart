@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/api_client.dart';
+import '../../widgets/confidence_banner.dart';
 
 /// Activities page — shows daily activity summary and 7-day trends.
 class ActivitiesPage extends StatefulWidget {
@@ -117,6 +118,7 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ConfidenceBanner(confidence: s.confidence, limitations: s.limitations),
           _ActivitySummaryCard(summary: s),
           const SizedBox(height: 16),
           if (_trends != null) _ActivityTrendsCard(trends: _trends!),

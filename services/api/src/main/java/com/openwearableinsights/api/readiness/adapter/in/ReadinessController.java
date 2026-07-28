@@ -119,7 +119,8 @@ public class ReadinessController {
                 "No prior day's score has been recorded yet — check back tomorrow for a comparison.",
                 null,
                 null,
-                "no_prior_data"
+                "no_prior_data",
+                today.confidence()
         );
     }
 

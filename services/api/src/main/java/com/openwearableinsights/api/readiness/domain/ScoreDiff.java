@@ -20,6 +20,9 @@ import java.util.List;
  *                         prior-day score, or "no_prior_data" when no prior
  *                         day's score has been recorded yet — never silently
  *                         substitutes a synthetic stand-in for a real day.
+ * @param confidence       today's score confidence — a diff inherits the
+ *                         uncertainty of the score it's built from, so this
+ *                         isn't computed separately.
  */
 public record ScoreDiff(
         int todayScore,
@@ -29,7 +32,8 @@ public record ScoreDiff(
         String summary,
         String biggestPositive,
         String biggestNegative,
-        String comparedAgainst
+        String comparedAgainst,
+        String confidence
 ) {
     /**
      * A single factor change between two scores.

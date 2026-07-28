@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/api_client.dart';
+import '../../widgets/confidence_banner.dart';
 
 /// Sleep page — shows sleep summary, stage breakdown, and 7-day trends.
 class SleepPage extends StatefulWidget {
@@ -117,6 +118,7 @@ class _SleepPageState extends State<SleepPage> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ConfidenceBanner(confidence: s.confidence, limitations: s.limitations),
           _SleepScoreCard(summary: s),
           const SizedBox(height: 16),
           _SleepStagesCard(summary: s),

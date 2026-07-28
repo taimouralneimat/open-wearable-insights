@@ -120,7 +120,7 @@ class DeterministicInsightEngineTest {
 
         ScoreDiff diff = new ScoreDiff(
                 score.score(), score.score() - 5, 5,
-                List.of(), "test", "HRV deviation", null, "yesterday"
+                List.of(), "test", "HRV deviation", null, "yesterday", score.confidence()
         );
 
         WhyAnswer why = engine.explainReadiness(score, Optional.of(diff));
