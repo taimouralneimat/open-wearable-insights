@@ -2,7 +2,7 @@
 
 - **Phase**: 3 — Insight intelligence
 - **Date**: 2026-07-29
-- **Status**: EC1/EC2/EC3/EC4 PASS (after bug fixes and end-to-end verification). EC5-EC7 not started.
+- **Status**: EC1/EC2/EC3/EC4/EC5 PASS (after bug fixes and end-to-end verification). EC6-EC7 not started.
 - **Version**: 0.3.0-SNAPSHOT
 
 ## Context
@@ -150,10 +150,45 @@ pass. Replaced every one with `log.warn(...)` including the exception.
   explicitly discloses that its own quality figures are placeholder;
   `readiness/diff` now carries a real `confidence` value.
 
-### EC5-EC7 — not started
-Per docs/product/release-plan.md: real sleep/training-load insights
-(would also let EC4's sleep/activities placeholder disclosures be
-replaced with real confidence once wired), expanded journal/behaviors,
+### EC5: Real sleep/training-load insights — PASS
+- **Sleep**: new `sleep/domain` + `sleep/application` layer
+  (`SleepInsightService`) computes real per-night summaries from
+  `sleep_stage` measurements — stage encoding matches
+  `packages/test-data/synthetic_generator.py`
+  (`SLEEP_STAGES = ["deep","rem","light","awake"]`, value = index).
+  Sleep score is an original v0.1 formula (duration vs. 7.5h target +
+  proportion of deep/REM sleep) — documented, not a vendor reproduction.
+  Confidence is honestly based on reading density (a full night is ~32
+  readings at 15-min intervals) rather than always claiming high
+  confidence. Unlike the readiness score (which excludes unreliable
+  sleep data from the blended factor), this dedicated view shows the
+  computed value with a clear low-confidence caveat instead of hiding
+  it — more useful on a page whose whole purpose is showing sleep data.
+- **Activities**: new `activities/domain` + `activities/application`
+  layer (`ActivityInsightService`) computes real step counts from
+  measurement data. Calories/active minutes/active zone minutes are
+  honestly reported as `null` (not fabricated as estimates from steps)
+  — the data model has no measurement type for them yet. Both surfaces
+  use "most recent day with data" rather than strict calendar "today",
+  matching real-world usage once import lags a day behind.
+- **Flutter**: updated models for nullable calorie/active-minute fields;
+  `_ActivitySummaryCard` shows "—" / "not tracked" instead of literal
+  "null" text.
+- **Verified end-to-end**: hand-checked the sleep score formula against
+  real data (durationRatio=0.133, restorativeRatio=0.5 → score 31.67 →
+  rounds to 32 — matched the API response exactly). Cross-checked
+  activity summary/trends against direct SQL queries on the same data —
+  steps matched exactly (8000/9000/8500 across 3 real days). Confirmed
+  trends honestly return only the 3 real days that exist rather than
+  fabricating a full 7-day range.
+- No dedicated unit tests added for `SleepInsightService`/
+  `ActivityInsightService` — both are thin DB-query wrappers where a
+  mocked JdbcTemplate test would have low value; live verification
+  against the real database (above) is stronger evidence, consistent
+  with how `ReadinessScoreHistoryRepository` was handled in EC2.
+
+### EC6-EC7 — not started
+Per docs/product/release-plan.md: expanded journal/behaviors taxonomy,
 exploratory correlations.
 
 ## Final verification

@@ -647,21 +647,23 @@ class SleepTrendPoint {
   }
 }
 
-/// Activity summary response.
+/// Activity summary response. Only [steps] is computed from real data —
+/// calories/activeMinutes/activeZoneMinutes are null when not tracked
+/// (see ActivityInsightService on the backend for why).
 class ActivitySummary {
   final int steps;
-  final int calories;
-  final int activeMinutes;
-  final int activeZoneMinutes;
+  final int? calories;
+  final int? activeMinutes;
+  final int? activeZoneMinutes;
   final String timestamp;
   final String confidence;
   final List<String> limitations;
 
   ActivitySummary({
     required this.steps,
-    required this.calories,
-    required this.activeMinutes,
-    required this.activeZoneMinutes,
+    this.calories,
+    this.activeMinutes,
+    this.activeZoneMinutes,
     required this.timestamp,
     required this.confidence,
     required this.limitations,
@@ -670,9 +672,9 @@ class ActivitySummary {
   factory ActivitySummary.fromJson(Map<String, dynamic> json) {
     return ActivitySummary(
       steps: json['steps'] as int,
-      calories: json['calories'] as int,
-      activeMinutes: json['activeMinutes'] as int,
-      activeZoneMinutes: json['activeZoneMinutes'] as int,
+      calories: json['calories'] as int?,
+      activeMinutes: json['activeMinutes'] as int?,
+      activeZoneMinutes: json['activeZoneMinutes'] as int?,
       timestamp: json['timestamp'] as String,
       confidence: json['confidence'] as String? ?? 'none',
       limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
@@ -680,25 +682,21 @@ class ActivitySummary {
   }
 }
 
+/// A day's step count within a trend view. Calories/active minutes aren't
+/// tracked in the current data model — see ActivitySummary.
 class ActivityTrendPoint {
   final String date;
   final int steps;
-  final int calories;
-  final int activeMinutes;
 
   ActivityTrendPoint({
     required this.date,
     required this.steps,
-    required this.calories,
-    required this.activeMinutes,
   });
 
   factory ActivityTrendPoint.fromJson(Map<String, dynamic> json) {
     return ActivityTrendPoint(
       date: json['date'] as String,
       steps: json['steps'] as int,
-      calories: json['calories'] as int,
-      activeMinutes: json['activeMinutes'] as int,
     );
   }
 }

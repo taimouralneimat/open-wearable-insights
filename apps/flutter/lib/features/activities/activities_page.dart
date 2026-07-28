@@ -153,13 +153,13 @@ class _ActivitySummaryCard extends StatelessWidget {
                 _StatTile(
                   icon: Icons.local_fire_department_outlined,
                   label: 'Calories',
-                  value: '${summary.calories}',
+                  value: summary.calories?.toString() ?? '—',
                   color: Colors.orange,
                 ),
                 _StatTile(
                   icon: Icons.timer_outlined,
                   label: 'Active min',
-                  value: '${summary.activeMinutes}',
+                  value: summary.activeMinutes?.toString() ?? '—',
                   color: Colors.green,
                 ),
               ],
@@ -172,8 +172,12 @@ class _ActivitySummaryCard extends StatelessWidget {
               children: [
                 const Icon(Icons.favorite, size: 16, color: Colors.red),
                 const SizedBox(width: 8),
-                Text('${summary.activeZoneMinutes} active zone minutes',
-                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                Text(
+                  summary.activeZoneMinutes != null
+                      ? '${summary.activeZoneMinutes} active zone minutes'
+                      : 'Active zone minutes not tracked',
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               ],
             ),
           ],

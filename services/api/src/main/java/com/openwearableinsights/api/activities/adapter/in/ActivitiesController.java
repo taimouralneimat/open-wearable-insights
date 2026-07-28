@@ -1,74 +1,49 @@
 package com.openwearableinsights.api.activities.adapter.in;
 
+import com.openwearableinsights.api.activities.application.ActivityInsightService;
+import com.openwearableinsights.api.activities.domain.ActivitySummary;
+import com.openwearableinsights.api.activities.domain.ActivityTrendPoint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.List;
 
 /**
  * REST controller for activity data and trends.
  *
- * <p>Phase 2: returns activity summaries and trends from imported data.
- * Currently returns synthetic/placeholder data until the full normalization
- * pipeline is wired.
+ * <p>Computes real step counts from measurement data (see
+ * ActivityInsightService). Calories/active minutes/active zone minutes
+ * are honestly reported as unavailable rather than fabricated — the data
+ * model has no measurement type for them yet.
  */
 @RestController
 @RequestMapping("/api/v1/activities")
 @Tag(name = "Activities", description = "Activity summaries and trends")
 public class ActivitiesController {
 
-    // Not derived from any real computation — see PLACEHOLDER_LIMITATIONS.
-    private static final String PLACEHOLDER_CONFIDENCE = "none";
-    private static final List<String> PLACEHOLDER_LIMITATIONS = List.of(
-            "This is placeholder/synthetic data, not computed from your real " +
-            "activity history — the full normalization pipeline has not been " +
-            "wired yet (Phase 2 known limitation, see docs/qa/phase-gate-report-phase2.md).",
-            "Do not treat these values as reflective of actual activity."
-    );
+    private static final Long DEFAULT_ACCOUNT_ID = 1L;
+    private static final int TREND_DAYS = 7;
+
+    private final ActivityInsightService activityInsightService;
+
+    public ActivitiesController(ActivityInsightService activityInsightService) {
+        this.activityInsightService = activityInsightService;
+    }
 
     @GetMapping("/summary")
     @Operation(summary = "Get activity summary",
-            description = "Returns daily activity summary (steps, calories, active minutes). Currently placeholder data — see limitations field.")
+            description = "Returns real step count for the most recent day with data. Calories/active minutes/active zone minutes are null — not yet tracked in the data model.")
     public ActivitySummary getSummary() {
-        return new ActivitySummary(
-                8420, 2340, 67, 5, Instant.now().toString(),
-                PLACEHOLDER_CONFIDENCE, PLACEHOLDER_LIMITATIONS
-        );
+        return activityInsightService.computeLatestSummary(DEFAULT_ACCOUNT_ID);
     }
 
     @GetMapping("/trends")
     @Operation(summary = "Get activity trends",
-            description = "Returns 7-day activity trend data.")
+            description = "Returns real step-count trends for up to the last 7 days with data.")
     public List<ActivityTrendPoint> getTrends() {
-        return List.of(
-                new ActivityTrendPoint("2026-07-21", 7200, 2100, 45),
-                new ActivityTrendPoint("2026-07-22", 9500, 2400, 72),
-                new ActivityTrendPoint("2026-07-23", 6100, 1950, 38),
-                new ActivityTrendPoint("2026-07-24", 11200, 2650, 85),
-                new ActivityTrendPoint("2026-07-25", 8400, 2300, 67),
-                new ActivityTrendPoint("2026-07-26", 9800, 2450, 75),
-                new ActivityTrendPoint("2026-07-27", 8420, 2340, 67)
-        );
+        return activityInsightService.computeStepTrends(DEFAULT_ACCOUNT_ID, TREND_DAYS);
     }
-
-    public record ActivitySummary(
-            int steps,
-            int calories,
-            int activeMinutes,
-            int activeZoneMinutes,
-            String timestamp,
-            String confidence,
-            List<String> limitations
-    ) {}
-
-    public record ActivityTrendPoint(
-            String date,
-            int steps,
-            int calories,
-            int activeMinutes
-    ) {}
 }

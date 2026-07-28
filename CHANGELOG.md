@@ -145,6 +145,22 @@ for releases after 1.0.0. Pre-1.0 development versions use `0.<phase>.<increment
   and Data Quality pages, so the disclosure is actually visible to users
   instead of sitting unused in an API response.
 
+### Added — Phase 3: Real sleep/training-load insights (EC5)
+- New `sleep/domain` + `sleep/application` (`SleepInsightService`)
+  computes real per-night sleep summaries from `sleep_stage`
+  measurements (stage encoding matches
+  `packages/test-data/synthetic_generator.py`), with an original v0.1
+  sleep-score formula and honest confidence based on reading density.
+- New `activities/domain` + `activities/application`
+  (`ActivityInsightService`) computes real step counts from measurement
+  data. Calories/active minutes/active zone minutes are reported as
+  `null` rather than fabricated — not yet tracked in the data model.
+  Both surfaces use "most recent day with data" instead of strict
+  calendar "today".
+- **Verified end-to-end** against real data: hand-checked the sleep
+  score formula matched the API response exactly; activity
+  summary/trends cross-checked against direct SQL and matched exactly.
+
 ### Fixed — Phase 3 bugs found during quality gate review
 - **Bug 1 (training load silently broken)**: `CurrentMetricsService
   .fetchStepsSum()` had leftover dead code — a query using
