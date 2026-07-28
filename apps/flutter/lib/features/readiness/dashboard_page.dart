@@ -16,6 +16,7 @@ class DashboardPage extends ConsumerStatefulWidget {
 class _DashboardPageState extends ConsumerState<DashboardPage> {
   final _apiClient = ApiClient();
   ReadinessResponse? _readiness;
+  ScoreDiffResponse? _scoreDiff;
   InsightResponse? _insight;
   bool _loading = true;
   String? _error;
@@ -34,9 +35,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     try {
       final readiness = await _apiClient.getLatestReadiness();
       final insight = await _apiClient.getInsight();
+      ScoreDiffResponse? diff;
+      try { diff = await _apiClient.getScoreDiff(); } catch (_) { diff = null; }
       setState(() {
         _readiness = readiness;
         _insight = insight;
+        _scoreDiff = diff;
         _loading = false;
       });
     } catch (e) {
@@ -154,6 +158,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         padding: const EdgeInsets.all(16),
         children: [
           _ReadinessCard(readiness: r),
+          if (_scoreDiff != null) ...[
+            const SizedBox(height: 16),
+            _ScoreDiffCard(diff: _scoreDiff!),
+          ],
           const SizedBox(height: 16),
           if (i != null) ...[
             _CoachCard(insight: i),
@@ -162,6 +170,91 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           _FactorsCard(readiness: r),
           const SizedBox(height: 16),
           _DataQualityCard(readiness: r),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _ScoreDiffCard extends StatelessWidget {
+  final ScoreDiffResponse diff;
+  const _ScoreDiffCard({required this.diff});
+
+  @override
+  Widget build(BuildContext context) {
+    final deltaColor = diff.scoreDelta > 0
+        ? Colors.green
+        : diff.scoreDelta < 0
+            ? Colors.red
+            : Colors.grey;
+    final deltaIcon = diff.scoreDelta > 0
+        ? Icons.trending_up
+        : diff.scoreDelta < 0
+            ? Icons.trending_down
+            : Icons.trending_flat;
+    final deltaText = diff.scoreDelta > 0
+        ? '+${diff.scoreDelta}'
+        : '${diff.scoreDelta}';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.compare_arrows, size: 20, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(diff.hasPriorData ? 'vs Yesterday' : 'Day-over-day',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const Spacer(),
+                if (diff.hasPriorData) ...[
+                  Icon(deltaIcon, color: deltaColor, size: 20),
+                  const SizedBox(width: 4),
+                  Text(deltaText,
+                      style: TextStyle(
+                          color: deltaColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(diff.summary, style: const TextStyle(fontSize: 13)),
+            const SizedBox(height: 12),
+            ...diff.factorDiffs.where((f) => f.direction != 'unchanged').map((f) => _FactorDiffRow(diff: f)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FactorDiffRow extends StatelessWidget {
+  final FactorDiffResponse diff;
+  const _FactorDiffRow({required this.diff});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = diff.direction == 'improved'
+        ? Colors.green
+        : Colors.red;
+    final icon = diff.direction == 'improved'
+        ? Icons.arrow_upward
+        : Icons.arrow_downward;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 8),
+          Expanded(child: Text(diff.name, style: const TextStyle(fontSize: 12))),
+          Text(
+            diff.contributionDelta > 0 ? '+${diff.contributionDelta.toStringAsFixed(1)}' : diff.contributionDelta.toStringAsFixed(1),
+            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );

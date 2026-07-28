@@ -91,6 +91,12 @@ class ApiClient {
         .toList();
   }
 
+  /// Get score diff vs prior day.
+  Future<ScoreDiffResponse> getScoreDiff() async {
+    final response = await _dio.get("/api/v1/readiness/diff");
+    return ScoreDiffResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get data-quality summary.
   Future<DataQualitySummary> getDataQualitySummary() async {
     final response = await _dio.get('/api/v1/data-quality/summary');
@@ -684,6 +690,82 @@ class MetricQuality {
       coverage: (json['coverage'] as num).toDouble(),
       quality: json['quality'] as String,
       frequency: json['frequency'] as String,
+    );
+  }
+}
+
+
+/// Score diff response from the API.
+class ScoreDiffResponse {
+  final int todayScore;
+  final int priorScore;
+  final int scoreDelta;
+  final List<FactorDiffResponse> factorDiffs;
+  final String summary;
+  final String? biggestPositive;
+  final String? biggestNegative;
+  final String comparedAgainst;
+
+  ScoreDiffResponse({
+    required this.todayScore,
+    required this.priorScore,
+    required this.scoreDelta,
+    required this.factorDiffs,
+    required this.summary,
+    this.biggestPositive,
+    this.biggestNegative,
+    required this.comparedAgainst,
+  });
+
+  bool get hasPriorData => comparedAgainst == 'yesterday';
+
+  factory ScoreDiffResponse.fromJson(Map<String, dynamic> json) {
+    return ScoreDiffResponse(
+      todayScore: json['todayScore'] as int,
+      priorScore: json['priorScore'] as int,
+      scoreDelta: json['scoreDelta'] as int,
+      factorDiffs: (json['factorDiffs'] as List)
+          .map((e) => FactorDiffResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      summary: json['summary'] as String,
+      biggestPositive: json['biggestPositive'] as String?,
+      biggestNegative: json['biggestNegative'] as String?,
+      comparedAgainst: json['comparedAgainst'] as String? ?? 'no_prior_data',
+    );
+  }
+}
+
+class FactorDiffResponse {
+  final String name;
+  final double todayValue;
+  final double priorValue;
+  final double valueDelta;
+  final double todayContribution;
+  final double priorContribution;
+  final double contributionDelta;
+  final String direction;
+
+  FactorDiffResponse({
+    required this.name,
+    required this.todayValue,
+    required this.priorValue,
+    required this.valueDelta,
+    required this.todayContribution,
+    required this.priorContribution,
+    required this.contributionDelta,
+    required this.direction,
+  });
+
+  factory FactorDiffResponse.fromJson(Map<String, dynamic> json) {
+    return FactorDiffResponse(
+      name: json['name'] as String,
+      todayValue: (json['todayValue'] as num).toDouble(),
+      priorValue: (json['priorValue'] as num).toDouble(),
+      valueDelta: (json['valueDelta'] as num).toDouble(),
+      todayContribution: (json['todayContribution'] as num).toDouble(),
+      priorContribution: (json['priorContribution'] as num).toDouble(),
+      contributionDelta: (json['contributionDelta'] as num).toDouble(),
+      direction: json['direction'] as String,
     );
   }
 }

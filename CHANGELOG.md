@@ -103,11 +103,65 @@ for releases after 1.0.0. Pre-1.0 development versions use `0.<phase>.<increment
   `existsByContentHashAndStatus(hash, "imported")` — undone batches no longer
   block re-import. Added `undoThenReimport_succeeds` test to verify.
 
+### Added — Phase 3: Insight intelligence (EC1/EC2)
+- **Personalized rolling baselines**: `BaselineService` computes real
+  per-metric baselines (HRV, RHR, stress, sleep duration, steps) from the
+  user's own measurement history (28-day → 7-day → provisional window),
+  with honest sample sizes and confidence — replaces the Phase 1 fixed
+  provisional baseline. `ReadinessCalculator` gained a
+  `calculate(CurrentMetrics, PersonalBaseline)` overload that computes
+  deviations from the user's own history rather than pre-computed inputs.
+  New `/api/v1/readiness/baseline` endpoint.
+- **Score-diff and reasoning on tap**: `ScoreDiffService` computes a
+  structured diff between today and a prior readiness score — which
+  factors moved, by how much, sorted by impact. New
+  `/api/v1/readiness/diff` endpoint. Flutter "vs Yesterday" card on the
+  dashboard shows the score delta and per-factor changes.
+- **Tests**: `PersonalBaselineTest` (5 tests), `ScoreDiffServiceTest`
+  (4 tests).
+
+### Fixed — Phase 3 bugs found during quality gate review
+- **Bug 1 (training load silently broken)**: `CurrentMetricsService
+  .fetchStepsSum()` had leftover dead code — a query using
+  `GROUP BY DATE(time)` through `jdbcTemplate.queryForObject()`, which
+  requires exactly one row. With more than one day of step data (the
+  normal case), it threw `IncorrectResultSizeDataAccessException`,
+  silently caught, always returning 0 — Training load (ACWR) was reported
+  as "missing" even when real data existed. Fixed by deleting the dead
+  query.
+- **Bug 2 (sleep-duration approximation fed nonsense into the score)**:
+  the `readingCount * 0.25 hours` approximation produced clearly
+  unrealistic values (e.g. 1.0 hours) against real test data, directly
+  corrupting the score's largest negative factor. Fixed by adding a
+  plausibility bound (2-14 hours) in both `CurrentMetricsService` and
+  `BaselineService` — values outside that range are logged and reported
+  as missing data rather than fed into the score.
+- **Bug 3 ("vs Yesterday" never compared against yesterday)**:
+  `ReadinessController.diff()` fabricated "prior" by plugging baseline
+  averages back in as if they were yesterday's raw metrics, which
+  mathematically forced every prior-day deviation to exactly 0. Fixed by
+  adding real persistence: new `readiness_score_history` table (Flyway
+  V04), `ReadinessScoreHistoryRepository`. `/diff` now looks up the real
+  persisted prior day; if none exists yet, returns an honest
+  `comparedAgainst: "no_prior_data"` response instead of fabricating a
+  comparison. `ScoreDiff` gained a `comparedAgainst` field; the Flutter
+  card only shows "vs Yesterday" and the trend delta when real prior-day
+  data exists.
+- **Contributing factor**: every DB query in `BaselineService` and
+  `CurrentMetricsService` silently swallowed exceptions with no logging —
+  exactly why Bug 1 went undetected through the original end-to-end
+  verification pass. Replaced every `catch (Exception e) {}` with
+  `log.warn(...)` including the exception.
+
 ### Notes
 - No real health data is used in development or testing. All fixtures are
   synthetic or explicitly anonymized.
 - The application remains fully usable when Ollama is unavailable.
 - All backend changes verified with `./gradlew build` + tests.
 - All Flutter changes verified with `flutter analyze` + `flutter build web`.
+- Phase 3 bug fixes were additionally verified against the real running
+  backend + Postgres with real inserted data, including reproducing Bug 1
+  directly in SQL before fixing it, per the process rules in
+  `docs/qa/phase1-fixes-and-lessons.md`.
 
 [Unreleased]: https://github.com/taimour-dev/open-wearable-insights/compare/HEAD

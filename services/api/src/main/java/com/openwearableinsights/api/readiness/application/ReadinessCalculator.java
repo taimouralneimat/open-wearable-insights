@@ -1,7 +1,9 @@
 package com.openwearableinsights.api.readiness.application;
 
+import com.openwearableinsights.api.readiness.domain.CurrentMetrics;
 import com.openwearableinsights.api.readiness.domain.FactorContribution;
 import com.openwearableinsights.api.readiness.domain.FactorContribution.Direction;
+import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import com.openwearableinsights.api.readiness.domain.ReadinessInputs;
 import com.openwearableinsights.api.readiness.domain.ReadinessScore;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,67 @@ public class ReadinessCalculator {
     private static final double W_COMPLETENESS = 0.05;
 
     private static final int PROVISIONAL_THRESHOLD_DAYS = 7;
+
+
+    /**
+     * Calculate readiness from raw current metrics and a personalized baseline.
+     *
+     * This is the Phase 3 method that computes deviations internally from
+     * the user own baseline, rather than receiving pre-computed deviations.
+     * Falls back to the legacy method if no baseline data is available.
+     */
+    public ReadinessScore calculate(CurrentMetrics current, PersonalBaseline baseline) {
+        if (baseline.metricBaselines().isEmpty()) {
+            // No baseline data — fall back to provisional with empty deviations
+            return calculate(new ReadinessInputs(
+                    Optional.empty(), Optional.empty(),
+                    current.sleepDurationHours(), current.sleepNeedHours(),
+                    current.acuteLoad(), current.chronicLoad(),
+                    current.stressScore(),
+                    current.dataCompleteness(),
+                    0
+            ));
+        }
+
+        // Compute deviations from personal baseline
+        Optional<Double> hrvDev = current.hrvMs().flatMap(h ->
+                baseline.baselineFor("hrv").map(b -> h - b));
+        Optional<Double> rhrDev = current.rhrBpm().flatMap(r ->
+                baseline.baselineFor("rhr").map(b -> r - b));
+
+        // Sleep need: use baseline sleep duration as the need if no explicit need
+        Optional<Double> sleepNeed = current.sleepNeedHours().or(() ->
+                baseline.baselineFor("sleep_duration"));
+
+        ReadinessInputs inputs = new ReadinessInputs(
+                hrvDev,
+                rhrDev,
+                current.sleepDurationHours(),
+                sleepNeed,
+                current.acuteLoad(),
+                current.chronicLoad(),
+                current.stressScore(),
+                current.dataCompleteness(),
+                baseline.baselineDays()
+        );
+
+        ReadinessScore score = calculate(inputs);
+
+        // Override baseline period and provisional with honest baseline info
+        return new ReadinessScore(
+                score.score(),
+                score.algorithmVersion(),
+                baseline.isProvisional(),
+                baseline.windowDescription(),
+                baseline.confidence(),
+                score.dataQuality(),
+                score.factors(),
+                score.missingDataTreatment(),
+                score.explanation(),
+                score.limitations(),
+                score.computedAt()
+        );
+    }
 
     public ReadinessScore calculate(ReadinessInputs inputs) {
         List<FactorContribution> factors = new ArrayList<>();
