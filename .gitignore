@@ -41,6 +41,10 @@ app-data/
 *.sqlite3
 *.db-journal
 
+# dev-start.sh / dev-stop.sh runtime state
+.dev-logs/
+.dev-pids/
+
 # -----------------------------------------------------------------------------
 # Secrets, tokens, credentials
 # -----------------------------------------------------------------------------

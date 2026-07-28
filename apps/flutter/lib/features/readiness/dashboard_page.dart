@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/api_client.dart';
 
 /// Dashboard page — shows readiness score, factor contributions, and daily coach.
@@ -52,6 +53,26 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       appBar: AppBar(
         title: const Text('Open Wearable Insights'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.bedtime_outlined),
+            tooltip: 'Sleep',
+            onPressed: () => context.push('/sleep'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.directions_run_outlined),
+            tooltip: 'Activities',
+            onPressed: () => context.push('/activities'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.analytics_outlined),
+            tooltip: 'Data Quality',
+            onPressed: () => context.push('/data-quality'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.upload_file_outlined),
+            tooltip: 'Import data',
+            onPressed: () => context.push('/import'),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',

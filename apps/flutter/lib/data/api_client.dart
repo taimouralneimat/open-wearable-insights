@@ -30,6 +30,72 @@ class ApiClient {
     final response = await _dio.get('/api/v1/coach/status');
     return LlmStatus.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// Scan the local import directory for importable files.
+  Future<ImportScanResult> scanImportDirectory() async {
+    final response = await _dio.get('/api/v1/ingestion/scan');
+    return ImportScanResult.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Dry-run validation of import files.
+  Future<DryRunSummary> dryRunValidation() async {
+    final response = await _dio.get('/api/v1/ingestion/dry-run');
+    return DryRunSummary.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Import all supported files from the import directory.
+  Future<ImportProgress> importAll() async {
+    final response = await _dio.post('/api/v1/ingestion/import');
+    return ImportProgress.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Undo an import batch.
+  Future<UndoResult> undoBatch(int batchId) async {
+    final response = await _dio.post('/api/v1/ingestion/undo/$batchId');
+    return UndoResult.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// List all import batches.
+  Future<List<ImportBatchResponse>> listBatches() async {
+    final response = await _dio.get('/api/v1/ingestion/batches');
+    return (response.data as List)
+        .map((e) => ImportBatchResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get sleep summary.
+  Future<SleepSummary> getSleepSummary() async {
+    final response = await _dio.get('/api/v1/sleep/summary');
+    return SleepSummary.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get sleep trends.
+  Future<List<SleepTrendPoint>> getSleepTrends() async {
+    final response = await _dio.get('/api/v1/sleep/trends');
+    return (response.data as List)
+        .map((e) => SleepTrendPoint.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get activity summary.
+  Future<ActivitySummary> getActivitySummary() async {
+    final response = await _dio.get('/api/v1/activities/summary');
+    return ActivitySummary.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get activity trends.
+  Future<List<ActivityTrendPoint>> getActivityTrends() async {
+    final response = await _dio.get('/api/v1/activities/trends');
+    return (response.data as List)
+        .map((e) => ActivityTrendPoint.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get data-quality summary.
+  Future<DataQualitySummary> getDataQualitySummary() async {
+    final response = await _dio.get('/api/v1/data-quality/summary');
+    return DataQualitySummary.fromJson(response.data as Map<String, dynamic>);
+  }
 }
 
 /// Readiness score response from the API.
@@ -172,6 +238,452 @@ class LlmStatus {
     return LlmStatus(
       enabled: json['enabled'] as bool,
       mode: json['mode'] as String,
+    );
+  }
+}
+
+/// Result of scanning the local import directory.
+class ImportScanResult {
+  final List<ScannedFileResponse> files;
+  final String directory;
+  final bool exists;
+  final String? errorMessage;
+
+  ImportScanResult({
+    required this.files,
+    required this.directory,
+    required this.exists,
+    this.errorMessage,
+  });
+
+  factory ImportScanResult.fromJson(Map<String, dynamic> json) {
+    return ImportScanResult(
+      files: (json['files'] as List)
+          .map((e) => ScannedFileResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      directory: json['directory'] as String,
+      exists: json['exists'] as bool,
+      errorMessage: json['errorMessage'] as String?,
+    );
+  }
+}
+
+class ScannedFileResponse {
+  final String filename;
+  final int sizeBytes;
+  final String lastModified;
+  final String detectedFormat;
+  final bool supported;
+
+  ScannedFileResponse({
+    required this.filename,
+    required this.sizeBytes,
+    required this.lastModified,
+    required this.detectedFormat,
+    required this.supported,
+  });
+
+  factory ScannedFileResponse.fromJson(Map<String, dynamic> json) {
+    return ScannedFileResponse(
+      filename: json['filename'] as String,
+      sizeBytes: json['sizeBytes'] as int,
+      lastModified: json['lastModified'] as String,
+      detectedFormat: json['detectedFormat'] as String,
+      supported: json['supported'] as bool,
+    );
+  }
+}
+
+
+/// Summary of a dry-run validation pass.
+class DryRunSummary {
+  final List<ValidationResultResponse> results;
+  final String directory;
+  final bool exists;
+  final String? errorMessage;
+  final int supportedFiles;
+  final int duplicates;
+  final int totalRecords;
+  final int unsupportedFiles;
+
+  DryRunSummary({
+    required this.results,
+    required this.directory,
+    required this.exists,
+    this.errorMessage,
+    required this.supportedFiles,
+    required this.duplicates,
+    required this.totalRecords,
+    required this.unsupportedFiles,
+  });
+
+  factory DryRunSummary.fromJson(Map<String, dynamic> json) {
+    return DryRunSummary(
+      results: (json['results'] as List)
+          .map((e) => ValidationResultResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      directory: json['directory'] as String,
+      exists: json['exists'] as bool,
+      errorMessage: json['errorMessage'] as String?,
+      supportedFiles: json['supportedFiles'] as int,
+      duplicates: json['duplicates'] as int,
+      totalRecords: json['totalRecords'] as int,
+      unsupportedFiles: json['unsupportedFiles'] as int,
+    );
+  }
+}
+
+class ValidationResultResponse {
+  final String filename;
+  final String detectedFormat;
+  final bool supported;
+  final String? contentHash;
+  final int recordCount;
+  final bool duplicate;
+  final List<String> errors;
+  final List<String> warnings;
+  final List<String> unsupportedRecords;
+
+  ValidationResultResponse({
+    required this.filename,
+    required this.detectedFormat,
+    required this.supported,
+    this.contentHash,
+    required this.recordCount,
+    required this.duplicate,
+    required this.errors,
+    required this.warnings,
+    required this.unsupportedRecords,
+  });
+
+  factory ValidationResultResponse.fromJson(Map<String, dynamic> json) {
+    return ValidationResultResponse(
+      filename: json['filename'] as String,
+      detectedFormat: json['detectedFormat'] as String,
+      supported: json['supported'] as bool,
+      contentHash: json['contentHash'] as String?,
+      recordCount: json['recordCount'] as int,
+      duplicate: json['duplicate'] as bool,
+      errors: (json['errors'] as List).cast<String>(),
+      warnings: (json['warnings'] as List).cast<String>(),
+      unsupportedRecords: (json['unsupportedRecords'] as List).cast<String>(),
+    );
+  }
+}
+
+
+/// Import progress report.
+class ImportProgress {
+  final List<FileImportResult> files;
+  final String directory;
+  final bool exists;
+  final String? errorMessage;
+  final int imported;
+  final int skipped;
+  final int failed;
+  final int totalRecords;
+
+  ImportProgress({
+    required this.files,
+    required this.directory,
+    required this.exists,
+    this.errorMessage,
+    required this.imported,
+    required this.skipped,
+    required this.failed,
+    required this.totalRecords,
+  });
+
+  factory ImportProgress.fromJson(Map<String, dynamic> json) {
+    return ImportProgress(
+      files: (json['files'] as List)
+          .map((e) => FileImportResult.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      directory: json['directory'] as String,
+      exists: json['exists'] as bool,
+      errorMessage: json['errorMessage'] as String?,
+      imported: json['imported'] as int,
+      skipped: json['skipped'] as int,
+      failed: json['failed'] as int,
+      totalRecords: json['totalRecords'] as int,
+    );
+  }
+}
+
+class FileImportResult {
+  final String filename;
+  final String status;
+  final String? message;
+  final int recordCount;
+  final String? contentHash;
+
+  FileImportResult({
+    required this.filename,
+    required this.status,
+    this.message,
+    required this.recordCount,
+    this.contentHash,
+  });
+
+  factory FileImportResult.fromJson(Map<String, dynamic> json) {
+    return FileImportResult(
+      filename: json['filename'] as String,
+      status: json['status'] as String,
+      message: json['message'] as String?,
+      recordCount: json['recordCount'] as int,
+      contentHash: json['contentHash'] as String?,
+    );
+  }
+}
+
+class UndoResult {
+  final bool success;
+  final String message;
+  final int? batchId;
+  final String? fileName;
+
+  UndoResult({
+    required this.success,
+    required this.message,
+    this.batchId,
+    this.fileName,
+  });
+
+  factory UndoResult.fromJson(Map<String, dynamic> json) {
+    return UndoResult(
+      success: json['success'] as bool,
+      message: json['message'] as String,
+      batchId: json['batchId'] as int?,
+      fileName: json['fileName'] as String?,
+    );
+  }
+}
+
+class ImportBatchResponse {
+  final int id;
+  final int accountId;
+  final String source;
+  final String contentHash;
+  final String status;
+  final String importedAt;
+  final String? undoAt;
+  final String? fileName;
+  final int recordCount;
+
+  ImportBatchResponse({
+    required this.id,
+    required this.accountId,
+    required this.source,
+    required this.contentHash,
+    required this.status,
+    required this.importedAt,
+    this.undoAt,
+    this.fileName,
+    required this.recordCount,
+  });
+
+  factory ImportBatchResponse.fromJson(Map<String, dynamic> json) {
+    return ImportBatchResponse(
+      id: json['id'] as int,
+      accountId: json['accountId'] as int,
+      source: json['source'] as String,
+      contentHash: json['contentHash'] as String,
+      status: json['status'] as String,
+      importedAt: json['importedAt'] as String,
+      undoAt: json['undoAt'] as String?,
+      fileName: json['fileName'] as String?,
+      recordCount: json['recordCount'] as int,
+    );
+  }
+}
+
+
+/// Sleep summary response.
+class SleepSummary {
+  final double totalHours;
+  final double deepHours;
+  final double remHours;
+  final double lightHours;
+  final double awakeHours;
+  final int sleepScore;
+  final List<SleepStagePoint> stages;
+
+  SleepSummary({
+    required this.totalHours,
+    required this.deepHours,
+    required this.remHours,
+    required this.lightHours,
+    required this.awakeHours,
+    required this.sleepScore,
+    required this.stages,
+  });
+
+  factory SleepSummary.fromJson(Map<String, dynamic> json) {
+    return SleepSummary(
+      totalHours: (json['totalHours'] as num).toDouble(),
+      deepHours: (json['deepHours'] as num).toDouble(),
+      remHours: (json['remHours'] as num).toDouble(),
+      lightHours: (json['lightHours'] as num).toDouble(),
+      awakeHours: (json['awakeHours'] as num).toDouble(),
+      sleepScore: json['sleepScore'] as int,
+      stages: (json['stages'] as List)
+          .map((e) => SleepStagePoint.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class SleepStagePoint {
+  final String time;
+  final String stage;
+
+  SleepStagePoint({required this.time, required this.stage});
+
+  factory SleepStagePoint.fromJson(Map<String, dynamic> json) {
+    return SleepStagePoint(
+      time: json['time'] as String,
+      stage: json['stage'] as String,
+    );
+  }
+}
+
+class SleepTrendPoint {
+  final String date;
+  final double totalHours;
+  final double deepHours;
+  final double remHours;
+  final double lightHours;
+  final double awakeHours;
+  final int sleepScore;
+
+  SleepTrendPoint({
+    required this.date,
+    required this.totalHours,
+    required this.deepHours,
+    required this.remHours,
+    required this.lightHours,
+    required this.awakeHours,
+    required this.sleepScore,
+  });
+
+  factory SleepTrendPoint.fromJson(Map<String, dynamic> json) {
+    return SleepTrendPoint(
+      date: json['date'] as String,
+      totalHours: (json['totalHours'] as num).toDouble(),
+      deepHours: (json['deepHours'] as num).toDouble(),
+      remHours: (json['remHours'] as num).toDouble(),
+      lightHours: (json['lightHours'] as num).toDouble(),
+      awakeHours: (json['awakeHours'] as num).toDouble(),
+      sleepScore: json['sleepScore'] as int,
+    );
+  }
+}
+
+/// Activity summary response.
+class ActivitySummary {
+  final int steps;
+  final int calories;
+  final int activeMinutes;
+  final int activeZoneMinutes;
+  final String timestamp;
+
+  ActivitySummary({
+    required this.steps,
+    required this.calories,
+    required this.activeMinutes,
+    required this.activeZoneMinutes,
+    required this.timestamp,
+  });
+
+  factory ActivitySummary.fromJson(Map<String, dynamic> json) {
+    return ActivitySummary(
+      steps: json['steps'] as int,
+      calories: json['calories'] as int,
+      activeMinutes: json['activeMinutes'] as int,
+      activeZoneMinutes: json['activeZoneMinutes'] as int,
+      timestamp: json['timestamp'] as String,
+    );
+  }
+}
+
+class ActivityTrendPoint {
+  final String date;
+  final int steps;
+  final int calories;
+  final int activeMinutes;
+
+  ActivityTrendPoint({
+    required this.date,
+    required this.steps,
+    required this.calories,
+    required this.activeMinutes,
+  });
+
+  factory ActivityTrendPoint.fromJson(Map<String, dynamic> json) {
+    return ActivityTrendPoint(
+      date: json['date'] as String,
+      steps: json['steps'] as int,
+      calories: json['calories'] as int,
+      activeMinutes: json['activeMinutes'] as int,
+    );
+  }
+}
+
+
+/// Data-quality summary response.
+class DataQualitySummary {
+  final double completeness;
+  final String freshness;
+  final int daysOfData;
+  final int totalSources;
+  final List<MetricQuality> metrics;
+  final List<String> issues;
+  final String algorithmVersion;
+
+  DataQualitySummary({
+    required this.completeness,
+    required this.freshness,
+    required this.daysOfData,
+    required this.totalSources,
+    required this.metrics,
+    required this.issues,
+    required this.algorithmVersion,
+  });
+
+  factory DataQualitySummary.fromJson(Map<String, dynamic> json) {
+    return DataQualitySummary(
+      completeness: (json['completeness'] as num).toDouble(),
+      freshness: json['freshness'] as String,
+      daysOfData: json['daysOfData'] as int,
+      totalSources: json['totalSources'] as int,
+      metrics: (json['metrics'] as List)
+          .map((e) => MetricQuality.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      issues: (json['issues'] as List).cast<String>(),
+      algorithmVersion: json['algorithmVersion'] as String,
+    );
+  }
+}
+
+class MetricQuality {
+  final String metric;
+  final double coverage;
+  final String quality;
+  final String frequency;
+
+  MetricQuality({
+    required this.metric,
+    required this.coverage,
+    required this.quality,
+    required this.frequency,
+  });
+
+  factory MetricQuality.fromJson(Map<String, dynamic> json) {
+    return MetricQuality(
+      metric: json['metric'] as String,
+      coverage: (json['coverage'] as num).toDouble(),
+      quality: json['quality'] as String,
+      frequency: json['frequency'] as String,
     );
   }
 }

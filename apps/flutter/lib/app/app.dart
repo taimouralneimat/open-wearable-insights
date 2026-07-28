@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
+import 'package:open_wearable_insights/features/import/import_page.dart';
+import 'package:open_wearable_insights/features/sleep/sleep_page.dart';
+import 'package:open_wearable_insights/features/activities/activities_page.dart';
+import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 
 /// Open Wearable Insights — app shell with routing.
 ///
@@ -26,6 +30,22 @@ class OpenWearableInsightsApp extends StatelessWidget {
       GoRoute(
         path: '/',
         builder: (context, state) => const DashboardPage(),
+      ),
+      GoRoute(
+        path: '/import',
+        builder: (context, state) => const ImportPage(),
+      ),
+      GoRoute(
+        path: '/sleep',
+        builder: (context, state) => const SleepPage(),
+      ),
+      GoRoute(
+        path: '/activities',
+        builder: (context, state) => const ActivitiesPage(),
+      ),
+      GoRoute(
+        path: '/data-quality',
+        builder: (context, state) => const DataQualityPage(),
       ),
     ],
   );
