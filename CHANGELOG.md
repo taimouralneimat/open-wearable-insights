@@ -161,6 +161,28 @@ for releases after 1.0.0. Pre-1.0 development versions use `0.<phase>.<increment
   score formula matched the API response exactly; activity
   summary/trends cross-checked against direct SQL and matched exactly.
 
+### Added — Phase 3: Journal & behaviors taxonomy (EC6)
+- New `journal/domain` + `journal/application` (`JournalService`) +
+  `journal/adapter/in` (`JournalController`) on top of the
+  `journal_entries` table that existed since the Phase 0 schema but was
+  never built on.
+- Taxonomy: 6 categories, 33 behaviors — deliberately broader than the
+  original Phase 1 stub (6 behaviors, no categories), suggested rather
+  than enforced (free-text custom behaviors still accepted). Entries
+  always stored `treated_as_untrusted = true`.
+- New `GET /api/v1/journal/behaviors`, `POST /api/v1/journal/entries`,
+  `GET /api/v1/journal/entries` endpoints.
+- **Flutter**: new `journal_page.dart` with a category/behavior picker
+  and entry list, wired into dashboard navigation.
+- **Tests**: 6 new `JournalServiceTest` cases.
+- **Verified end-to-end**: real POST/GET round-trip against the running
+  backend, raw DB row inspection confirming correct encoding, blank-
+  behavior validation confirmed rejected with 400.
+- **Known gap**: the Flutter journal page was verified via
+  `flutter analyze`/`build web` only, not an interactive click-through —
+  noted explicitly in `docs/qa/phase-gate-report-phase3.md` rather than
+  claimed as fully covered.
+
 ### Fixed — Phase 3 bugs found during quality gate review
 - **Bug 1 (training load silently broken)**: `CurrentMetricsService
   .fetchStepsSum()` had leftover dead code — a query using

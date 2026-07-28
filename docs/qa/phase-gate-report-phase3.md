@@ -2,7 +2,7 @@
 
 - **Phase**: 3 — Insight intelligence
 - **Date**: 2026-07-29
-- **Status**: EC1/EC2/EC3/EC4/EC5 PASS (after bug fixes and end-to-end verification). EC6-EC7 not started.
+- **Status**: EC1/EC2/EC3/EC4/EC5/EC6 PASS (EC6 has one noted coverage gap — see below). EC7 not started.
 - **Version**: 0.3.0-SNAPSHOT
 
 ## Context
@@ -187,9 +187,56 @@ pass. Replaced every one with `log.warn(...)` including the exception.
   against the real database (above) is stronger evidence, consistent
   with how `ReadinessScoreHistoryRepository` was handled in EC2.
 
-### EC6-EC7 — not started
-Per docs/product/release-plan.md: expanded journal/behaviors taxonomy,
-exploratory correlations.
+### EC6: Journal & behaviors taxonomy — PASS (with one noted coverage gap)
+- The `journal_entries` table already existed from the Phase 0 schema but
+  no module was ever built on it. Added `journal/domain`,
+  `journal/application` (`JournalService`), `journal/adapter/in`
+  (`JournalController`) following the same layering as the rest of the
+  codebase.
+- Taxonomy: 6 categories (Sleep, Nutrition, Recovery, Mental wellbeing,
+  Training, Supplements), 33 behaviors total — deliberately broader than
+  the original Phase 1 stub (6 behaviors, no categories) but not
+  attempting the ~140-behavior breadth some competitor products offer,
+  per the product backlog's explicit scoping note on this exit
+  criterion. The taxonomy is a suggested list, not an enforced
+  constraint — free-text custom behaviors are still accepted, matching
+  the existing schema (no DB-level enum).
+- Category is round-tripped through the existing free-text `behavior`
+  column as `"category::behavior"` rather than requiring a schema
+  migration — decoded back into separate `category`/`behavior` fields on
+  read, with a fallback to `"Other"` for any pre-existing data without
+  the encoding.
+- Entries are always stored with `treated_as_untrusted = true`, per the
+  schema's own intent and `docs/product/parity-matrix.md` row 5/6.
+- New `GET /api/v1/journal/behaviors`, `POST /api/v1/journal/entries`,
+  `GET /api/v1/journal/entries` endpoints. Bean Validation rejects blank
+  behaviors (verified: returns 400).
+- **Flutter**: new `journal_page.dart` — category dropdown + behavior
+  chips + optional value/note fields in a bottom sheet, entry list with
+  empty/loading/error states, wired into dashboard navigation.
+- **Tests**: 6 new `JournalServiceTest` cases — taxonomy breadth
+  (asserts total behavior count exceeds 3x the original stub),
+  category/behavior encoding and decoding round-trip, legacy-data
+  fallback, untrusted-input flag always set.
+- **Verified end-to-end**: booted the real backend, called
+  `POST /journal/entries` twice with real data, confirmed correct
+  auto-generated IDs, confirmed the raw DB row shows the expected
+  `"Nutrition::Alcohol"` encoding, confirmed `GET /journal/entries`
+  correctly decodes it back and orders most-recent-first, confirmed
+  blank-behavior submission is rejected with 400.
+- **Coverage gap, noted rather than hidden**: unlike EC1-EC5, the new
+  Flutter journal page itself was only verified via `flutter analyze`
+  and `flutter build web` — not an actual interactive render/click-
+  through in a live browser. Static analysis didn't catch the Phase 1
+  `textBaseline` runtime crash earlier in this project, so this is a
+  real, not merely theoretical, gap. Recommend a manual click-through of
+  the journal flow (add an entry via the bottom sheet, confirm it
+  appears in the list) before considering EC6 fully closed.
+
+### EC7 — not started
+Per docs/product/release-plan.md: exploratory correlations (sample count,
+uncertainty, no causation claims) between journal behaviors and
+readiness/sleep outcomes.
 
 ## Final verification
 - `./gradlew build` — BUILD SUCCESSFUL, 42 tests pass.

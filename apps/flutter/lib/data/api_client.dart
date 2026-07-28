@@ -108,6 +108,38 @@ class ApiClient {
     final response = await _dio.get('/api/v1/data-quality/summary');
     return DataQualitySummary.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// Get the curated journal behavior taxonomy.
+  Future<List<BehaviorCategory>> getJournalBehaviors() async {
+    final response = await _dio.get('/api/v1/journal/behaviors');
+    return (response.data as List)
+        .map((e) => BehaviorCategory.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Log a journal entry.
+  Future<JournalEntryResponse> addJournalEntry({
+    String? category,
+    required String behavior,
+    String? value,
+    String? note,
+  }) async {
+    final response = await _dio.post('/api/v1/journal/entries', data: {
+      'category': category,
+      'behavior': behavior,
+      'value': value,
+      'note': note,
+    });
+    return JournalEntryResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// List journal entries, most recent first.
+  Future<List<JournalEntryResponse>> getJournalEntries() async {
+    final response = await _dio.get('/api/v1/journal/entries');
+    return (response.data as List)
+        .map((e) => JournalEntryResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }
 
 /// Readiness score response from the API.
@@ -841,6 +873,54 @@ class FactorDiffResponse {
       priorContribution: (json['priorContribution'] as num).toDouble(),
       contributionDelta: (json['contributionDelta'] as num).toDouble(),
       direction: json['direction'] as String,
+    );
+  }
+}
+
+/// A category of suggested journal behaviors.
+class BehaviorCategory {
+  final String name;
+  final List<String> behaviors;
+
+  BehaviorCategory({required this.name, required this.behaviors});
+
+  factory BehaviorCategory.fromJson(Map<String, dynamic> json) {
+    return BehaviorCategory(
+      name: json['name'] as String,
+      behaviors: (json['behaviors'] as List).cast<String>(),
+    );
+  }
+}
+
+/// A logged journal entry — self-reported, always treated as untrusted input.
+class JournalEntryResponse {
+  final int id;
+  final String time;
+  final String category;
+  final String behavior;
+  final String? value;
+  final String? note;
+  final bool treatedAsUntrusted;
+
+  JournalEntryResponse({
+    required this.id,
+    required this.time,
+    required this.category,
+    required this.behavior,
+    this.value,
+    this.note,
+    required this.treatedAsUntrusted,
+  });
+
+  factory JournalEntryResponse.fromJson(Map<String, dynamic> json) {
+    return JournalEntryResponse(
+      id: json['id'] as int,
+      time: json['time'] as String,
+      category: json['category'] as String,
+      behavior: json['behavior'] as String,
+      value: json['value'] as String?,
+      note: json['note'] as String?,
+      treatedAsUntrusted: json['treatedAsUntrusted'] as bool,
     );
   }
 }

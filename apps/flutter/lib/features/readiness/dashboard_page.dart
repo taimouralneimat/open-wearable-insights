@@ -73,6 +73,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             onPressed: () => context.push('/data-quality'),
           ),
           IconButton(
+            icon: const Icon(Icons.edit_note),
+            tooltip: 'Journal',
+            onPressed: () => context.push('/journal'),
+          ),
+          IconButton(
             icon: const Icon(Icons.upload_file_outlined),
             tooltip: 'Import data',
             onPressed: () => context.push('/import'),

@@ -5,6 +5,7 @@ import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/sleep/sleep_page.dart';
 import 'package:open_wearable_insights/features/activities/activities_page.dart';
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
+import 'package:open_wearable_insights/features/journal/journal_page.dart';
 
 /// Open Wearable Insights — app shell with routing.
 ///
@@ -46,6 +47,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
       GoRoute(
         path: '/data-quality',
         builder: (context, state) => const DataQualityPage(),
+      ),
+      GoRoute(
+        path: '/journal',
+        builder: (context, state) => const JournalPage(),
       ),
     ],
   );
