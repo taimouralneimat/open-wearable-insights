@@ -42,6 +42,9 @@ dependencies {
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
 
+    // Garmin FIT SDK (ADR-0006) — official artifact, published to Maven Central
+    implementation(libs.garmin.fit.sdk)
+
     // PostgreSQL driver
     runtimeOnly(libs.postgresql)
 
