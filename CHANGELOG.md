@@ -246,6 +246,38 @@ own commits, not just Cline's.
   verification pass. Replaced every `catch (Exception e) {}` with
   `log.warn(...)` including the exception.
 
+### Added — Phase 4: Pluggable wearable connectors, real FIT parsing (ADR-0006)
+- New `connections` module: `WearableConnector` interface + `ConnectorRegistry`
+  (Spring autowires every registered connector) — adding a future wearable
+  vendor means adding one class, not touching `ingestion`.
+- `GarminFitConnector`: first implementation, using the official Garmin FIT
+  SDK (`com.garmin:fit`, Maven Central) to extract hr, steps, stress,
+  sleep_stage, and hrv (rMSSD from the RR-interval array) from real FIT
+  message types.
+- Wired the connector into `DryRunValidator` (real record counts, replacing
+  the previous stubbed `yield 0`) and `ImportService`, which now actually
+  persists parsed measurements to the `measurements` table via the new
+  `MeasurementRepository` — previously **no import format, including
+  JSON/CSV, ever wrote to `measurements`**; import only ever recorded batch
+  metadata. FIT files were the forcing function that surfaced this.
+- `packages/test-data/synthetic-activity.fit` upgraded from placeholder text
+  bytes to a real, parseable FIT binary built with the SDK's own encoder
+  (`SyntheticFitFixtureGenerator`, backend test sources) — still entirely
+  synthetic, no real device data, per the project's no-real-health-data rule.
+- Verified live end-to-end against a running backend: dry-run reports the
+  real record count, import persists real rows (confirmed via direct DB
+  query joined through `provenance` → `import_batches`), re-import is
+  idempotent (no duplicate rows), and a corrupted `.fit` file reports a real
+  parse error instead of silently returning 0 or crashing the batch scan.
+- **Known gap**: `rhr` (resting heart rate) is not derived — FIT exposes
+  per-record instantaneous HR only; tracked as a follow-up.
+
+### Fixed — Garmin FIT SDK dependency coordinates
+- `libs.versions.toml`/`build.gradle.kts` referenced the FIT SDK via
+  `com.github.garmin:fit-java-sdk` through JitPack, which doesn't resolve.
+  The real, official artifact is `com.garmin:fit` on Maven Central. Fixed
+  and verified via `./gradlew dependencies`.
+
 ### Notes
 - No real health data is used in development or testing. All fixtures are
   synthetic or explicitly anonymized.

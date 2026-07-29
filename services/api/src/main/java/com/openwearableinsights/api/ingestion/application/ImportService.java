@@ -1,12 +1,18 @@
 package com.openwearableinsights.api.ingestion.application;
 
+import com.openwearableinsights.api.connections.application.ConnectorRegistry;
+import com.openwearableinsights.api.connections.domain.ParsedMeasurement;
 import com.openwearableinsights.api.ingestion.domain.ImportBatch;
 import com.openwearableinsights.api.ingestion.domain.ValidationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,19 +37,26 @@ import java.util.List;
 @Service
 public class ImportService {
 
+    private static final Logger log = LoggerFactory.getLogger(ImportService.class);
     private static final Long DEFAULT_ACCOUNT_ID = 1L;
 
     private final DryRunValidator validator;
     private final ImportBatchRepository batchRepository;
+    private final ConnectorRegistry connectorRegistry;
+    private final MeasurementRepository measurementRepository;
     private final TransactionTemplate requiresNewTx;
 
     public ImportService(
             DryRunValidator validator,
             ImportBatchRepository batchRepository,
+            ConnectorRegistry connectorRegistry,
+            MeasurementRepository measurementRepository,
             PlatformTransactionManager txManager
     ) {
         this.validator = validator;
         this.batchRepository = batchRepository;
+        this.connectorRegistry = connectorRegistry;
+        this.measurementRepository = measurementRepository;
         this.requiresNewTx = new TransactionTemplate(txManager);
         this.requiresNewTx.setPropagationBehavior(
                 org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW
@@ -97,9 +110,12 @@ public class ImportService {
                     continue;
                 }
 
-                // Persist the import batch in its own transaction
+                // Persist the import batch (+ any connector-parsed measurements) in its own transaction
                 try {
-                    ImportBatch saved = requiresNewTx.execute(status -> {
+                    var connector = connectorRegistry.findFor(vr.filename());
+                    Path filePath = Path.of(dryRun.directory(), vr.filename());
+
+                    int persistedCount = requiresNewTx.execute(status -> {
                         ImportBatch batch = new ImportBatch(
                                 DEFAULT_ACCOUNT_ID,
                                 vr.detectedFormat(),
@@ -107,14 +123,29 @@ public class ImportService {
                                 vr.filename(),
                                 vr.recordCount()
                         );
-                        return batchRepository.save(batch);
+                        ImportBatch saved = batchRepository.save(batch);
+
+                        if (connector.isPresent()) {
+                            List<ParsedMeasurement> parsed;
+                            try {
+                                parsed = connector.get().parse(filePath);
+                            } catch (IOException e) {
+                                throw new RuntimeException("Failed to parse " + vr.filename() + ": " + e.getMessage(), e);
+                            }
+                            return measurementRepository.persist(
+                                    DEFAULT_ACCOUNT_ID, saved.getId(), connector.get().getConnectorId(), parsed
+                            );
+                        }
+                        return vr.recordCount();
                     });
+
                     fileResults.add(new FileImportResult(
-                            vr.filename(), "imported", null, vr.recordCount(), vr.contentHash()
+                            vr.filename(), "imported", null, persistedCount, vr.contentHash()
                     ));
                     imported++;
-                    totalRecords += vr.recordCount();
+                    totalRecords += persistedCount;
                 } catch (Exception e) {
+                    log.warn("Failed to import {}: {}", vr.filename(), e.getMessage(), e);
                     fileResults.add(new FileImportResult(
                             vr.filename(), "error",
                             "Failed to persist: " + e.getMessage(), 0, vr.contentHash()

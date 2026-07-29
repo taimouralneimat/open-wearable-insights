@@ -50,8 +50,8 @@ graph TB
 | Module | Phase 1 | Notes |
 |---|---|---|
 | identity | stub + local auth | single-user; OIDC seam |
-| connections | stub | integration config later |
-| ingestion | ✅ implemented | FIT/CSV/JSON/synthetic |
+| connections | ✅ implemented | `WearableConnector` + `ConnectorRegistry`; Garmin FIT first (ADR-0006) |
+| ingestion | ✅ implemented | FIT (via connections)/CSV/JSON/synthetic |
 | normalization | ✅ implemented | canonical model |
 | provenance | ✅ implemented | source/batch/algo version |
 | activities | stub | Phase 2 |

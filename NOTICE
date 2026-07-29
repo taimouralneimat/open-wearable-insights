@@ -13,6 +13,9 @@ This product includes software developed by the following projects:
 - TimescaleDB (https://www.timescale.com/) — Apache License 2.0
 - Testcontainers (https://www.testcontainers.org/) — MIT License
 - Micrometer (https://micrometer.io/) — Apache License 2.0
+- Garmin FIT SDK (https://developer.garmin.com/fit/overview/) — Flexible and
+  Interoperable Data Transfer (FIT) Protocol License Agreement
+  (https://github.com/garmin/fit-java-sdk/blob/main/LICENSE.txt)
 
 - Flutter (https://flutter.dev/) — BSD-3-Clause License
 - Dart (https://dart.dev/) — BSD-3-Clause License

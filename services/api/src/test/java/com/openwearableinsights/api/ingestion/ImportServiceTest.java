@@ -1,5 +1,7 @@
 package com.openwearableinsights.api.ingestion;
 
+import com.openwearableinsights.api.connections.adapter.garmin.GarminFitConnector;
+import com.openwearableinsights.api.connections.application.ConnectorRegistry;
 import com.openwearableinsights.api.ingestion.application.DryRunValidator;
 import com.openwearableinsights.api.ingestion.application.DryRunValidator.DryRunSummary;
 import com.openwearableinsights.api.ingestion.application.ImportBatchRepository;
@@ -7,6 +9,7 @@ import com.openwearableinsights.api.ingestion.application.ImportService;
 import com.openwearableinsights.api.ingestion.application.ImportService.FileImportResult;
 import com.openwearableinsights.api.ingestion.application.ImportService.ImportProgress;
 import com.openwearableinsights.api.ingestion.application.ImportService.UndoResult;
+import com.openwearableinsights.api.ingestion.application.MeasurementRepository;
 import com.openwearableinsights.api.ingestion.domain.ImportBatch;
 import com.openwearableinsights.api.ingestion.domain.ValidationResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +53,8 @@ class ImportServiceTest {
 
         // Create a real DryRunValidator pointing at the temp dir
         var scanner = new com.openwearableinsights.api.ingestion.application.ImportDirectoryScanner(tempDir.toString());
-        var validator = new DryRunValidator(scanner);
+        var connectorRegistry = new ConnectorRegistry(List.of(new GarminFitConnector()));
+        var validator = new DryRunValidator(scanner, connectorRegistry);
 
         // Fake PlatformTransactionManager that executes callbacks synchronously
         PlatformTransactionManager txManager = new PlatformTransactionManager() {
@@ -64,7 +68,7 @@ class ImportServiceTest {
             public void rollback(org.springframework.transaction.TransactionStatus status) {}
         };
 
-        importService = new ImportService(validator, batchRepository, txManager);
+        importService = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), txManager);
     }
 
     @Test
@@ -247,13 +251,14 @@ class ImportServiceTest {
     @Test
     void nonexistentDirectory_returnsError() {
         var scanner = new com.openwearableinsights.api.ingestion.application.ImportDirectoryScanner("/nonexistent/path");
-        var validator = new DryRunValidator(scanner);
+        var connectorRegistry = new ConnectorRegistry(List.of(new GarminFitConnector()));
+        var validator = new DryRunValidator(scanner, connectorRegistry);
         PlatformTransactionManager txManager = new PlatformTransactionManager() {
             @Override public org.springframework.transaction.TransactionStatus getTransaction(org.springframework.transaction.TransactionDefinition d) { return new SimpleTransactionStatus(); }
             @Override public void commit(org.springframework.transaction.TransactionStatus s) {}
             @Override public void rollback(org.springframework.transaction.TransactionStatus s) {}
         };
-        var service = new ImportService(validator, batchRepository, txManager);
+        var service = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), txManager);
 
         ImportProgress progress = service.importAll();
 

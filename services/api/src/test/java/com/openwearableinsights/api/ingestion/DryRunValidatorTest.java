@@ -1,5 +1,8 @@
 package com.openwearableinsights.api.ingestion;
 
+import com.openwearableinsights.api.connections.adapter.garmin.GarminFitConnector;
+import com.openwearableinsights.api.connections.adapter.garmin.SyntheticFitFixtureGenerator;
+import com.openwearableinsights.api.connections.application.ConnectorRegistry;
 import com.openwearableinsights.api.ingestion.application.DryRunValidator;
 import com.openwearableinsights.api.ingestion.application.DryRunValidator.DryRunSummary;
 import com.openwearableinsights.api.ingestion.application.ImportDirectoryScanner;
@@ -10,6 +13,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +33,7 @@ class DryRunValidatorTest {
 
     private void setupValidator() {
         var scanner = new ImportDirectoryScanner(tempDir.toString());
-        validator = new DryRunValidator(scanner);
+        validator = new DryRunValidator(scanner, new ConnectorRegistry(List.of(new GarminFitConnector())));
     }
 
     @Test
@@ -146,7 +150,7 @@ class DryRunValidatorTest {
     @Test
     void nonexistentDirectory_returnsError() {
         var scanner = new ImportDirectoryScanner("/nonexistent/path/that/does/not/exist");
-        var validator = new DryRunValidator(scanner);
+        var validator = new DryRunValidator(scanner, new ConnectorRegistry(List.of(new GarminFitConnector())));
         DryRunSummary summary = validator.validateAll();
         assertThat(summary.exists()).isFalse();
         assertThat(summary.errorMessage()).isNotNull();
@@ -173,9 +177,10 @@ class DryRunValidatorTest {
     }
 
     @Test
-    void fitFile_recognizedAndHashedButNotParsed() throws IOException {
+    void fitFile_parsedViaGarminConnector() throws IOException {
         setupValidator();
-        Files.write(tempDir.resolve("activity.fit"), "SYNTHETIC-FIT-PLACEHOLDER".getBytes());
+        Path fitFile = tempDir.resolve("activity.fit");
+        SyntheticFitFixtureGenerator.generate(fitFile);
 
         DryRunSummary summary = validator.validateAll();
 
@@ -183,7 +188,20 @@ class DryRunValidatorTest {
         assertThat(vr.supported()).isTrue();
         assertThat(vr.detectedFormat()).isEqualTo("fit");
         assertThat(vr.contentHash()).isNotBlank();
-        assertThat(vr.recordCount()).isZero(); // FIT parsing pending SDK
-        assertThat(vr.warnings()).isNotEmpty();
+        // 5 hr + 3 steps + 2 stress + 4 sleep_stage + 1 hrv (see SyntheticFitFixtureGenerator)
+        assertThat(vr.recordCount()).isEqualTo(15);
+    }
+
+    @Test
+    void corruptFitFile_reportsErrorNotSilentZero() throws IOException {
+        setupValidator();
+        Files.write(tempDir.resolve("bad.fit"), "NOT-A-REAL-FIT-FILE".getBytes());
+
+        DryRunSummary summary = validator.validateAll();
+
+        ValidationResult vr = summary.results().get(0);
+        assertThat(vr.supported()).isTrue();
+        assertThat(vr.detectedFormat()).isEqualTo("fit");
+        assertThat(vr.errors()).isNotEmpty();
     }
 }

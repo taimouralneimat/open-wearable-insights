@@ -1,5 +1,6 @@
 package com.openwearableinsights.api.ingestion.application;
 
+import com.openwearableinsights.api.connections.application.ConnectorRegistry;
 import com.openwearableinsights.api.ingestion.domain.ValidationResult;
 import com.openwearableinsights.api.ingestion.domain.ScannedFile;
 import org.springframework.stereotype.Service;
@@ -35,22 +36,25 @@ public class DryRunValidator {
 
     private final ImportDirectoryScanner scanner;
     private final ImportBatchRepository batchRepository;
+    private final ConnectorRegistry connectorRegistry;
 
     /**
      * Spring-injected constructor — checks DB for duplicates.
      */
     @org.springframework.beans.factory.annotation.Autowired
-    public DryRunValidator(ImportDirectoryScanner scanner, ImportBatchRepository batchRepository) {
+    public DryRunValidator(ImportDirectoryScanner scanner, ImportBatchRepository batchRepository, ConnectorRegistry connectorRegistry) {
         this.scanner = scanner;
         this.batchRepository = batchRepository;
+        this.connectorRegistry = connectorRegistry;
     }
 
     /**
      * Test constructor — no DB duplicate checking (for unit tests).
      */
-    public DryRunValidator(ImportDirectoryScanner scanner) {
+    public DryRunValidator(ImportDirectoryScanner scanner, ConnectorRegistry connectorRegistry) {
         this.scanner = scanner;
         this.batchRepository = null;
+        this.connectorRegistry = connectorRegistry;
     }
 
     /**
@@ -149,12 +153,19 @@ public class DryRunValidator {
                 case "json" -> countJsonRecords(filePath, unsupportedRecords, warnings);
                 case "csv" -> countCsvRecords(filePath, unsupportedRecords, warnings);
                 case "fit" -> {
-                    warnings.add("FIT parsing pending Garmin SDK integration (ADR-0006). File recognized and hashed.");
-                    yield 0;
+                    var connector = connectorRegistry.findFor(file.filename());
+                    if (connector.isEmpty()) {
+                        warnings.add("No connector registered for this FIT file.");
+                        yield 0;
+                    }
+                    yield connector.get().parse(filePath).size();
                 }
                 default -> 0;
             };
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
+            // RuntimeException also covers connector-thrown parse failures
+            // (e.g. com.garmin.fit.FitRuntimeException for malformed FIT
+            // files) — a bad vendor file must not crash the whole scan.
             errors.add("Failed to parse file: " + e.getMessage());
         }
 
