@@ -97,6 +97,21 @@ class ApiClient {
         .toList();
   }
 
+  /// List recent discrete workout sessions (runs, rides, ...) — distinct
+  /// from the day-level step summary above. See ADR-0006.
+  Future<List<ActivitySessionResponse>> getActivitySessions() async {
+    final response = await _dio.get('/api/v1/activities/sessions');
+    return (response.data as List)
+        .map((e) => ActivitySessionResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get full detail for one activity session, including HR-zone breakdown.
+  Future<ActivitySessionResponse> getActivitySession(int id) async {
+    final response = await _dio.get('/api/v1/activities/sessions/$id');
+    return ActivitySessionResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get score diff vs prior day.
   Future<ScoreDiffResponse> getScoreDiff() async {
     final response = await _dio.get("/api/v1/readiness/diff");
@@ -719,6 +734,60 @@ class ActivitySummary {
       timestamp: json['timestamp'] as String,
       confidence: json['confidence'] as String? ?? 'none',
       limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
+    );
+  }
+}
+
+/// A discrete workout/activity session (e.g. a run) — distinct from
+/// [ActivitySummary], which is a day-level step rollup. Parsed from
+/// connector data on import; see ADR-0006 and ActivitySessionRepository
+/// on the backend.
+class ActivitySessionResponse {
+  final int id;
+  final String sport;
+  final String startTime;
+  final String endTime;
+  final double durationSeconds;
+  final double? distanceMeters;
+  final double? avgSpeedMps;
+  final double? maxSpeedMps;
+  final double? avgPaceSecPerKm;
+  final int? avgHeartRate;
+  final int? maxHeartRate;
+  final int? calories;
+  final List<double> hrZoneSeconds;
+
+  ActivitySessionResponse({
+    required this.id,
+    required this.sport,
+    required this.startTime,
+    required this.endTime,
+    required this.durationSeconds,
+    this.distanceMeters,
+    this.avgSpeedMps,
+    this.maxSpeedMps,
+    this.avgPaceSecPerKm,
+    this.avgHeartRate,
+    this.maxHeartRate,
+    this.calories,
+    required this.hrZoneSeconds,
+  });
+
+  factory ActivitySessionResponse.fromJson(Map<String, dynamic> json) {
+    return ActivitySessionResponse(
+      id: json['id'] as int,
+      sport: json['sport'] as String,
+      startTime: json['startTime'] as String,
+      endTime: json['endTime'] as String,
+      durationSeconds: (json['durationSeconds'] as num).toDouble(),
+      distanceMeters: (json['distanceMeters'] as num?)?.toDouble(),
+      avgSpeedMps: (json['avgSpeedMps'] as num?)?.toDouble(),
+      maxSpeedMps: (json['maxSpeedMps'] as num?)?.toDouble(),
+      avgPaceSecPerKm: (json['avgPaceSecPerKm'] as num?)?.toDouble(),
+      avgHeartRate: json['avgHeartRate'] as int?,
+      maxHeartRate: json['maxHeartRate'] as int?,
+      calories: json['calories'] as int?,
+      hrZoneSeconds: (json['hrZoneSeconds'] as List?)?.map((e) => (e as num).toDouble()).toList() ?? const [],
     );
   }
 }

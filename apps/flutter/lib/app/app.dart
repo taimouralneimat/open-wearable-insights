@@ -5,6 +5,7 @@ import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
 import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/sleep/sleep_page.dart';
 import 'package:open_wearable_insights/features/activities/activities_page.dart';
+import 'package:open_wearable_insights/features/activities/activity_session_detail_page.dart';
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 import 'package:open_wearable_insights/features/journal/journal_page.dart';
 
@@ -38,7 +39,20 @@ class OpenWearableInsightsApp extends StatelessWidget {
             routes: [GoRoute(path: '/sleep', builder: (context, state) => const SleepPage())],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/activities', builder: (context, state) => const ActivitiesPage())],
+            routes: [
+              GoRoute(
+                path: '/activities',
+                builder: (context, state) => const ActivitiesPage(),
+                routes: [
+                  GoRoute(
+                    path: 'sessions/:id',
+                    builder: (context, state) => ActivitySessionDetailPage(
+                      id: int.parse(state.pathParameters['id']!),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [GoRoute(path: '/journal', builder: (context, state) => const JournalPage())],

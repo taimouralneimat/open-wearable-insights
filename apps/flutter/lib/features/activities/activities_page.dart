@@ -18,6 +18,7 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
   final _apiClient = ApiClient();
   ActivitySummary? _summary;
   List<ActivityTrendPoint>? _trends;
+  List<ActivitySessionResponse> _sessions = [];
   bool _loading = true;
   String? _error;
 
@@ -35,9 +36,11 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
     try {
       final summary = await _apiClient.getActivitySummary();
       final trends = await _apiClient.getActivityTrends();
+      final sessions = await _apiClient.getActivitySessions();
       setState(() {
         _summary = summary;
         _trends = trends;
+        _sessions = sessions;
         _loading = false;
       });
     } catch (e) {
@@ -92,6 +95,10 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
           _ActivitySummaryCard(summary: s),
           const SizedBox(height: AppSpacing.lg),
           if (_trends != null) _ActivityTrendsCard(trends: _trends!),
+          if (_sessions.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            _RecentSessionsCard(sessions: _sessions),
+          ],
         ],
       ),
     );
@@ -200,6 +207,74 @@ class _ActivityTrendsCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _RecentSessionsCard extends StatelessWidget {
+  final List<ActivitySessionResponse> sessions;
+  const _RecentSessionsCard({required this.sessions});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Recent sessions', style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.xs),
+            ...sessions.map((s) => _SessionTile(session: s)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionTile extends StatelessWidget {
+  final ActivitySessionResponse session;
+  const _SessionTile({required this.session});
+
+  IconData get _icon => switch (session.sport) {
+        'running' => Icons.directions_run,
+        'walking' => Icons.directions_walk,
+        'cycling' => Icons.directions_bike,
+        _ => Icons.fitness_center,
+      };
+
+  String get _sportLabel => session.sport.isEmpty ? 'Activity' : session.sport[0].toUpperCase() + session.sport.substring(1);
+
+  String get _distanceLabel {
+    if (session.distanceMeters == null) return '';
+    return ' · ${(session.distanceMeters! / 1000).toStringAsFixed(2)} km';
+  }
+
+  String get _durationLabel {
+    final total = session.durationSeconds.round();
+    final m = total ~/ 60;
+    return '${m}m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final start = DateTime.tryParse(session.startTime);
+    final dateLabel = start != null ? '${start.month}/${start.day}' : '';
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: CircleAvatar(
+        backgroundColor: theme.colorScheme.primaryContainer,
+        child: Icon(_icon, color: theme.colorScheme.onPrimaryContainer, size: 20),
+      ),
+      title: Text(_sportLabel, style: theme.textTheme.bodyLarge),
+      subtitle: Text('$dateLabel · $_durationLabel$_distanceLabel', style: theme.textTheme.bodySmall),
+      trailing: session.avgHeartRate != null
+          ? Text('${session.avgHeartRate} bpm', style: theme.textTheme.labelLarge)
+          : null,
+      onTap: () => context.push('/activities/sessions/${session.id}'),
     );
   }
 }
