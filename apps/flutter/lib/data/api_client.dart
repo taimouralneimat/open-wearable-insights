@@ -140,6 +140,15 @@ class ApiClient {
         .map((e) => JournalEntryResponse.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  /// Get exploratory behavior correlations. Only includes behaviors that
+  /// meet a minimum sample size — never fabricates confidence.
+  Future<List<BehaviorCorrelationResponse>> getCorrelations() async {
+    final response = await _dio.get('/api/v1/journal/correlations');
+    return (response.data as List)
+        .map((e) => BehaviorCorrelationResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }
 
 /// Readiness score response from the API.
@@ -921,6 +930,46 @@ class JournalEntryResponse {
       value: json['value'] as String?,
       note: json['note'] as String?,
       treatedAsUntrusted: json['treatedAsUntrusted'] as bool,
+    );
+  }
+}
+
+/// An exploratory correlation between a logged behavior and readiness —
+/// never causation. See CorrelationService on the backend.
+class BehaviorCorrelationResponse {
+  final String category;
+  final String behavior;
+  final int loggedDayCount;
+  final int notLoggedDayCount;
+  final double avgReadinessWhenLogged;
+  final double avgReadinessWhenNotLogged;
+  final double difference;
+  final String confidence;
+  final List<String> limitations;
+
+  BehaviorCorrelationResponse({
+    required this.category,
+    required this.behavior,
+    required this.loggedDayCount,
+    required this.notLoggedDayCount,
+    required this.avgReadinessWhenLogged,
+    required this.avgReadinessWhenNotLogged,
+    required this.difference,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory BehaviorCorrelationResponse.fromJson(Map<String, dynamic> json) {
+    return BehaviorCorrelationResponse(
+      category: json['category'] as String,
+      behavior: json['behavior'] as String,
+      loggedDayCount: json['loggedDayCount'] as int,
+      notLoggedDayCount: json['notLoggedDayCount'] as int,
+      avgReadinessWhenLogged: (json['avgReadinessWhenLogged'] as num).toDouble(),
+      avgReadinessWhenNotLogged: (json['avgReadinessWhenNotLogged'] as num).toDouble(),
+      difference: (json['difference'] as num).toDouble(),
+      confidence: json['confidence'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
     );
   }
 }

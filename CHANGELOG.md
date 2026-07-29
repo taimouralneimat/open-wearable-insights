@@ -183,6 +183,36 @@ for releases after 1.0.0. Pre-1.0 development versions use `0.<phase>.<increment
   noted explicitly in `docs/qa/phase-gate-report-phase3.md` rather than
   claimed as fully covered.
 
+### Added — Phase 3: Exploratory behavior correlations (EC7)
+- New `journal/domain/BehaviorCorrelation.java` +
+  `journal/application/CorrelationService.java` — compares readiness
+  scores on days a logged behavior was present vs. absent. Deliberately
+  a simple group-mean comparison, not dressed up with statistics (e.g.
+  p-values) a handful of data points can't support.
+- Requires a minimum sample size (≥3) in both groups — behaviors below
+  it are excluded, never shown with fabricated confidence. Confidence is
+  only ever "low"/"medium", never "high", by design. Every result always
+  carries explicit correlation-not-causation language.
+- Reused `ReadinessScoreHistoryRepository` (added a
+  `findScoresByAccountId()` method) rather than duplicating that query
+  via raw SQL from the journal module.
+- New `GET /api/v1/journal/correlations` endpoint. 6 new
+  `CorrelationServiceTest` cases, including one that encodes "confidence
+  is never high" as an executable assertion. Flutter: new
+  `_CorrelationsCard` on the journal page.
+- **Verified end-to-end**: seeded real multi-day readiness + journal
+  data, hand-traced the exact group-mean math against the live API
+  response (matched exactly, including data left over from earlier in
+  this session's own EC6 testing), confirmed a below-threshold behavior
+  was correctly excluded.
+
+### Phase 3 complete
+All 7 exit criteria addressed (EC6 has one documented coverage gap — see
+docs/qa/phase-gate-report-phase3.md). Every exit criterion surfaced at
+least one real bug or gap during independent verification that a
+build-passing check alone would have missed, including in this session's
+own commits, not just Cline's.
+
 ### Fixed — Phase 3 bugs found during quality gate review
 - **Bug 1 (training load silently broken)**: `CurrentMetricsService
   .fetchStepsSum()` had leftover dead code — a query using

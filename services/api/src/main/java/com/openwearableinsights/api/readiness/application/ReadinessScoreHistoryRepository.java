@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,6 +70,31 @@ public class ReadinessScoreHistoryRepository {
         } catch (Exception e) {
             log.warn("Failed to persist readiness score history for account {} on {}: {}",
                     accountId, date, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * All persisted (date -> score) pairs for an account. Used by
+     * CorrelationService (journal module) to compare readiness on days a
+     * behavior was logged vs. not — deliberately returns just the score,
+     * not the full ReadinessScore, since that's all a group-mean
+     * comparison needs.
+     */
+    public Map<LocalDate, Integer> findScoresByAccountId(Long accountId) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT score_date, score FROM readiness_score_history WHERE account_id = ?",
+                    accountId
+            );
+            Map<LocalDate, Integer> result = new HashMap<>();
+            for (Map<String, Object> row : rows) {
+                result.put(((java.sql.Date) row.get("score_date")).toLocalDate(),
+                        ((Number) row.get("score")).intValue());
+            }
+            return result;
+        } catch (Exception e) {
+            log.warn("Failed to fetch readiness scores for account {}: {}", accountId, e.getMessage(), e);
+            return Map.of();
         }
     }
 

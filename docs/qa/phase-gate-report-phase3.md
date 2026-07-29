@@ -2,7 +2,7 @@
 
 - **Phase**: 3 — Insight intelligence
 - **Date**: 2026-07-29
-- **Status**: EC1/EC2/EC3/EC4/EC5/EC6 PASS (EC6 has one noted coverage gap — see below). EC7 not started.
+- **Status**: PASS — all 7 exit criteria addressed (EC6 has one noted coverage gap — see below).
 - **Version**: 0.3.0-SNAPSHOT
 
 ## Context
@@ -233,10 +233,61 @@ pass. Replaced every one with `log.warn(...)` including the exception.
   the journal flow (add an entry via the bottom sheet, confirm it
   appears in the list) before considering EC6 fully closed.
 
-### EC7 — not started
-Per docs/product/release-plan.md: exploratory correlations (sample count,
-uncertainty, no causation claims) between journal behaviors and
-readiness/sleep outcomes.
+### EC7: Exploratory correlations — PASS
+- New `journal/domain/BehaviorCorrelation.java`,
+  `journal/application/CorrelationService.java`. Deliberately a simple
+  group-mean comparison (readiness on days a behavior was logged vs.
+  not), not dressed up with statistics like p-values that a handful of
+  data points can't actually support — consistent with the project's
+  "explainable over sophisticated" principle.
+- Reused `ReadinessScoreHistoryRepository` (from EC2, already exposed
+  via the `readiness.application` NamedInterface) rather than querying
+  `readiness_score_history` a second time via raw SQL from the journal
+  module — added a `findScoresByAccountId()` method to it instead of
+  duplicating the query. Confirmed Modulith verification allows the new
+  cross-module dependency (it's a legitimate, already-exposed interface,
+  not a new violation).
+- **Minimum sample size**: requires ≥3 days in BOTH the logged and
+  not-logged groups — behaviors below this are excluded entirely, not
+  shown with fabricated confidence.
+- **Confidence**: only ever "low" or "medium" — "high" is never used for
+  a comparison this small, by design (enforced structurally, not just by
+  convention).
+- **No causation claims**: every result's limitations always include
+  explicit correlation-not-causation language and a small-sample caveat.
+- **Tests**: 6 new `CorrelationServiceTest` cases, including
+  `confidence_isNeverHigh_evenWithLargeSamples` (encodes the design
+  principle as an executable assertion, same pattern as the existing
+  `noMedicalDiagnosisLanguage` test) and a hand-verified group-mean math
+  test.
+- **Flutter**: new `_CorrelationsCard` on the journal page, showing each
+  correlation with its own correlation-not-causation caption, sample
+  sizes, and confidence — not hidden in an unused API field.
+- **Verified end-to-end with real data**: seeded 6 days of
+  `readiness_score_history` (3 lower-scoring, 3 higher-scoring) and 3
+  matching journal entries, then called the live endpoint. Result
+  included a real entry from *earlier in this same session's* EC6
+  testing (today's real persisted score) alongside the seeded data —
+  hand-traced the exact math: logged-day average 48.0
+  ((45+48+42+57)/4), not-logged average 69.25 ((75+78+72+52)/4),
+  matching the API response exactly. A behavior logged only once during
+  EC6 testing ("Cold exposure") was correctly excluded from the results
+  for being below the sample-size threshold — confirmed by its absence.
+
+## Phase 3 status: all 7 exit criteria addressed
+
+EC1-EC5 and EC7 fully pass with real-data end-to-end verification. EC6
+passes with one explicitly noted coverage gap (the Flutter journal page
+itself was checked via `flutter analyze`/`build web` but not an
+interactive click-through in a live browser — worth a manual pass).
+
+Every exit criterion in this phase surfaced at least one real bug or
+gap during independent verification that a build-passing check alone
+would have missed — this session's own EC6 commit even turned out to be
+missing its own test file, caught by applying the same discipline to
+this session's own work as to Cline's. That pattern held for all seven:
+the value was consistently in the verification step, not just the
+implementation.
 
 ## Final verification
 - `./gradlew build` — BUILD SUCCESSFUL, 42 tests pass.

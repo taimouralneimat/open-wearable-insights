@@ -1,7 +1,9 @@
 package com.openwearableinsights.api.journal.adapter.in;
 
+import com.openwearableinsights.api.journal.application.CorrelationService;
 import com.openwearableinsights.api.journal.application.JournalService;
 import com.openwearableinsights.api.journal.domain.BehaviorCategory;
+import com.openwearableinsights.api.journal.domain.BehaviorCorrelation;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,9 +30,11 @@ public class JournalController {
     private static final Long DEFAULT_ACCOUNT_ID = 1L;
 
     private final JournalService journalService;
+    private final CorrelationService correlationService;
 
-    public JournalController(JournalService journalService) {
+    public JournalController(JournalService journalService, CorrelationService correlationService) {
         this.journalService = journalService;
+        this.correlationService = correlationService;
     }
 
     @GetMapping("/behaviors")
@@ -57,6 +61,13 @@ public class JournalController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate since
     ) {
         return journalService.listEntries(DEFAULT_ACCOUNT_ID, since);
+    }
+
+    @GetMapping("/correlations")
+    @Operation(summary = "Get exploratory behavior correlations",
+            description = "Compares readiness scores on days each logged behavior was present vs. absent. Requires a minimum sample size in both groups — behaviors without enough data simply aren't included, not shown with fabricated confidence. Always correlation, never causation.")
+    public List<BehaviorCorrelation> getCorrelations() {
+        return correlationService.computeCorrelations(DEFAULT_ACCOUNT_ID);
     }
 
     public record JournalEntryRequest(

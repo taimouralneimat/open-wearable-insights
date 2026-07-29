@@ -17,6 +17,7 @@ class _JournalPageState extends State<JournalPage> {
   final _apiClient = ApiClient();
   List<BehaviorCategory>? _taxonomy;
   List<JournalEntryResponse>? _entries;
+  List<BehaviorCorrelationResponse> _correlations = [];
   bool _loading = true;
   String? _error;
 
@@ -34,9 +35,18 @@ class _JournalPageState extends State<JournalPage> {
     try {
       final taxonomy = await _apiClient.getJournalBehaviors();
       final entries = await _apiClient.getJournalEntries();
+      // Correlations are a nice-to-have enhancement, not core to the
+      // journal working — don't fail the whole page if this call fails.
+      List<BehaviorCorrelationResponse> correlations = [];
+      try {
+        correlations = await _apiClient.getCorrelations();
+      } catch (_) {
+        correlations = [];
+      }
       setState(() {
         _taxonomy = taxonomy;
         _entries = entries;
+        _correlations = correlations;
         _loading = false;
       });
     } catch (e) {
@@ -120,10 +130,91 @@ class _JournalPageState extends State<JournalPage> {
     }
     return RefreshIndicator(
       onRefresh: _loadData,
-      child: ListView.builder(
+      child: ListView(
         padding: const EdgeInsets.all(16),
-        itemCount: entries.length,
-        itemBuilder: (context, i) => _EntryTile(entry: entries[i]),
+        children: [
+          if (_correlations.isNotEmpty) ...[
+            _CorrelationsCard(correlations: _correlations),
+            const SizedBox(height: 16),
+          ],
+          ...entries.map((e) => _EntryTile(entry: e)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CorrelationsCard extends StatelessWidget {
+  final List<BehaviorCorrelationResponse> correlations;
+  const _CorrelationsCard({required this.correlations});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.blue.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.insights, size: 20, color: Colors.blue.shade800),
+                const SizedBox(width: 8),
+                Text('Patterns worth watching',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blue.shade800)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Correlation, not causation — many other factors vary day to day too.',
+              style: TextStyle(fontSize: 12, color: Colors.blue.shade900, fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 12),
+            ...correlations.map((c) => _CorrelationRow(correlation: c)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CorrelationRow extends StatelessWidget {
+  final BehaviorCorrelationResponse correlation;
+  const _CorrelationRow({required this.correlation});
+
+  @override
+  Widget build(BuildContext context) {
+    final worse = correlation.difference < 0;
+    final color = worse ? Colors.red : Colors.green;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(worse ? Icons.trending_down : Icons.trending_up, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '${correlation.behavior}: readiness averaged '
+                  '${correlation.avgReadinessWhenLogged.toStringAsFixed(0)} on logged days vs. '
+                  '${correlation.avgReadinessWhenNotLogged.toStringAsFixed(0)} otherwise',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 22),
+            child: Text(
+              '${correlation.loggedDayCount} logged / ${correlation.notLoggedDayCount} not logged · '
+              '${correlation.confidence} confidence',
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
+          ),
+        ],
       ),
     );
   }
