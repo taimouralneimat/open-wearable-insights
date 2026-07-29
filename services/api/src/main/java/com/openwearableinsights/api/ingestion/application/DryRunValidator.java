@@ -158,7 +158,7 @@ public class DryRunValidator {
                         warnings.add("No connector registered for this FIT file.");
                         yield 0;
                     }
-                    yield connector.get().parse(filePath).size();
+                    yield connector.get().parse(filePath).size() + connector.get().parseActivities(filePath).size();
                 }
                 default -> 0;
             };

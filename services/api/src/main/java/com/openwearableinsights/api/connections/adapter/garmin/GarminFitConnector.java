@@ -6,9 +6,11 @@ import com.garmin.fit.HrvMesgListener;
 import com.garmin.fit.MesgBroadcaster;
 import com.garmin.fit.MonitoringMesgListener;
 import com.garmin.fit.RecordMesgListener;
+import com.garmin.fit.SessionMesgListener;
 import com.garmin.fit.SleepLevel;
 import com.garmin.fit.SleepLevelMesgListener;
 import com.garmin.fit.StressLevelMesgListener;
+import com.openwearableinsights.api.connections.domain.ParsedActivity;
 import com.openwearableinsights.api.connections.domain.ParsedMeasurement;
 import com.openwearableinsights.api.connections.domain.WearableConnector;
 import org.springframework.stereotype.Component;
@@ -119,6 +121,50 @@ public class GarminFitConnector implements WearableConnector {
         }
 
         return measurements;
+    }
+
+    @Override
+    public List<ParsedActivity> parseActivities(Path file) throws IOException {
+        List<ParsedActivity> activities = new ArrayList<>();
+
+        Decode decode = new Decode();
+        MesgBroadcaster broadcaster = new MesgBroadcaster(decode);
+
+        broadcaster.addListener((SessionMesgListener) mesg -> {
+            if (mesg.getStartTime() == null || mesg.getTotalElapsedTime() == null) {
+                return;
+            }
+            Instant start = mesg.getStartTime().getInstant();
+            Instant end = start.plusMillis(Math.round(mesg.getTotalElapsedTime() * 1000));
+
+            List<Double> hrZoneSeconds = new ArrayList<>();
+            Float[] zones = mesg.getTimeInHrZone();
+            if (zones != null) {
+                for (Float zone : zones) {
+                    hrZoneSeconds.add(zone == null ? null : zone.doubleValue());
+                }
+            }
+
+            activities.add(new ParsedActivity(
+                    start,
+                    end,
+                    mesg.getSport() != null ? mesg.getSport().name().toLowerCase() : "generic",
+                    mesg.getTotalElapsedTime(),
+                    mesg.getTotalDistance() != null ? mesg.getTotalDistance().doubleValue() : null,
+                    mesg.getAvgSpeed() != null ? mesg.getAvgSpeed().doubleValue() : null,
+                    mesg.getMaxSpeed() != null ? mesg.getMaxSpeed().doubleValue() : null,
+                    mesg.getAvgHeartRate() != null ? mesg.getAvgHeartRate().intValue() : null,
+                    mesg.getMaxHeartRate() != null ? mesg.getMaxHeartRate().intValue() : null,
+                    mesg.getTotalCalories(),
+                    hrZoneSeconds
+            ));
+        });
+
+        try (InputStream in = Files.newInputStream(file)) {
+            decode.read(in, broadcaster);
+        }
+
+        return activities;
     }
 
     /**

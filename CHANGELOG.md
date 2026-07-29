@@ -272,6 +272,31 @@ own commits, not just Cline's.
 - **Known gap**: `rhr` (resting heart rate) is not derived — FIT exposes
   per-record instantaneous HR only; tracked as a follow-up.
 
+### Added — Phase 4: Activity session parsing (parity-matrix row 10)
+- `WearableConnector.parseActivities()` (default empty) + new
+  `ParsedActivity` domain type — discrete workout sessions (sport, duration,
+  distance, avg/max speed, avg/max HR, calories, HR-zone breakdown) are a
+  different shape from point-in-time measurements, so they get their own
+  parse path rather than being forced into `ParsedMeasurement`.
+- `GarminFitConnector.parseActivities()` extracts this from FIT `SessionMesg`.
+- New `activities` table (Flyway V05) + `ActivityRepository` (write side,
+  mirrors `MeasurementRepository`), wired into `ImportService`/
+  `DryRunValidator` alongside the existing measurement path.
+- New read side `ActivitySessionRepository` and two endpoints: `GET
+  /api/v1/activities/sessions` (list, up to 20 most recent) and
+  `/sessions/{id}` (detail, 404 if not found) — distinct from the
+  pre-existing `/summary`/`/trends`, which are a day-level step rollup, not
+  a workout session. Detail response includes a derived (not stored raw)
+  pace figure computed from average speed.
+- Fixture generator extended with a synthetic 30-minute running session;
+  `synthetic-activity.fit` regenerated.
+- Verified live end-to-end: real session persisted (confirmed via direct DB
+  query), both endpoints return real data, re-import is idempotent (no
+  duplicate activity rows).
+- **Known gap**: only whole-session summaries are parsed (FIT `SessionMesg`)
+  — lap/split-level detail (`LapMesg`) is not yet extracted. No Flutter
+  screen consumes these endpoints yet; this PR is backend-only.
+
 ### Fixed — Garmin FIT SDK dependency coordinates
 - `libs.versions.toml`/`build.gradle.kts` referenced the FIT SDK via
   `com.github.garmin:fit-java-sdk` through JitPack, which doesn't resolve.

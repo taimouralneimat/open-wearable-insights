@@ -2,6 +2,7 @@ package com.openwearableinsights.api.ingestion;
 
 import com.openwearableinsights.api.connections.adapter.garmin.GarminFitConnector;
 import com.openwearableinsights.api.connections.application.ConnectorRegistry;
+import com.openwearableinsights.api.ingestion.application.ActivityRepository;
 import com.openwearableinsights.api.ingestion.application.DryRunValidator;
 import com.openwearableinsights.api.ingestion.application.DryRunValidator.DryRunSummary;
 import com.openwearableinsights.api.ingestion.application.ImportBatchRepository;
@@ -68,7 +69,7 @@ class ImportServiceTest {
             public void rollback(org.springframework.transaction.TransactionStatus status) {}
         };
 
-        importService = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), txManager);
+        importService = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), mock(ActivityRepository.class), txManager);
     }
 
     @Test
@@ -258,7 +259,7 @@ class ImportServiceTest {
             @Override public void commit(org.springframework.transaction.TransactionStatus s) {}
             @Override public void rollback(org.springframework.transaction.TransactionStatus s) {}
         };
-        var service = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), txManager);
+        var service = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), mock(ActivityRepository.class), txManager);
 
         ImportProgress progress = service.importAll();
 

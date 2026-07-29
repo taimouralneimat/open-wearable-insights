@@ -53,3 +53,26 @@ Known limitation, not yet addressed: resting heart rate (`rhr`) is not
 derived from FIT records — FIT exposes per-record instantaneous heart rate,
 not a "resting" classification; deriving `rhr` needs additional logic (e.g.
 minimum HR during a detected rest window) and is tracked as a follow-up.
+
+## Status update (2026-07-29, part 2): activity session parsing
+
+Extended `WearableConnector` with `parseActivities()` (default empty) and
+added `ParsedActivity` alongside `ParsedMeasurement` — a session has a
+start/end and aggregate stats (sport, distance, avg/max speed, avg/max HR,
+calories, HR-zone breakdown), a fundamentally different shape from a
+point-in-time reading, so it's a separate parse path rather than forcing it
+into `ParsedMeasurement`.
+
+`GarminFitConnector.parseActivities()` extracts this from FIT `SessionMesg`.
+New `activities` table (Flyway V05), written by `ActivityRepository`
+(mirrors `MeasurementRepository`) and wired into `ImportService`/
+`DryRunValidator` alongside the existing measurement path. Read side:
+`ActivitySessionRepository` + two new endpoints, `GET
+/api/v1/activities/sessions` (list) and `/sessions/{id}` (detail) —
+distinct from the pre-existing `/summary`/`/trends` endpoints, which are a
+day-level step rollup, not a workout session.
+
+Verified live: real session persisted from the fixture, both endpoints
+return real data including a derived (not stored raw) pace figure, re-import
+is idempotent. No Flutter screen consumes these endpoints yet — backend
+only, tracked as a follow-up.

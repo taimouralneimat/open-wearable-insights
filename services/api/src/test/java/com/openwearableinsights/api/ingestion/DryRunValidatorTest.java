@@ -188,8 +188,8 @@ class DryRunValidatorTest {
         assertThat(vr.supported()).isTrue();
         assertThat(vr.detectedFormat()).isEqualTo("fit");
         assertThat(vr.contentHash()).isNotBlank();
-        // 5 hr + 3 steps + 2 stress + 4 sleep_stage + 1 hrv (see SyntheticFitFixtureGenerator)
-        assertThat(vr.recordCount()).isEqualTo(15);
+        // 5 hr + 3 steps + 2 stress + 4 sleep_stage + 1 hrv + 1 activity session (see SyntheticFitFixtureGenerator)
+        assertThat(vr.recordCount()).isEqualTo(16);
     }
 
     @Test

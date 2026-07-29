@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.ingestion.application;
 
 import com.openwearableinsights.api.connections.application.ConnectorRegistry;
+import com.openwearableinsights.api.connections.domain.ParsedActivity;
 import com.openwearableinsights.api.connections.domain.ParsedMeasurement;
 import com.openwearableinsights.api.ingestion.domain.ImportBatch;
 import com.openwearableinsights.api.ingestion.domain.ValidationResult;
@@ -44,6 +45,7 @@ public class ImportService {
     private final ImportBatchRepository batchRepository;
     private final ConnectorRegistry connectorRegistry;
     private final MeasurementRepository measurementRepository;
+    private final ActivityRepository activityRepository;
     private final TransactionTemplate requiresNewTx;
 
     public ImportService(
@@ -51,12 +53,14 @@ public class ImportService {
             ImportBatchRepository batchRepository,
             ConnectorRegistry connectorRegistry,
             MeasurementRepository measurementRepository,
+            ActivityRepository activityRepository,
             PlatformTransactionManager txManager
     ) {
         this.validator = validator;
         this.batchRepository = batchRepository;
         this.connectorRegistry = connectorRegistry;
         this.measurementRepository = measurementRepository;
+        this.activityRepository = activityRepository;
         this.requiresNewTx = new TransactionTemplate(txManager);
         this.requiresNewTx.setPropagationBehavior(
                 org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW
@@ -126,15 +130,21 @@ public class ImportService {
                         ImportBatch saved = batchRepository.save(batch);
 
                         if (connector.isPresent()) {
-                            List<ParsedMeasurement> parsed;
+                            List<ParsedMeasurement> parsedMeasurements;
+                            List<ParsedActivity> parsedActivities;
                             try {
-                                parsed = connector.get().parse(filePath);
+                                parsedMeasurements = connector.get().parse(filePath);
+                                parsedActivities = connector.get().parseActivities(filePath);
                             } catch (IOException e) {
                                 throw new RuntimeException("Failed to parse " + vr.filename() + ": " + e.getMessage(), e);
                             }
-                            return measurementRepository.persist(
-                                    DEFAULT_ACCOUNT_ID, saved.getId(), connector.get().getConnectorId(), parsed
+                            int measurementCount = measurementRepository.persist(
+                                    DEFAULT_ACCOUNT_ID, saved.getId(), connector.get().getConnectorId(), parsedMeasurements
                             );
+                            int activityCount = activityRepository.persist(
+                                    DEFAULT_ACCOUNT_ID, saved.getId(), connector.get().getConnectorId(), parsedActivities
+                            );
+                            return measurementCount + activityCount;
                         }
                         return vr.recordCount();
                     });

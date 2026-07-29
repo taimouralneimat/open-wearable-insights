@@ -9,8 +9,10 @@ import com.garmin.fit.HrvMesg;
 import com.garmin.fit.Manufacturer;
 import com.garmin.fit.MonitoringMesg;
 import com.garmin.fit.RecordMesg;
+import com.garmin.fit.SessionMesg;
 import com.garmin.fit.SleepLevel;
 import com.garmin.fit.SleepLevelMesg;
+import com.garmin.fit.Sport;
 import com.garmin.fit.StressLevelMesg;
 
 import java.nio.file.Path;
@@ -107,6 +109,25 @@ public final class SyntheticFitFixtureGenerator {
             hrv.setTime(i, rrIntervals[i]);
         }
         encoder.write(hrv);
+
+        // One 30-minute synthetic running session, distinct from the point
+        // telemetry above — exercises SessionMesg parsing (ParsedActivity).
+        SessionMesg session = new SessionMesg();
+        session.setStartTime(new DateTime(BASE_TIME));
+        session.setSport(Sport.RUNNING);
+        session.setTotalElapsedTime(1800f);
+        session.setTotalTimerTime(1800f);
+        session.setTotalDistance(5000f);
+        session.setAvgSpeed(2.7778f);
+        session.setMaxSpeed(3.5f);
+        session.setAvgHeartRate((short) 148);
+        session.setMaxHeartRate((short) 172);
+        session.setTotalCalories(320);
+        float[] hrZoneSeconds = {60f, 300f, 900f, 480f, 60f};
+        for (int i = 0; i < hrZoneSeconds.length; i++) {
+            session.setTimeInHrZone(i, hrZoneSeconds[i]);
+        }
+        encoder.write(session);
 
         encoder.close();
     }

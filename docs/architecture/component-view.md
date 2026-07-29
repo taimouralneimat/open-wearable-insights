@@ -54,7 +54,7 @@ graph TB
 | ingestion | ✅ implemented | FIT (via connections)/CSV/JSON/synthetic |
 | normalization | ✅ implemented | canonical model |
 | provenance | ✅ implemented | source/batch/algo version |
-| activities | stub | Phase 2 |
+| activities | ✅ implemented (backend) | day-level step rollup + real session parsing (ADR-0006); no Flutter UI yet |
 | sleep | partial | Phase 1 summary; Phase 3 deep |
 | training-load | stub | Phase 3 |
 | readiness | ✅ implemented | v0.1 provisional |

@@ -24,4 +24,13 @@ public interface WearableConnector {
 
     /** Parse the file into canonical measurements. */
     List<ParsedMeasurement> parse(Path file) throws IOException;
+
+    /**
+     * Parse the file into activity/workout sessions, if the format has that
+     * concept. Default empty — not every connector's source format encodes
+     * bounded sessions (e.g. a sleep-only export).
+     */
+    default List<ParsedActivity> parseActivities(Path file) throws IOException {
+        return List.of();
+    }
 }
