@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../app/theme.dart';
 import '../../data/api_client.dart';
+import '../../widgets/state_views.dart';
 
 /// Import page — guided UI for importing wearable data from a local folder.
 ///
@@ -143,13 +145,10 @@ class _ImportPageState extends State<ImportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Import Data'),
+        title: const Text('Import data'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rescan',
-            onPressed: _scanDirectory,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rescan', onPressed: _scanDirectory),
+          const SizedBox(width: AppSpacing.xs),
         ],
       ),
       body: _buildBody(),
@@ -157,136 +156,64 @@ class _ImportPageState extends State<ImportPage> {
   }
 
   Widget _buildBody() {
-    if (_loading) return _buildLoading();
-    if (_error != null) return _buildError();
-    if (_scanResult == null) return _buildEmpty();
+    if (_loading) return const LoadingView(label: 'Scanning import directory…');
+    if (_error != null) return ErrorView(title: "Couldn't scan import directory", message: _error!, onRetry: _scanDirectory);
+    if (_scanResult == null) return const EmptyView(icon: Icons.folder_off_outlined, title: 'No scan result');
     if (!_scanResult!.exists) return _buildDirectoryMissing();
     if (_scanResult!.files.isEmpty) return _buildNoFiles();
     return _buildFileList();
   }
 
-  Widget _buildLoading() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Scanning import directory...'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          const Text('Couldn\'t scan import directory',
-              style: TextStyle(fontSize: 20)),
-          const SizedBox(height: 8),
-          Text(_error!,
-              style: const TextStyle(color: Colors.grey),
-              textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          ElevatedButton(
-              onPressed: _scanDirectory, child: const Text('Retry')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmpty() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.folder_off_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('No scan result', style: TextStyle(fontSize: 20)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDirectoryMissing() {
+    final theme = Theme.of(context);
     final dir = _scanResult?.directory ?? 'unknown';
     final msg = _scanResult?.errorMessage ?? 'Directory does not exist.';
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.folder_off_outlined,
-                size: 64, color: Colors.orange),
-            const SizedBox(height: 16),
-            const Text('Import directory not found',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
-            Text(msg,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 24),
-            _buildGuidanceCard(dir),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.folder_off_outlined, size: 56, color: theme.status.fair),
+          const SizedBox(height: AppSpacing.lg),
+          Text('Import directory not found', style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
+          const SizedBox(height: AppSpacing.sm),
+          Text(msg, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: AppSpacing.xl),
+          _buildGuidanceCard(dir),
+        ],
       ),
     );
   }
 
   Widget _buildGuidanceCard(String dir) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('How to import data',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
-            const Text('1. Create the import directory outside the repo:'),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: SelectableText(
-                'mkdir -p "$dir"',
-                style: const TextStyle(fontFamily: 'monospace'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text('2. Place your Garmin export files there:'),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: SelectableText(
-                'cp ~/Downloads/garmin-export/* "$dir"/',
-                style: const TextStyle(fontFamily: 'monospace'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text('3. Click rescan to detect your files.'),
-            const SizedBox(height: 8),
-            const Row(
+            Text('How to import data', style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.md),
+            Text('1. Create the import directory outside the repo:', style: theme.textTheme.bodyMedium),
+            const SizedBox(height: AppSpacing.xs),
+            _CodeBlock('mkdir -p "$dir"'),
+            const SizedBox(height: AppSpacing.md),
+            Text('2. Place your Garmin export files there:', style: theme.textTheme.bodyMedium),
+            const SizedBox(height: AppSpacing.xs),
+            _CodeBlock('cp ~/Downloads/garmin-export/* "$dir"/'),
+            const SizedBox(height: AppSpacing.md),
+            Text('3. Click rescan to detect your files.', style: theme.textTheme.bodyMedium),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
               children: [
-                Icon(Icons.lock_outline, size: 16, color: Colors.green),
-                SizedBox(width: 8),
+                Icon(Icons.lock_outline, size: 16, color: theme.status.good),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     'Real health data stays outside the repo. '
                     'Only checksums and metadata are stored in the database.',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                    style: theme.textTheme.bodySmall,
                   ),
                 ),
               ],
@@ -299,118 +226,104 @@ class _ImportPageState extends State<ImportPage> {
 
   Widget _buildNoFiles() {
     final dir = _scanResult?.directory ?? 'unknown';
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.folder_open_outlined,
-                size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text('No files found',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
-            Text('Place your export files in:\n$dir',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _scanDirectory,
-              child: const Text('Rescan'),
-            ),
-          ],
-        ),
-      ),
+    return EmptyView(
+      icon: Icons.folder_open_outlined,
+      title: 'No files found',
+      message: 'Place your export files in:\n$dir',
+      action: FilledButton(onPressed: _scanDirectory, child: const Text('Rescan')),
     );
   }
 
   Widget _buildFileList() {
+    final theme = Theme.of(context);
     final result = _scanResult!;
     final supported = result.files.where((f) => f.supported).toList();
     final unsupported = result.files.where((f) => !f.supported).toList();
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         _DirectoryInfoCard(directory: result.directory),
-        const SizedBox(height: 16),
-        // Action buttons
+        const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
             Expanded(
-              child: ElevatedButton.icon(
+              child: OutlinedButton.icon(
                 onPressed: _validating ? null : _runDryRun,
                 icon: _validating
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.fact_check_outlined),
-                label: Text(_validating ? 'Validating...' : 'Dry-Run'),
+                label: Text(_validating ? 'Validating…' : 'Dry-run'),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: ElevatedButton.icon(
+              child: FilledButton.icon(
                 onPressed: _importing ? null : _runImport,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
                 icon: _importing
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary),
                       )
                     : const Icon(Icons.download_outlined),
-                label: Text(_importing ? 'Importing...' : 'Import'),
+                label: Text(_importing ? 'Importing…' : 'Import'),
               ),
             ),
           ],
         ),
         if (_dryRunResult != null) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _DryRunSummaryCard(summary: _dryRunResult!),
         ],
         if (_importProgress != null) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _ImportProgressCard(progress: _importProgress!),
         ],
         if (_batches.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _BatchesCard(
-            batches: _batches,
-            onUndo: _undoBatch,
-          ),
+          const SizedBox(height: AppSpacing.lg),
+          _BatchesCard(batches: _batches, onUndo: _undoBatch),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         if (supported.isNotEmpty) ...[
-          _SectionHeader(
-            title: 'Supported Files',
-            count: supported.length,
-            icon: Icons.check_circle,
-            color: Colors.green,
-          ),
-          const SizedBox(height: 8),
-          ...supported.map((f) => _FileTile(file: f)),
-          const SizedBox(height: 16),
+          _SectionHeader(title: 'Supported files', count: supported.length, icon: Icons.check_circle, color: theme.status.good),
+          const SizedBox(height: AppSpacing.sm),
+          ...supported.map((f) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: _FileTile(file: f),
+              )),
+          const SizedBox(height: AppSpacing.sm),
         ],
         if (unsupported.isNotEmpty) ...[
-          _SectionHeader(
-            title: 'Unsupported Files',
-            count: unsupported.length,
-            icon: Icons.warning_amber,
-            color: Colors.orange,
-          ),
-          const SizedBox(height: 8),
-          ...unsupported.map((f) => _FileTile(file: f)),
-          const SizedBox(height: 16),
+          _SectionHeader(title: 'Unsupported files', count: unsupported.length, icon: Icons.warning_amber, color: theme.status.fair),
+          const SizedBox(height: AppSpacing.sm),
+          ...unsupported.map((f) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: _FileTile(file: f),
+              )),
+          const SizedBox(height: AppSpacing.sm),
         ],
         const _PrivacyNoteCard(),
       ],
+    );
+  }
+}
+
+class _CodeBlock extends StatelessWidget {
+  final String code;
+  const _CodeBlock(this.code);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: SelectableText(code, style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace')),
     );
   }
 }
@@ -421,28 +334,28 @@ class _ImportProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     return Card(
-      color: Colors.blue.shade50,
+      color: status.infoContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.download_done, color: Colors.blue),
-                SizedBox(width: 8),
-                Text('Import Results',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Icon(Icons.download_done, color: status.onInfoContainer),
+                const SizedBox(width: AppSpacing.sm),
+                Text('Import results', style: theme.textTheme.titleMedium?.copyWith(color: status.onInfoContainer)),
               ],
             ),
-            const SizedBox(height: 12),
-            _ProgressStat(label: 'Imported', value: progress.imported, color: Colors.green),
-            _ProgressStat(label: 'Skipped (duplicates/unsupported)', value: progress.skipped, color: Colors.orange),
-            _ProgressStat(label: 'Failed', value: progress.failed, color: Colors.red),
-            _ProgressStat(label: 'Total records', value: progress.totalRecords, color: Colors.blue),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
+            _ProgressStat(label: 'Imported', value: progress.imported, color: status.good),
+            _ProgressStat(label: 'Skipped (duplicates/unsupported)', value: progress.skipped, color: status.fair),
+            _ProgressStat(label: 'Failed', value: progress.failed, color: status.poor),
+            _ProgressStat(label: 'Total records', value: progress.totalRecords, color: status.onInfoContainer),
+            const SizedBox(height: AppSpacing.md),
             ...progress.files.map((f) => _FileImportTile(result: f)),
           ],
         ),
@@ -455,22 +368,18 @@ class _ProgressStat extends StatelessWidget {
   final String label;
   final int value;
   final Color color;
-  const _ProgressStat({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+  const _ProgressStat({required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(label, style: theme.textTheme.bodyMedium),
           const Spacer(),
-          Text('$value',
-              style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+          Text('$value', style: theme.textTheme.labelLarge?.copyWith(color: color)),
         ],
       ),
     );
@@ -483,11 +392,13 @@ class _FileImportTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final color = result.status == 'imported'
-        ? Colors.green
+        ? status.good
         : result.status == 'duplicate' || result.status == 'skipped'
-            ? Colors.orange
-            : Colors.red;
+            ? status.fair
+            : status.poor;
     final icon = result.status == 'imported'
         ? Icons.check_circle
         : result.status == 'duplicate'
@@ -495,17 +406,15 @@ class _FileImportTile extends StatelessWidget {
             : result.status == 'skipped'
                 ? Icons.skip_next
                 : Icons.error;
-    final statusText = result.status;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 8),
-          Expanded(child: Text(result.filename)),
-          Text(statusText,
-              style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(result.filename, style: theme.textTheme.bodyMedium)),
+          Text(result.status, style: theme.textTheme.labelMedium?.copyWith(color: color)),
         ],
       ),
     );
@@ -519,22 +428,21 @@ class _BatchesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.history, color: Colors.blue),
-                SizedBox(width: 8),
-                Text('Import History',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Icon(Icons.history, color: theme.colorScheme.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Text('Import history', style: theme.textTheme.titleMedium),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             ...batches.map((b) => _BatchTile(batch: b, onUndo: onUndo)),
           ],
         ),
@@ -550,27 +458,27 @@ class _BatchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final isUndone = batch.status == 'undone';
-    final statusText = isUndone ? 'Undone' : 'Undo';
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Icon(
             isUndone ? Icons.undo : Icons.check_circle,
-            color: isUndone ? Colors.grey : Colors.green,
+            color: isUndone ? theme.colorScheme.onSurfaceVariant : status.good,
             size: 20,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(batch.fileName ?? 'Unknown file',
-                    style: const TextStyle(fontSize: 13)),
+                Text(batch.fileName ?? 'Unknown file', style: theme.textTheme.bodyMedium),
                 Text(
-                  '${batch.source.toUpperCase()} • ${batch.recordCount} records • ${batch.importedAt.substring(0, 19)}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 11),
+                  '${batch.source.toUpperCase()} · ${batch.recordCount} records · ${batch.importedAt.substring(0, 19)}',
+                  style: theme.textTheme.bodySmall,
                 ),
               ],
             ),
@@ -578,11 +486,9 @@ class _BatchTile extends StatelessWidget {
           if (!isUndone)
             TextButton(
               onPressed: () => onUndo(batch.id),
-              child: Text(statusText, style: const TextStyle(color: Colors.orange)),
+              child: Text('Undo', style: TextStyle(color: status.fair)),
             ),
-          if (isUndone)
-            Text(statusText,
-                style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          if (isUndone) Text('Undone', style: theme.textTheme.bodySmall),
         ],
       ),
     );
@@ -595,23 +501,22 @@ class _DirectoryInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
-            const Icon(Icons.folder, color: Colors.blue),
-            const SizedBox(width: 12),
+            Icon(Icons.folder, color: theme.colorScheme.primary),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Import Directory',
-                      style: TextStyle(fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 4),
+                  Text('Import directory', style: theme.textTheme.labelLarge),
+                  const SizedBox(height: AppSpacing.xs),
                   SelectableText(directory,
-                      style: const TextStyle(
-                          color: Colors.grey, fontFamily: 'monospace')),
+                      style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace')),
                 ],
               ),
             ),
@@ -628,68 +533,35 @@ class _DryRunSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.fact_check, color: Colors.blue),
-                const SizedBox(width: 8),
-                const Text('Dry-Run Validation Results',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('Re-run'),
-                ),
+                Icon(Icons.fact_check, color: theme.colorScheme.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: Text('Dry-run validation results', style: theme.textTheme.titleMedium)),
               ],
             ),
-            const SizedBox(height: 12),
-            _SummaryStat(
-                label: 'Supported files', value: summary.supportedFiles, color: Colors.green),
-            _SummaryStat(
-                label: 'Unsupported files', value: summary.unsupportedFiles, color: Colors.orange),
-            _SummaryStat(
-                label: 'Duplicates', value: summary.duplicates, color: Colors.red),
-            _SummaryStat(
-                label: 'Total records', value: summary.totalRecords, color: Colors.blue),
-            const SizedBox(height: 16),
-            const Text('Per-File Details',
-                style: TextStyle(fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
-            ...summary.results.map((r) => _ValidationTile(result: r)),
+            const SizedBox(height: AppSpacing.md),
+            _ProgressStat(label: 'Supported files', value: summary.supportedFiles, color: status.good),
+            _ProgressStat(label: 'Unsupported files', value: summary.unsupportedFiles, color: status.fair),
+            _ProgressStat(label: 'Duplicates', value: summary.duplicates, color: status.poor),
+            _ProgressStat(label: 'Total records', value: summary.totalRecords, color: theme.colorScheme.primary),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Per-file details', style: theme.textTheme.labelLarge),
+            const SizedBox(height: AppSpacing.sm),
+            ...summary.results.map((r) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: _ValidationTile(result: r),
+                )),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SummaryStat extends StatelessWidget {
-  final String label;
-  final int value;
-  final Color color;
-  const _SummaryStat({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          const Spacer(),
-          Text('$value',
-              style: TextStyle(color: color, fontWeight: FontWeight.w600)),
-        ],
       ),
     );
   }
@@ -701,90 +573,76 @@ class _ValidationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final hasIssues = result.errors.isNotEmpty ||
         result.warnings.isNotEmpty ||
         result.unsupportedRecords.isNotEmpty ||
         result.duplicate;
 
-    return Card(
-      color: hasIssues ? Colors.orange.shade50 : Colors.green.shade50,
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        title: Row(
-          children: [
-            Icon(
-              result.supported ? Icons.check_circle : Icons.cancel,
-              color: result.supported ? Colors.green : Colors.red,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(child: Text(result.filename)),
-            if (result.duplicate)
-              const Padding(
-                padding: EdgeInsets.only(left: 4),
-                child: Icon(Icons.content_copy, size: 16, color: Colors.orange),
+    return Container(
+      decoration: BoxDecoration(
+        color: hasIssues ? status.fairContainer : status.goodContainer,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+          title: Row(
+            children: [
+              Icon(
+                result.supported ? Icons.check_circle : Icons.cancel,
+                color: result.supported ? status.good : status.poor,
+                size: 20,
               ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: Text(result.filename, style: theme.textTheme.bodyMedium)),
+              if (result.duplicate)
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.xs),
+                  child: Icon(Icons.content_copy, size: 16, color: status.fair),
+                ),
+            ],
+          ),
+          subtitle: Text(
+            '${result.detectedFormat.toUpperCase()} · ${result.recordCount} records'
+            '${result.duplicate ? ' · DUPLICATE' : ''}',
+            style: theme.textTheme.bodySmall,
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (result.contentHash != null) ...[
+                    Text('Content hash (SHA-256):', style: theme.textTheme.labelMedium),
+                    const SizedBox(height: AppSpacing.xs),
+                    SelectableText(result.contentHash!,
+                        style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace')),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                  if (result.errors.isNotEmpty) ...[
+                    Text('Errors:', style: theme.textTheme.labelMedium?.copyWith(color: status.poor)),
+                    ...result.errors.map((e) => Text('• $e', style: theme.textTheme.bodySmall?.copyWith(color: status.poor))),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                  if (result.warnings.isNotEmpty) ...[
+                    Text('Warnings:', style: theme.textTheme.labelMedium?.copyWith(color: status.fair)),
+                    ...result.warnings.map((w) => Text('• $w', style: theme.textTheme.bodySmall?.copyWith(color: status.fair))),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                  if (result.unsupportedRecords.isNotEmpty) ...[
+                    Text('Unsupported records:', style: theme.textTheme.labelMedium?.copyWith(color: status.fair)),
+                    ...result.unsupportedRecords.map((u) => Text('• $u', style: theme.textTheme.bodySmall?.copyWith(color: status.fair))),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
-        subtitle: Text(
-          '${result.detectedFormat.toUpperCase()} • ${result.recordCount} records'
-          '${result.duplicate ? ' • DUPLICATE' : ''}',
-          style: TextStyle(
-            color: result.duplicate ? Colors.orange : Colors.grey,
-            fontSize: 12,
-          ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (result.contentHash != null) ...[
-                  const Text('Content hash (SHA-256):',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 4),
-                  SelectableText(result.contentHash!,
-                      style: const TextStyle(
-                          fontSize: 10, fontFamily: 'monospace', color: Colors.grey)),
-                  const SizedBox(height: 8),
-                ],
-                if (result.errors.isNotEmpty) ...[
-                  const Text('Errors:',
-                      style: TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.w500)),
-                  ...result.errors.map((e) => Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text('• $e',
-                            style: const TextStyle(color: Colors.red, fontSize: 12)),
-                      )),
-                  const SizedBox(height: 8),
-                ],
-                if (result.warnings.isNotEmpty) ...[
-                  const Text('Warnings:',
-                      style: TextStyle(
-                          color: Colors.orange, fontWeight: FontWeight.w500)),
-                  ...result.warnings.map((w) => Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text('• $w',
-                            style: const TextStyle(color: Colors.orange, fontSize: 12)),
-                      )),
-                  const SizedBox(height: 8),
-                ],
-                if (result.unsupportedRecords.isNotEmpty) ...[
-                  const Text('Unsupported records:',
-                      style: TextStyle(
-                          color: Colors.orange, fontWeight: FontWeight.w500)),
-                  ...result.unsupportedRecords.map((u) => Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text('• $u',
-                            style: const TextStyle(color: Colors.orange, fontSize: 12)),
-                      )),
-                ],
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -795,22 +653,15 @@ class _SectionHeader extends StatelessWidget {
   final int count;
   final IconData icon;
   final Color color;
-  const _SectionHeader({
-    required this.title,
-    required this.count,
-    required this.icon,
-    required this.color,
-  });
+  const _SectionHeader({required this.title, required this.count, required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
-        const SizedBox(width: 8),
-        Text('$title ($count)',
-            style:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        const SizedBox(width: AppSpacing.sm),
+        Text('$title ($count)', style: Theme.of(context).textTheme.titleMedium),
       ],
     );
   }
@@ -822,19 +673,22 @@ class _FileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final sizeStr = _formatSize(file.sizeBytes);
     return Card(
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
         leading: Icon(
           file.supported ? Icons.check_circle : Icons.warning_amber,
-          color: file.supported ? Colors.green : Colors.orange,
+          color: file.supported ? status.good : status.fair,
         ),
-        title: Text(file.filename),
-        subtitle: Text('${file.detectedFormat.toUpperCase()} • $sizeStr'),
-        trailing: file.supported
-            ? const Text('Ready', style: TextStyle(color: Colors.green))
-            : const Text('Unsupported',
-                style: TextStyle(color: Colors.orange)),
+        title: Text(file.filename, style: theme.textTheme.bodyMedium),
+        subtitle: Text('${file.detectedFormat.toUpperCase()} · $sizeStr', style: theme.textTheme.bodySmall),
+        trailing: Text(
+          file.supported ? 'Ready' : 'Unsupported',
+          style: theme.textTheme.labelMedium?.copyWith(color: file.supported ? status.good : status.fair),
+        ),
       ),
     );
   }
@@ -851,27 +705,27 @@ class _PrivacyNoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     return Card(
-      color: Colors.green.shade50,
+      color: status.goodContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
-            const Icon(Icons.lock_outline, color: Colors.green),
-            const SizedBox(width: 12),
+            Icon(Icons.lock_outline, color: status.onGoodContainer),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Privacy-first import',
-                      style: TextStyle(fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 4),
+                  Text('Privacy-first import', style: theme.textTheme.labelLarge?.copyWith(color: status.onGoodContainer)),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Files stay in the local import directory outside the repo. '
                     'Only checksums and metadata are stored in the database. '
                     'No data leaves your machine.',
-                    style: TextStyle(
-                        color: Colors.green.shade800, fontSize: 12),
+                    style: theme.textTheme.bodySmall?.copyWith(color: status.onGoodContainer),
                   ),
                 ],
               ),

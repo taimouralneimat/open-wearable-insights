@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../app/app.dart';
+import '../../app/theme.dart';
 import '../../data/api_client.dart';
+import '../../widgets/state_views.dart';
 
 /// Journal page — log self-reported behaviors and view past entries.
 ///
@@ -75,11 +78,9 @@ class _JournalPageState extends State<JournalPage> {
       appBar: AppBar(
         title: const Text('Journal'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: _loadData,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Refresh', onPressed: _loadData),
+          const MoreMenuButton(),
+          const SizedBox(width: AppSpacing.xs),
         ],
       ),
       body: _buildBody(),
@@ -92,52 +93,32 @@ class _JournalPageState extends State<JournalPage> {
   }
 
   Widget _buildBody() {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const LoadingView(label: 'Loading journal…');
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('Could not load journal: $_error',
-                style: const TextStyle(color: Colors.grey), textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
-          ],
-        ),
-      );
+      return ErrorView(title: 'Could not load journal', message: _error!, onRetry: _loadData);
     }
     final entries = _entries ?? [];
     if (entries.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.edit_note, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text('No entries yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-              SizedBox(height: 8),
-              Text('Log behaviors like alcohol, stress, or recovery work\n'
-                  'to see them alongside your readiness over time.',
-                  textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
-            ],
-          ),
-        ),
+      return const EmptyView(
+        icon: Icons.edit_note_outlined,
+        title: 'No entries yet',
+        message: 'Log behaviors like alcohol, stress, or recovery work\n'
+            'to see them alongside your readiness over time.',
       );
     }
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxxl + AppSpacing.lg),
         children: [
           if (_correlations.isNotEmpty) ...[
             _CorrelationsCard(correlations: _correlations),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
           ],
-          ...entries.map((e) => _EntryTile(entry: e)),
+          ...entries.map((e) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: _EntryTile(entry: e),
+              )),
         ],
       ),
     );
@@ -150,27 +131,29 @@ class _CorrelationsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     return Card(
-      color: Colors.blue.shade50,
+      color: status.infoContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.insights, size: 20, color: Colors.blue.shade800),
-                const SizedBox(width: 8),
+                Icon(Icons.insights, size: 20, color: status.onInfoContainer),
+                const SizedBox(width: AppSpacing.sm),
                 Text('Patterns worth watching',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blue.shade800)),
+                    style: theme.textTheme.titleMedium?.copyWith(color: status.onInfoContainer)),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               'Correlation, not causation — many other factors vary day to day too.',
-              style: TextStyle(fontSize: 12, color: Colors.blue.shade900, fontStyle: FontStyle.italic),
+              style: theme.textTheme.bodySmall?.copyWith(color: status.onInfoContainer, fontStyle: FontStyle.italic),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             ...correlations.map((c) => _CorrelationRow(correlation: c)),
           ],
         ),
@@ -185,33 +168,36 @@ class _CorrelationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final worse = correlation.difference < 0;
-    final color = worse ? Colors.red : Colors.green;
+    final color = worse ? status.poor : status.good;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(worse ? Icons.trending_down : Icons.trending_up, size: 16, color: color),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   '${correlation.behavior}: readiness averaged '
                   '${correlation.avgReadinessWhenLogged.toStringAsFixed(0)} on logged days vs. '
                   '${correlation.avgReadinessWhenNotLogged.toStringAsFixed(0)} otherwise',
-                  style: const TextStyle(fontSize: 13),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: status.onInfoContainer),
                 ),
               ),
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 22),
+            padding: const EdgeInsets.only(left: 24, top: 2),
             child: Text(
               '${correlation.loggedDayCount} logged / ${correlation.notLoggedDayCount} not logged · '
               '${correlation.confidence} confidence',
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              style: theme.textTheme.bodySmall?.copyWith(color: status.onInfoContainer.withValues(alpha: 0.75)),
             ),
           ),
         ],
@@ -226,19 +212,21 @@ class _EntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: ListTile(
-        leading: const Icon(Icons.edit_note),
-        title: Text(entry.behavior),
-        subtitle: Text([
-          entry.category,
-          if (entry.value != null && entry.value!.isNotEmpty) entry.value,
-          if (entry.note != null && entry.note!.isNotEmpty) entry.note,
-        ].join(' · ')),
-        trailing: Text(
-          entry.time.substring(0, 10),
-          style: const TextStyle(color: Colors.grey, fontSize: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+        leading: Icon(Icons.edit_note, color: theme.colorScheme.primary),
+        title: Text(entry.behavior, style: theme.textTheme.titleMedium),
+        subtitle: Text(
+          [
+            entry.category,
+            if (entry.value != null && entry.value!.isNotEmpty) entry.value,
+            if (entry.note != null && entry.note!.isNotEmpty) entry.note,
+          ].join(' · '),
+          style: theme.textTheme.bodyMedium,
         ),
+        trailing: Text(entry.time.substring(0, 10), style: theme.textTheme.bodySmall),
       ),
     );
   }
@@ -294,18 +282,32 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(
-        left: 16, right: 16, top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Log a behavior', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 16),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+              ),
+            ),
+            Text('Log a behavior', style: theme.textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.lg),
             DropdownButtonFormField<BehaviorCategory>(
               initialValue: _selectedCategory,
               decoration: const InputDecoration(labelText: 'Category'),
@@ -320,10 +322,10 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
                 });
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: _selectedCategory.behaviors.map((b) {
                 return ChoiceChip(
                   label: Text(b),
@@ -332,24 +334,24 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             TextField(
               controller: _valueController,
               decoration: const InputDecoration(labelText: 'Value (optional, e.g. "2 units", "10 min")'),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _noteController,
               decoration: const InputDecoration(labelText: 'Note (optional)'),
             ),
             if (_error != null) ...[
-              const SizedBox(height: 8),
-              Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+              const SizedBox(height: AppSpacing.sm),
+              Text(_error!, style: theme.textTheme.bodySmall?.copyWith(color: theme.status.poor)),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: FilledButton(
                 onPressed: _submitting ? null : _submit,
                 child: _submitting
                     ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))

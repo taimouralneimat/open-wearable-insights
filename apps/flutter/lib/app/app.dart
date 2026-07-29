@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:open_wearable_insights/app/theme.dart';
 import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
 import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/sleep/sleep_page.dart';
@@ -17,10 +18,9 @@ class OpenWearableInsightsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Open Wearable Insights',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E8B57)),
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
       routerConfig: _router,
     );
   }
@@ -28,30 +28,111 @@ class OpenWearableInsightsApp extends StatelessWidget {
   static final GoRouter _router = GoRouter(
     initialLocation: '/',
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const DashboardPage(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [GoRoute(path: '/', builder: (context, state) => const DashboardPage())],
+          ),
+          StatefulShellBranch(
+            routes: [GoRoute(path: '/sleep', builder: (context, state) => const SleepPage())],
+          ),
+          StatefulShellBranch(
+            routes: [GoRoute(path: '/activities', builder: (context, state) => const ActivitiesPage())],
+          ),
+          StatefulShellBranch(
+            routes: [GoRoute(path: '/journal', builder: (context, state) => const JournalPage())],
+          ),
+        ],
       ),
       GoRoute(
         path: '/import',
         builder: (context, state) => const ImportPage(),
       ),
       GoRoute(
-        path: '/sleep',
-        builder: (context, state) => const SleepPage(),
-      ),
-      GoRoute(
-        path: '/activities',
-        builder: (context, state) => const ActivitiesPage(),
-      ),
-      GoRoute(
         path: '/data-quality',
         builder: (context, state) => const DataQualityPage(),
       ),
-      GoRoute(
-        path: '/journal',
-        builder: (context, state) => const JournalPage(),
-      ),
     ],
   );
+}
+
+/// Persistent bottom navigation around the four daily-use surfaces.
+///
+/// Import and data-quality are infrequent, "settings-like" actions —
+/// they're reached from the overflow menu on each tab's app bar instead of
+/// competing for a bottom-nav slot (kept to <=5 destinations per platform
+/// guidance).
+class AppShell extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
+  const AppShell({super.key, required this.navigationShell});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: navigationShell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        ),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.monitor_heart_outlined),
+            selectedIcon: Icon(Icons.monitor_heart),
+            label: 'Today',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bedtime_outlined),
+            selectedIcon: Icon(Icons.bedtime),
+            label: 'Sleep',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.directions_run_outlined),
+            selectedIcon: Icon(Icons.directions_run),
+            label: 'Activity',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.edit_note_outlined),
+            selectedIcon: Icon(Icons.edit_note),
+            label: 'Journal',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Overflow menu used on each tab's app bar for the secondary "more" actions
+/// (import, data quality) that don't belong in the primary bottom nav.
+class MoreMenuButton extends StatelessWidget {
+  const MoreMenuButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      tooltip: 'More',
+      icon: const Icon(Icons.more_vert),
+      onSelected: (value) => context.push('/$value'),
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: 'import',
+          child: ListTile(
+            leading: Icon(Icons.upload_file_outlined),
+            title: Text('Import data'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        PopupMenuItem(
+          value: 'data-quality',
+          child: ListTile(
+            leading: Icon(Icons.fact_check_outlined),
+            title: Text('Data quality'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
+    );
+  }
 }

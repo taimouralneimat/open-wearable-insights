@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../app/app.dart';
+import '../../app/theme.dart';
 import '../../data/api_client.dart';
+import '../../widgets/state_views.dart';
 
 /// Dashboard page — shows readiness score, factor contributions, and daily coach.
 ///
@@ -55,43 +58,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Open Wearable Insights'),
+        title: const Text('Today'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.bedtime_outlined),
-            tooltip: 'Sleep',
-            onPressed: () => context.push('/sleep'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.directions_run_outlined),
-            tooltip: 'Activities',
-            onPressed: () => context.push('/activities'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.analytics_outlined),
-            tooltip: 'Data Quality',
-            onPressed: () => context.push('/data-quality'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit_note),
-            tooltip: 'Journal',
-            onPressed: () => context.push('/journal'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.upload_file_outlined),
-            tooltip: 'Import data',
-            onPressed: () => context.push('/import'),
-          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
             onPressed: _loadData,
           ),
-          IconButton(
-            icon: const Icon(Icons.psychology_outlined),
-            tooltip: 'LLM: fallback (deterministic)',
-            onPressed: () {},
-          ),
+          const MoreMenuButton(),
+          const SizedBox(width: AppSpacing.xs),
         ],
       ),
       body: _buildBody(),
@@ -99,59 +74,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Widget _buildBody() {
-    if (_loading) return _buildLoading();
-    if (_error != null) return _buildError();
-    if (_readiness == null) return _buildEmpty();
+    if (_loading) return const LoadingView(label: 'Loading readiness…');
+    if (_error != null) return ErrorView(title: "Couldn't load dashboard", message: _error!, onRetry: _loadData);
+    if (_readiness == null) {
+      return EmptyView(
+        icon: Icons.monitor_heart_outlined,
+        title: 'No data yet',
+        message: 'Import wearable data to see your readiness score.',
+        action: FilledButton.icon(
+          onPressed: () => context.push('/import'),
+          icon: const Icon(Icons.upload_file_outlined, size: 18),
+          label: const Text('Import data'),
+        ),
+      );
+    }
     return _buildPopulated();
-  }
-
-  Widget _buildLoading() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Loading readiness...'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          const Text('Couldn\'t load dashboard', style: TextStyle(fontSize: 20)),
-          const SizedBox(height: 8),
-          Text(_error!, style: const TextStyle(color: Colors.grey), textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmpty() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.monitor_heart_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('No data yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-          SizedBox(height: 8),
-          Text(
-            'Run ./scripts/load-synthetic.sh or import data\nto see your readiness score.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildPopulated() {
@@ -160,20 +97,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           _ReadinessCard(readiness: r),
           if (_scoreDiff != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             _ScoreDiffCard(diff: _scoreDiff!),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           if (i != null) ...[
             _CoachCard(insight: i),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
           ],
           _FactorsCard(readiness: r),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _DataQualityCard(readiness: r),
         ],
       ),
@@ -181,54 +118,48 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 }
 
-
 class _ScoreDiffCard extends StatelessWidget {
   final ScoreDiffResponse diff;
   const _ScoreDiffCard({required this.diff});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final deltaColor = diff.scoreDelta > 0
-        ? Colors.green
+        ? status.good
         : diff.scoreDelta < 0
-            ? Colors.red
-            : Colors.grey;
+            ? status.poor
+            : theme.colorScheme.onSurfaceVariant;
     final deltaIcon = diff.scoreDelta > 0
         ? Icons.trending_up
         : diff.scoreDelta < 0
             ? Icons.trending_down
             : Icons.trending_flat;
-    final deltaText = diff.scoreDelta > 0
-        ? '+${diff.scoreDelta}'
-        : '${diff.scoreDelta}';
+    final deltaText = diff.scoreDelta > 0 ? '+${diff.scoreDelta}' : '${diff.scoreDelta}';
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.compare_arrows, size: 20, color: Colors.blue),
-                const SizedBox(width: 8),
-                Text(diff.hasPriorData ? 'vs Yesterday' : 'Day-over-day',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Icon(Icons.compare_arrows, size: 20, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.sm),
+                Text(diff.hasPriorData ? 'vs Yesterday' : 'Day-over-day', style: theme.textTheme.titleMedium),
                 const Spacer(),
                 if (diff.hasPriorData) ...[
                   Icon(deltaIcon, color: deltaColor, size: 20),
-                  const SizedBox(width: 4),
-                  Text(deltaText,
-                      style: TextStyle(
-                          color: deltaColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(deltaText, style: theme.textTheme.titleMedium?.copyWith(color: deltaColor)),
                 ],
               ],
             ),
-            const SizedBox(height: 8),
-            Text(diff.summary, style: const TextStyle(fontSize: 13)),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
+            Text(diff.summary, style: theme.textTheme.bodyMedium),
+            const SizedBox(height: AppSpacing.md),
             ...diff.factorDiffs.where((f) => f.direction != 'unchanged').map((f) => _FactorDiffRow(diff: f)),
           ],
         ),
@@ -243,22 +174,19 @@ class _FactorDiffRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = diff.direction == 'improved'
-        ? Colors.green
-        : Colors.red;
-    final icon = diff.direction == 'improved'
-        ? Icons.arrow_upward
-        : Icons.arrow_downward;
+    final status = Theme.of(context).status;
+    final color = diff.direction == 'improved' ? status.good : status.poor;
+    final icon = diff.direction == 'improved' ? Icons.arrow_upward : Icons.arrow_downward;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
           Icon(icon, color: color, size: 14),
-          const SizedBox(width: 8),
-          Expanded(child: Text(diff.name, style: const TextStyle(fontSize: 12))),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(diff.name, style: Theme.of(context).textTheme.bodySmall)),
           Text(
             diff.contributionDelta > 0 ? '+${diff.contributionDelta.toStringAsFixed(1)}' : diff.contributionDelta.toStringAsFixed(1),
-            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: color),
           ),
         ],
       ),
@@ -272,41 +200,44 @@ class _ReadinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = readiness.score >= 75
-        ? Colors.green
-        : readiness.score >= 50
-            ? Colors.orange
-            : Colors.red;
+    final theme = Theme.of(context);
+    final status = theme.status;
+    final color = status.forScore(readiness.score);
+    final container = status.containerForScore(readiness.score);
+    final band = readiness.score >= 75 ? 'Good' : readiness.score >= 50 ? 'Fair' : 'Needs attention';
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
         child: Column(
           children: [
+            Text('READINESS', style: theme.textTheme.labelSmall),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text('${readiness.score}',
-                    style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: color)),
-                const Text('/100', style: TextStyle(fontSize: 24, color: Colors.grey)),
+                Text('${readiness.score}', style: theme.textTheme.displayLarge?.copyWith(color: color)),
+                Text('/100', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               ],
             ),
-            const SizedBox(height: 8),
-            if (readiness.provisional)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text('provisional', style: TextStyle(color: Colors.orange)),
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+              decoration: BoxDecoration(color: container, borderRadius: BorderRadius.circular(AppRadius.pill)),
+              child: Text(
+                readiness.provisional ? '$band · provisional' : band,
+                style: theme.textTheme.labelLarge?.copyWith(color: color),
               ),
-            const SizedBox(height: 8),
-            Text('Algorithm v${readiness.algorithmVersion} - ${readiness.baselinePeriod}',
-                style: const TextStyle(color: Colors.grey, fontSize: 12)),
-            const SizedBox(height: 12),
-            Text(readiness.explanation, textAlign: TextAlign.center),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Algorithm v${readiness.algorithmVersion} · ${readiness.baselinePeriod}',
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(readiness.explanation, textAlign: TextAlign.center, style: theme.textTheme.bodyLarge),
           ],
         ),
       ),
@@ -351,48 +282,75 @@ class _CoachCardState extends State<_CoachCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final insight = widget.insight;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.lightbulb_outline, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(insight.headline,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                ),
-                TextButton.icon(
-                  onPressed: _expanded ? null : _askWhy,
-                  icon: const Icon(Icons.help_outline, size: 16),
-                  label: const Text('Why?'),
-                ),
+                Icon(Icons.lightbulb_outline, size: 20, color: theme.colorScheme.tertiary),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: Text(insight.headline, style: theme.textTheme.titleMedium)),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(insight.summary),
-            const SizedBox(height: 12),
-            const Text('Recommended actions:', style: TextStyle(fontWeight: FontWeight.w500)),
-            ...insight.recommendedActions.map((a) => Text('- $a')),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
+            Text(insight.summary, style: theme.textTheme.bodyMedium),
+            const SizedBox(height: AppSpacing.md),
+            Text('RECOMMENDED ACTIONS', style: theme.textTheme.labelSmall),
+            const SizedBox(height: AppSpacing.xs),
+            ...insight.recommendedActions.map((a) => _BulletLine(text: a)),
             if (insight.cautions.isNotEmpty) ...[
-              const Text('Cautions:', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.orange)),
-              ...insight.cautions.map((c) => Text('- $c', style: const TextStyle(color: Colors.grey))),
+              const SizedBox(height: AppSpacing.md),
+              Text('CAUTIONS', style: theme.textTheme.labelSmall?.copyWith(color: status.fair)),
+              const SizedBox(height: AppSpacing.xs),
+              ...insight.cautions.map((c) => _BulletLine(text: c, color: status.fair)),
             ],
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _expanded ? null : _askWhy,
+                icon: const Icon(Icons.help_outline, size: 16),
+                label: const Text('Why?'),
+              ),
+            ),
             if (_expanded) ...[
-              const Divider(height: 24),
+              const Divider(height: AppSpacing.xl),
               if (_whyLoading) const Center(child: CircularProgressIndicator()),
               if (_whyError != null)
                 Text('Could not load explanation: $_whyError',
-                    style: const TextStyle(color: Colors.red, fontSize: 12)),
+                    style: theme.textTheme.bodySmall?.copyWith(color: status.poor)),
               if (_why != null) _WhyAnswerSection(why: _why!),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BulletLine extends StatelessWidget {
+  final String text;
+  final Color? color;
+  const _BulletLine({required this.text, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('–  ', style: theme.textTheme.bodyMedium?.copyWith(color: color)),
+          Expanded(child: Text(text, style: theme.textTheme.bodyMedium?.copyWith(color: color))),
+        ],
       ),
     );
   }
@@ -404,25 +362,27 @@ class _WhyAnswerSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(why.answer, style: const TextStyle(fontStyle: FontStyle.italic)),
-        const SizedBox(height: 12),
-        const Text('Cited metrics:', style: TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 4),
+        Text(why.answer, style: theme.textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
+        const SizedBox(height: AppSpacing.md),
+        Text('CITED METRICS', style: theme.textTheme.labelSmall),
+        const SizedBox(height: AppSpacing.xs),
         ...why.citedMetrics.map((m) {
           final color = m.direction == 'positive'
-              ? Colors.green
+              ? status.good
               : m.direction == 'negative'
-                  ? Colors.red
-                  : Colors.grey;
+                  ? status.poor
+                  : theme.colorScheme.onSurfaceVariant;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 2),
             child: Row(
               children: [
-                Expanded(child: Text('${m.name}: ${m.value}')),
-                Text(m.contribution, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+                Expanded(child: Text('${m.name}: ${m.value}', style: theme.textTheme.bodyMedium)),
+                Text(m.contribution, style: theme.textTheme.labelMedium?.copyWith(color: color)),
               ],
             ),
           );
@@ -438,18 +398,18 @@ class _FactorsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Factor Contributions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
+            Text('Factor contributions', style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.md),
             ...readiness.factors.map((f) => _FactorRow(factor: f)),
-            const SizedBox(height: 8),
-            Text(readiness.missingDataTreatment,
-                style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            const SizedBox(height: AppSpacing.sm),
+            Text(readiness.missingDataTreatment, style: theme.textTheme.bodySmall),
           ],
         ),
       ),
@@ -463,25 +423,26 @@ class _FactorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final icon = factor.direction == 'positive'
         ? Icons.arrow_upward
         : factor.direction == 'negative'
             ? Icons.arrow_downward
             : Icons.remove;
     final color = factor.direction == 'positive'
-        ? Colors.green
+        ? status.good
         : factor.direction == 'negative'
-            ? Colors.red
-            : Colors.grey;
+            ? status.poor
+            : theme.colorScheme.onSurfaceVariant;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Icon(icon, color: color, size: 16),
-          const SizedBox(width: 8),
-          Expanded(child: Text(factor.name)),
-          Text(factor.contribution.toStringAsFixed(1),
-              style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(factor.name, style: theme.textTheme.bodyMedium)),
+          Text(factor.contribution.toStringAsFixed(1), style: theme.textTheme.labelLarge?.copyWith(color: color)),
         ],
       ),
     );
@@ -494,20 +455,20 @@ class _DataQualityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Data Quality', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
+            Text('Data quality', style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
             _QualityRow(label: 'Confidence', value: readiness.confidence),
             _QualityRow(label: 'Data quality', value: readiness.dataQuality),
             _QualityRow(label: 'Baseline', value: readiness.baselinePeriod),
-            const SizedBox(height: 8),
-            Text('Limitations: ${readiness.limitations}',
-                style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            const SizedBox(height: AppSpacing.sm),
+            Text('Limitations: ${readiness.limitations}', style: theme.textTheme.bodySmall),
           ],
         ),
       ),
@@ -522,13 +483,14 @@ class _QualityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(label, style: theme.textTheme.bodyMedium),
           const Spacer(),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(value, style: theme.textTheme.labelLarge),
         ],
       ),
     );

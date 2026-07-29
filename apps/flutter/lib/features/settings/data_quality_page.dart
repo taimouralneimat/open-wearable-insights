@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../app/theme.dart';
 import '../../data/api_client.dart';
 import '../../widgets/confidence_banner.dart';
+import '../../widgets/state_views.dart';
 
 /// Data-quality dashboard page — shows completeness, coverage, and issues.
 class DataQualityPage extends StatefulWidget {
@@ -45,13 +47,10 @@ class _DataQualityPageState extends State<DataQualityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Data Quality'),
+        title: const Text('Data quality'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: _loadData,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Refresh', onPressed: _loadData),
+          const SizedBox(width: AppSpacing.xs),
         ],
       ),
       body: _buildBody(),
@@ -59,53 +58,12 @@ class _DataQualityPageState extends State<DataQualityPage> {
   }
 
   Widget _buildBody() {
-    if (_loading) return _buildLoading();
-    if (_error != null) return _buildError();
-    if (_summary == null) return _buildEmpty();
+    if (_loading) return const LoadingView(label: 'Loading data quality…');
+    if (_error != null) return ErrorView(message: _error!, onRetry: _loadData);
+    if (_summary == null) {
+      return const EmptyView(icon: Icons.analytics_outlined, title: 'No data quality metrics');
+    }
     return _buildPopulated();
-  }
-
-  Widget _buildLoading() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Loading data quality...'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          const Text('Couldn\'t load data quality', style: TextStyle(fontSize: 20)),
-          const SizedBox(height: 8),
-          Text(_error!, style: const TextStyle(color: Colors.grey), textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmpty() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.analytics_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('No data quality metrics', style: TextStyle(fontSize: 20)),
-        ],
-      ),
-    );
   }
 
   Widget _buildPopulated() {
@@ -113,13 +71,13 @@ class _DataQualityPageState extends State<DataQualityPage> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           ConfidenceBanner(confidence: s.confidence, limitations: s.limitations),
           _OverallQualityCard(summary: s),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _MetricCoverageCard(summary: s),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           if (s.issues.isNotEmpty) _IssuesCard(issues: s.issues),
         ],
       ),
@@ -133,37 +91,31 @@ class _OverallQualityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final completenessPct = (summary.completeness * 100).round();
-    final color = completenessPct >= 80
-        ? Colors.green
-        : completenessPct >= 60
-            ? Colors.orange
-            : Colors.red;
+    final color = theme.status.forScore(completenessPct, goodAt: 80, fairAt: 60);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
         child: Column(
           children: [
-            const Text('Overall Completeness', style: TextStyle(color: Colors.grey, fontSize: 14)),
-            const SizedBox(height: 8),
+            Text('OVERALL COMPLETENESS', style: theme.textTheme.labelSmall),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text('$completenessPct',
-                    style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: color)),
-                const Text('%', style: TextStyle(fontSize: 24, color: Colors.grey)),
+                Text('$completenessPct', style: theme.textTheme.displayLarge?.copyWith(color: color)),
+                Text('%', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               ],
             ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: summary.completeness,
-              backgroundColor: Colors.grey.shade200,
-              color: color,
-              minHeight: 8,
+            const SizedBox(height: AppSpacing.md),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              child: LinearProgressIndicator(value: summary.completeness, color: color, minHeight: 8),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -186,10 +138,11 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Text(value, style: theme.textTheme.titleMedium),
+        Text(label, style: theme.textTheme.bodySmall),
       ],
     );
   }
@@ -201,14 +154,15 @@ class _MetricCoverageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Metric Coverage', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
+            Text('Metric coverage', style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.md),
             ...summary.metrics.map((m) => _MetricRow(metric: m)),
           ],
         ),
@@ -223,32 +177,30 @@ class _MetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     final coveragePct = (metric.coverage * 100).round();
     final color = metric.quality == 'good'
-        ? Colors.green
+        ? status.good
         : metric.quality == 'fair'
-            ? Colors.orange
-            : Colors.red;
+            ? status.fair
+            : status.poor;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
-          SizedBox(width: 80, child: Text(metric.metric)),
-          const SizedBox(width: 8),
+          SizedBox(width: 84, child: Text(metric.metric, style: theme.textTheme.bodyMedium)),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: LinearProgressIndicator(
-              value: metric.coverage,
-              backgroundColor: Colors.grey.shade200,
-              color: color,
-              minHeight: 12,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              child: LinearProgressIndicator(value: metric.coverage, color: color, minHeight: 10),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           SizedBox(
-            width: 40,
-            child: Text('$coveragePct%',
-                style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.right),
+            width: 44,
+            child: Text('$coveragePct%', style: theme.textTheme.labelLarge?.copyWith(color: color), textAlign: TextAlign.right),
           ),
         ],
       ),
@@ -262,29 +214,30 @@ class _IssuesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
     return Card(
-      color: Colors.orange.shade50,
+      color: status.fairContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.warning_amber, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('Data Quality Issues',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.orange)),
+                Icon(Icons.warning_amber, color: status.onFairContainer),
+                const SizedBox(width: AppSpacing.sm),
+                Text('Data quality issues', style: theme.textTheme.titleMedium?.copyWith(color: status.onFairContainer)),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             ...issues.map((issue) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('• ', style: TextStyle(color: Colors.orange)),
-                      Expanded(child: Text(issue, style: const TextStyle(fontSize: 13))),
+                      Text('•  ', style: theme.textTheme.bodyMedium?.copyWith(color: status.onFairContainer)),
+                      Expanded(child: Text(issue, style: theme.textTheme.bodyMedium?.copyWith(color: status.onFairContainer))),
                     ],
                   ),
                 )),

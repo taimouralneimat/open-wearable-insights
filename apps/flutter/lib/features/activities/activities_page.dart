@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../app/app.dart';
+import '../../app/theme.dart';
 import '../../data/api_client.dart';
 import '../../widgets/confidence_banner.dart';
+import '../../widgets/state_views.dart';
 
 /// Activities page — shows daily activity summary and 7-day trends.
 class ActivitiesPage extends StatefulWidget {
@@ -48,13 +52,11 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Activities'),
+        title: const Text('Activity'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: _loadData,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Refresh', onPressed: _loadData),
+          const MoreMenuButton(),
+          const SizedBox(width: AppSpacing.xs),
         ],
       ),
       body: _buildBody(),
@@ -62,53 +64,21 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
   }
 
   Widget _buildBody() {
-    if (_loading) return _buildLoading();
-    if (_error != null) return _buildError();
-    if (_summary == null) return _buildEmpty();
+    if (_loading) return const LoadingView(label: 'Loading activity data…');
+    if (_error != null) return ErrorView(message: _error!, onRetry: _loadData);
+    if (_summary == null) {
+      return EmptyView(
+        icon: Icons.directions_run_outlined,
+        title: 'No activity data yet',
+        message: 'Import wearable data to see steps and trends.',
+        action: FilledButton.icon(
+          onPressed: () => context.push('/import'),
+          icon: const Icon(Icons.upload_file_outlined, size: 18),
+          label: const Text('Import data'),
+        ),
+      );
+    }
     return _buildPopulated();
-  }
-
-  Widget _buildLoading() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Loading activity data...'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          const Text('Couldn\'t load activity data', style: TextStyle(fontSize: 20)),
-          const SizedBox(height: 8),
-          Text(_error!, style: const TextStyle(color: Colors.grey), textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmpty() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.directions_run_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('No activity data yet', style: TextStyle(fontSize: 20)),
-        ],
-      ),
-    );
   }
 
   Widget _buildPopulated() {
@@ -116,11 +86,11 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           ConfidenceBanner(confidence: s.confidence, limitations: s.limitations),
           _ActivitySummaryCard(summary: s),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           if (_trends != null) _ActivityTrendsCard(trends: _trends!),
         ],
       ),
@@ -134,49 +104,46 @@ class _ActivitySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
         child: Column(
           children: [
-            const Text('Today', style: TextStyle(color: Colors.grey, fontSize: 14)),
-            const SizedBox(height: 12),
+            Text('TODAY', style: theme.textTheme.labelSmall),
+            const SizedBox(height: AppSpacing.lg),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _StatTile(
-                  icon: Icons.directions_walk,
-                  label: 'Steps',
-                  value: '${summary.steps}',
-                  color: Colors.blue,
-                ),
+                _StatTile(icon: Icons.directions_walk, label: 'Steps', value: '${summary.steps}', color: scheme.primary),
                 _StatTile(
                   icon: Icons.local_fire_department_outlined,
                   label: 'Calories',
                   value: summary.calories?.toString() ?? '—',
-                  color: Colors.orange,
+                  color: theme.status.fair,
                 ),
                 _StatTile(
                   icon: Icons.timer_outlined,
                   label: 'Active min',
                   value: summary.activeMinutes?.toString() ?? '—',
-                  color: Colors.green,
+                  color: scheme.tertiary,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Divider(),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.lg),
+            const Divider(height: 1),
+            const SizedBox(height: AppSpacing.md),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.favorite, size: 16, color: Colors.red),
-                const SizedBox(width: 8),
+                Icon(Icons.favorite, size: 16, color: theme.status.poor),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   summary.activeZoneMinutes != null
                       ? '${summary.activeZoneMinutes} active zone minutes'
                       : 'Active zone minutes not tracked',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  style: theme.textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -201,12 +168,13 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(icon, color: color, size: 32),
-        const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Icon(icon, color: color, size: 28),
+        const SizedBox(height: AppSpacing.xs),
+        Text(value, style: theme.textTheme.headlineSmall?.copyWith(color: color)),
+        Text(label, style: theme.textTheme.bodySmall),
       ],
     );
   }
@@ -218,15 +186,16 @@ class _ActivityTrendsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final maxSteps = trends.map((t) => t.steps).reduce((a, b) => a > b ? a : b);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('7-Day Steps Trend', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
+            Text('7-day steps trend', style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.md),
             ...trends.map((t) => _TrendBar(point: t, maxSteps: maxSteps)),
           ],
         ),
@@ -242,36 +211,30 @@ class _TrendBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final fraction = maxSteps > 0 ? (point.steps / maxSteps).clamp(0.0, 1.0) : 0.0;
     final color = point.steps >= 10000
-        ? Colors.green
+        ? theme.status.good
         : point.steps >= 7000
-            ? Colors.blue
-            : Colors.orange;
+            ? scheme.primary
+            : theme.status.fair;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
-          SizedBox(
-            width: 50,
-            child: Text(point.date.substring(5),
-                style: const TextStyle(color: Colors.grey, fontSize: 12)),
-          ),
-          const SizedBox(width: 8),
+          SizedBox(width: 44, child: Text(point.date.substring(5), style: theme.textTheme.bodySmall)),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: LinearProgressIndicator(
-              value: fraction,
-              backgroundColor: Colors.grey.shade200,
-              color: color,
-              minHeight: 12,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              child: LinearProgressIndicator(value: fraction, color: color, minHeight: 10),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           SizedBox(
-            width: 50,
-            child: Text('${point.steps}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.right),
+            width: 52,
+            child: Text('${point.steps}', style: theme.textTheme.labelLarge, textAlign: TextAlign.right),
           ),
         ],
       ),
