@@ -8,6 +8,19 @@ for releases after 1.0.0. Pre-1.0 development versions use `0.<phase>.<increment
 
 ## [Unreleased]
 
+### Correction (2026-07-30): "Phase 4" labels below are a misnomer
+Several entries below are headed "Phase 4," but `docs/product/release-plan.md`
+defines Phase 4 as **mobile applications** (iOS/Android builds, HealthKit
+adapter, Health Connect adapter) — none of that work has started. What was
+actually built (pluggable wearable connectors, real Garmin FIT parsing,
+activity-session parsing, the Flutter design-system pass, and the activity
+session list/detail UI) was really **Phase 2 hardening** — release-plan.md's
+Phase 2 exit criteria explicitly call for "Sleep, activity, trend views" and
+"Dry-run validation," which this work delivered for real in place of the
+prior stubs — plus general parity-gap-closing (closing parity-matrix row
+#10). The existing entry headers below are left as originally written, since
+they're the historical record of what was actually written at the time.
+
 ### Added — Phase 0: Discovery & foundation
 - Repository bootstrap: `.gitignore`, `LICENSE` (Apache 2.0), `NOTICE`,
   `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
