@@ -18,6 +18,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final _apiClient = ApiClient();
   ProfileResponse? _profile;
   List<String> _goalOptions = [];
+  IdentityVotesResponse? _votes;
   bool _loading = true;
   bool _saving = false;
   String? _error;
@@ -45,10 +46,15 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final profile = await _apiClient.getProfile();
       final goals = await _apiClient.getGoalOptions();
+      // Best-effort — votes are a secondary surface, shouldn't block the
+      // profile itself from loading.
+      IdentityVotesResponse? votes;
+      try { votes = await _apiClient.getIdentityVotes(); } catch (_) { votes = null; }
       if (!mounted) return;
       setState(() {
         _profile = profile;
         _goalOptions = goals;
+        _votes = votes;
         _nameController.text = profile.displayName ?? '';
         _selectedGoal = profile.primaryGoal;
         _loading = false;
@@ -69,9 +75,12 @@ class _ProfilePageState extends State<ProfilePage> {
         displayName: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
         primaryGoal: _selectedGoal,
       );
+      IdentityVotesResponse? votes;
+      try { votes = await _apiClient.getIdentityVotes(); } catch (_) { votes = null; }
       if (!mounted) return;
       setState(() {
         _profile = updated;
+        _votes = votes;
         _saving = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile saved')));
@@ -121,7 +130,8 @@ class _ProfilePageState extends State<ProfilePage> {
         Text('Primary goal', style: theme.textTheme.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          "Shapes what we emphasize in the coach's explanations over time — not used yet, just captured for now.",
+          'Every journal entry in a relevant category counts as a vote toward becoming '
+          "this kind of person — see it below once it's set.",
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: AppSpacing.md),
@@ -137,6 +147,10 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }).toList(),
         ),
+        if (_votes != null && _votes!.goal != null) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _IdentityVotesCard(votes: _votes!),
+        ],
         const SizedBox(height: AppSpacing.xxl),
         Text('Account', style: theme.textTheme.titleMedium),
         const SizedBox(height: AppSpacing.sm),
@@ -158,5 +172,49 @@ class _ProfilePageState extends State<ProfilePage> {
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
     return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+  }
+}
+
+/// Identity-based habit framing (Atomic Habits): every relevant logged
+/// entry is a "vote" for becoming this kind of person, not just a raw
+/// activity count.
+class _IdentityVotesCard extends StatelessWidget {
+  final IdentityVotesResponse votes;
+  const _IdentityVotesCard({required this.votes});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.how_to_vote_outlined, color: theme.colorScheme.onTertiaryContainer),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${votes.votes} vote${votes.votes == 1 ? '' : 's'} in the last ${votes.windowDays} days',
+                  style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onTertiaryContainer),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Toward becoming someone who prioritizes "${votes.goal}" — counted from '
+                  '${votes.relevantCategories.join(", ")} entries (${votes.totalEntries} total logged in the window).',
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onTertiaryContainer),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

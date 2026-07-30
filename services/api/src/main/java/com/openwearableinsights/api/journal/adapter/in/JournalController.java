@@ -1,10 +1,12 @@
 package com.openwearableinsights.api.journal.adapter.in;
 
+import com.openwearableinsights.api.identity.application.ProfileService;
 import com.openwearableinsights.api.journal.application.CorrelationService;
 import com.openwearableinsights.api.journal.application.JournalService;
 import com.openwearableinsights.api.journal.domain.BehaviorCategory;
 import com.openwearableinsights.api.journal.domain.BehaviorCorrelation;
 import com.openwearableinsights.api.journal.domain.HabitStreak;
+import com.openwearableinsights.api.journal.domain.IdentityVotes;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,12 +32,16 @@ public class JournalController {
 
     private static final Long DEFAULT_ACCOUNT_ID = 1L;
 
+    private static final int IDENTITY_VOTES_WINDOW_DAYS = 30;
+
     private final JournalService journalService;
     private final CorrelationService correlationService;
+    private final ProfileService profileService;
 
-    public JournalController(JournalService journalService, CorrelationService correlationService) {
+    public JournalController(JournalService journalService, CorrelationService correlationService, ProfileService profileService) {
         this.journalService = journalService;
         this.correlationService = correlationService;
+        this.profileService = profileService;
     }
 
     @GetMapping("/behaviors")
@@ -69,6 +75,15 @@ public class JournalController {
             description = "Consecutive-day streaks for every behavior the account has ever logged, sorted by current streak descending. currentStreak is 0 once a day is missed, even if longestStreak was higher before.")
     public List<HabitStreak> getStreaks() {
         return journalService.getStreaks(DEFAULT_ACCOUNT_ID);
+    }
+
+    @GetMapping("/identity-votes")
+    @Operation(summary = "Get identity-based habit \"votes\" toward the profile's primary goal",
+            description = "Atomic Habits identity framing: counts logged entries in the last 30 days whose category is relevant to the account's stated primary goal (Settings -> Profile). goal is null with zero votes if no goal is set — never guesses one.")
+    public IdentityVotes getIdentityVotes() {
+        String goal = profileService.fetchProfile(DEFAULT_ACCOUNT_ID).primaryGoal();
+        List<JournalEntry> entries = journalService.listEntries(DEFAULT_ACCOUNT_ID, null);
+        return journalService.computeIdentityVotes(goal, entries, IDENTITY_VOTES_WINDOW_DAYS);
     }
 
     @GetMapping("/correlations")

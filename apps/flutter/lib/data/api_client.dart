@@ -69,6 +69,12 @@ class ApiClient {
         .toList();
   }
 
+  /// Get identity-based habit "votes" toward the profile's primary goal.
+  Future<IdentityVotesResponse> getIdentityVotes() async {
+    final response = await _dio.get('/api/v1/journal/identity-votes');
+    return IdentityVotesResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get LLM status.
   Future<LlmStatus> getLlmStatus() async {
     final response = await _dio.get('/api/v1/coach/status');
@@ -462,6 +468,35 @@ class HabitStreakResponse {
       currentStreak: json['currentStreak'] as int,
       longestStreak: json['longestStreak'] as int,
       lastLoggedDate: json['lastLoggedDate'] as String,
+    );
+  }
+}
+
+/// Identity-based habit "votes" (Atomic Habits framing) — entries logged in
+/// categories relevant to the profile's stated primary goal. [goal] is null
+/// when no goal is set, never guessed.
+class IdentityVotesResponse {
+  final String? goal;
+  final int votes;
+  final int totalEntries;
+  final int windowDays;
+  final List<String> relevantCategories;
+
+  IdentityVotesResponse({
+    this.goal,
+    required this.votes,
+    required this.totalEntries,
+    required this.windowDays,
+    required this.relevantCategories,
+  });
+
+  factory IdentityVotesResponse.fromJson(Map<String, dynamic> json) {
+    return IdentityVotesResponse(
+      goal: json['goal'] as String?,
+      votes: json['votes'] as int,
+      totalEntries: json['totalEntries'] as int,
+      windowDays: json['windowDays'] as int,
+      relevantCategories: (json['relevantCategories'] as List).cast<String>(),
     );
   }
 }

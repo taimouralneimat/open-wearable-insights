@@ -3,6 +3,7 @@ package com.openwearableinsights.api.journal;
 import com.openwearableinsights.api.journal.application.JournalService;
 import com.openwearableinsights.api.journal.domain.BehaviorCategory;
 import com.openwearableinsights.api.journal.domain.HabitStreak;
+import com.openwearableinsights.api.journal.domain.IdentityVotes;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -188,5 +189,54 @@ class JournalServiceTest {
 
     private Map<String, Object> row(String behavior, Instant time) {
         return Map.of("behavior", behavior, "time", Timestamp.from(time));
+    }
+
+    @Test
+    void computeIdentityVotes_countsOnlyEntriesInRelevantCategories() {
+        JournalService service = new JournalService(mock(JdbcTemplate.class));
+        Instant now = Instant.now();
+        List<JournalEntry> entries = List.of(
+                entry("Recovery", "Full rest day", now),
+                entry("Sleep", "Consistent bedtime", now),
+                entry("Nutrition", "Alcohol", now), // not relevant to "Recovery & readiness"
+                entry("Recovery", "Cold exposure", now)
+        );
+
+        IdentityVotes votes = service.computeIdentityVotes("Recovery & readiness", entries, 30);
+
+        assertThat(votes.goal()).isEqualTo("Recovery & readiness");
+        assertThat(votes.votes()).isEqualTo(3);
+        assertThat(votes.totalEntries()).isEqualTo(4);
+        assertThat(votes.relevantCategories()).contains("Recovery", "Sleep", "Mental wellbeing");
+    }
+
+    @Test
+    void computeIdentityVotes_noGoalSet_returnsNullGoalAndZeroVotes() {
+        JournalService service = new JournalService(mock(JdbcTemplate.class));
+        List<JournalEntry> entries = List.of(entry("Recovery", "Full rest day", Instant.now()));
+
+        IdentityVotes votes = service.computeIdentityVotes(null, entries, 30);
+
+        assertThat(votes.goal()).isNull();
+        assertThat(votes.votes()).isZero();
+        assertThat(votes.relevantCategories()).isEmpty();
+    }
+
+    @Test
+    void computeIdentityVotes_entriesOutsideWindow_excluded() {
+        JournalService service = new JournalService(mock(JdbcTemplate.class));
+        Instant now = Instant.now();
+        List<JournalEntry> entries = List.of(
+                entry("Recovery", "Full rest day", now.minus(60, java.time.temporal.ChronoUnit.DAYS))
+        );
+
+        IdentityVotes votes = service.computeIdentityVotes("Recovery & readiness", entries, 30);
+
+        assertThat(votes.votes()).isZero();
+        assertThat(votes.totalEntries()).isZero();
+    }
+
+    private JournalEntry entry(String category, String behavior, Instant time) {
+        return new JournalEntry(1L, 1L, time, category, behavior, null, null, true, time);
     }
 }

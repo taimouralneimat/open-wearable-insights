@@ -2,6 +2,7 @@ package com.openwearableinsights.api.journal.application;
 
 import com.openwearableinsights.api.journal.domain.BehaviorCategory;
 import com.openwearableinsights.api.journal.domain.HabitStreak;
+import com.openwearableinsights.api.journal.domain.IdentityVotes;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,21 @@ public class JournalService {
             ))
     );
 
+    /**
+     * Identity-based habit framing (Atomic Habits): which journal categories
+     * count as a "vote" toward each of {@link com.openwearableinsights.api.identity.application.ProfileService#SUGGESTED_GOALS}.
+     * Deliberately hand-picked, not derived — the same "curated, not exhaustive"
+     * convention as the taxonomy itself. "General wellness" counts every
+     * category since it's not specific to any one area.
+     */
+    private static final Map<String, List<String>> GOAL_CATEGORIES = Map.of(
+            "Recovery & readiness", List.of("Recovery", "Sleep", "Mental wellbeing"),
+            "Endurance performance", List.of("Training", "Nutrition"),
+            "Strength & training load", List.of("Training", "Recovery"),
+            "Sleep quality", List.of("Sleep"),
+            "General wellness", List.of("Sleep", "Nutrition", "Recovery", "Mental wellbeing", "Training", "Supplements", "Environment")
+    );
+
     private final JdbcTemplate jdbcTemplate;
 
     public JournalService(JdbcTemplate jdbcTemplate) {
@@ -159,6 +175,32 @@ public class JournalService {
      * stays alive if the most recent logged day is today or yesterday
      * (yesterday still "alive" since today may not be over yet).
      */
+    /**
+     * Counts logged entries within the last {@code windowDays} whose category
+     * is relevant to {@code goal} — "votes" for the identity that goal
+     * represents, per Atomic Habits' identity-based habit framing. Pure
+     * (given already-fetched entries) so it's directly unit-testable and
+     * doesn't need its own DB round-trip — callers already have entries via
+     * {@link #listEntries}.
+     *
+     * @param goal must match one of {@code ProfileService.SUGGESTED_GOALS}
+     *             exactly; an unrecognized or null/blank goal returns zero
+     *             votes and no relevant categories rather than guessing.
+     */
+    public IdentityVotes computeIdentityVotes(String goal, List<JournalEntry> entries, int windowDays) {
+        List<String> categories = (goal == null || goal.isBlank())
+                ? List.of() : GOAL_CATEGORIES.getOrDefault(goal, List.of());
+
+        Instant cutoff = Instant.now().minus(windowDays, java.time.temporal.ChronoUnit.DAYS);
+        List<JournalEntry> inWindow = entries.stream().filter(e -> !e.time().isBefore(cutoff)).toList();
+        int votes = (int) inWindow.stream().filter(e -> categories.contains(e.category())).count();
+
+        return new IdentityVotes(
+                (goal == null || goal.isBlank()) ? null : goal,
+                votes, inWindow.size(), windowDays, categories
+        );
+    }
+
     public List<HabitStreak> getStreaks(Long accountId) {
         try {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList(
