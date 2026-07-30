@@ -2,6 +2,7 @@ package com.openwearableinsights.api.journal;
 
 import com.openwearableinsights.api.journal.application.JournalService;
 import com.openwearableinsights.api.journal.domain.BehaviorCategory;
+import com.openwearableinsights.api.journal.domain.HabitStreak;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -122,5 +123,70 @@ class JournalServiceTest {
 
         assertThat(entries.get(0).category()).isEqualTo("Other");
         assertThat(entries.get(0).behavior()).isEqualTo("caffeine");
+    }
+
+    @Test
+    void getStreaks_consecutiveDaysEndingToday_countsCurrentStreak() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        Instant today = Instant.now();
+        List<Map<String, Object>> rows = List.of(
+                row("Recovery::Cold exposure", today.minus(2, java.time.temporal.ChronoUnit.DAYS)),
+                row("Recovery::Cold exposure", today.minus(1, java.time.temporal.ChronoUnit.DAYS)),
+                row("Recovery::Cold exposure", today)
+        );
+        when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(rows);
+        JournalService service = new JournalService(jdbc);
+
+        List<HabitStreak> streaks = service.getStreaks(1L);
+
+        assertThat(streaks).hasSize(1);
+        assertThat(streaks.get(0).category()).isEqualTo("Recovery");
+        assertThat(streaks.get(0).behavior()).isEqualTo("Cold exposure");
+        assertThat(streaks.get(0).currentStreak()).isEqualTo(3);
+        assertThat(streaks.get(0).longestStreak()).isEqualTo(3);
+    }
+
+    @Test
+    void getStreaks_gapBeforeLastEntry_resetsCurrentButKeepsLongest() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        Instant today = Instant.now();
+        List<Map<String, Object>> rows = List.of(
+                row("Sleep::Consistent bedtime", today.minus(10, java.time.temporal.ChronoUnit.DAYS)),
+                row("Sleep::Consistent bedtime", today.minus(9, java.time.temporal.ChronoUnit.DAYS)),
+                row("Sleep::Consistent bedtime", today.minus(8, java.time.temporal.ChronoUnit.DAYS)),
+                row("Sleep::Consistent bedtime", today.minus(5, java.time.temporal.ChronoUnit.DAYS))
+        );
+        when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(rows);
+        JournalService service = new JournalService(jdbc);
+
+        List<HabitStreak> streaks = service.getStreaks(1L);
+
+        assertThat(streaks).hasSize(1);
+        assertThat(streaks.get(0).longestStreak()).isEqualTo(3);
+        assertThat(streaks.get(0).currentStreak()).isEqualTo(0);
+    }
+
+    @Test
+    void getStreaks_sortedByCurrentStreakDescending() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        Instant today = Instant.now();
+        List<Map<String, Object>> rows = List.of(
+                row("Recovery::Full rest day", today),
+                row("Nutrition::Alcohol", today.minus(30, java.time.temporal.ChronoUnit.DAYS)),
+                row("Sleep::Nap taken", today),
+                row("Sleep::Nap taken", today.minus(1, java.time.temporal.ChronoUnit.DAYS))
+        );
+        when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(rows);
+        JournalService service = new JournalService(jdbc);
+
+        List<HabitStreak> streaks = service.getStreaks(1L);
+
+        assertThat(streaks).hasSize(3);
+        assertThat(streaks.get(0).behavior()).isEqualTo("Nap taken");
+        assertThat(streaks.get(0).currentStreak()).isEqualTo(2);
+    }
+
+    private Map<String, Object> row(String behavior, Instant time) {
+        return Map.of("behavior", behavior, "time", Timestamp.from(time));
     }
 }

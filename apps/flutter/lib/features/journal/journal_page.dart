@@ -21,6 +21,7 @@ class _JournalPageState extends State<JournalPage> {
   List<BehaviorCategory>? _taxonomy;
   List<JournalEntryResponse>? _entries;
   List<BehaviorCorrelationResponse> _correlations = [];
+  List<HabitStreakResponse> _streaks = [];
   bool _loading = true;
   String? _error;
 
@@ -46,10 +47,17 @@ class _JournalPageState extends State<JournalPage> {
       } catch (_) {
         correlations = [];
       }
+      List<HabitStreakResponse> streaks = [];
+      try {
+        streaks = await _apiClient.getHabitStreaks();
+      } catch (_) {
+        streaks = [];
+      }
       setState(() {
         _taxonomy = taxonomy;
         _entries = entries;
         _correlations = correlations;
+        _streaks = streaks;
         _loading = false;
       });
     } catch (e) {
@@ -111,6 +119,10 @@ class _JournalPageState extends State<JournalPage> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxxl + AppSpacing.lg),
         children: [
+          if (_streaks.any((s) => s.currentStreak >= 2)) ...[
+            _StreaksCard(streaks: _streaks.where((s) => s.currentStreak >= 2).toList()),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           if (_correlations.isNotEmpty) ...[
             _CorrelationsCard(correlations: _correlations),
             const SizedBox(height: AppSpacing.lg),
@@ -120,6 +132,52 @@ class _JournalPageState extends State<JournalPage> {
                 child: _EntryTile(entry: e),
               )),
         ],
+      ),
+    );
+  }
+}
+
+/// "Don't break the chain" — consecutive-day streaks for behaviors actually
+/// being kept up. Only shows streaks of 2+ days; a single log isn't a
+/// streak yet.
+class _StreaksCard extends StatelessWidget {
+  final List<HabitStreakResponse> streaks;
+  const _StreaksCard({required this.streaks});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    return Card(
+      color: status.goodContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.local_fire_department, size: 20, color: status.onGoodContainer),
+                const SizedBox(width: AppSpacing.sm),
+                Text('Streaks', style: theme.textTheme.titleMedium?.copyWith(color: status.onGoodContainer)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: streaks.map((s) {
+                return Chip(
+                  avatar: Icon(Icons.local_fire_department, size: 16, color: status.onGoodContainer),
+                  label: Text('${s.behavior} · ${s.currentStreak}d'),
+                  backgroundColor: status.good.withValues(alpha: 0.15),
+                  labelStyle: theme.textTheme.labelLarge?.copyWith(color: status.onGoodContainer),
+                  side: BorderSide.none,
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

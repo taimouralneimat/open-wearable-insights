@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.coach.adapter.in;
 
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine;
+import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.HabitCue;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.Insight;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.WhyAnswer;
 import com.openwearableinsights.api.readiness.application.BaselineService;
@@ -92,6 +93,14 @@ public class CoachController {
                 scoreDiffService.computeDiff(score, prior, "yesterday"));
 
         return insightEngine.explainReadiness(score, diff);
+    }
+
+    @GetMapping("/habit-cue")
+    @Operation(summary = "Get today's habit cue",
+            description = "One specific journal behavior suggested from today's worst real readiness factor — the cue in a cue/response/reward loop, triggered by an actual wearable signal rather than a fixed time or generic tip list. present=false when there's honestly nothing to suggest.")
+    public HabitCue getHabitCue() {
+        ReadinessScore score = calculateCurrent();
+        return insightEngine.suggestHabitCue(score);
     }
 
     @GetMapping("/status")

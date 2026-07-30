@@ -54,6 +54,21 @@ class ApiClient {
     return InsightResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Get today's habit cue — one specific journal behavior suggested from
+  /// today's worst real readiness factor.
+  Future<HabitCueResponse> getHabitCue() async {
+    final response = await _dio.get('/api/v1/coach/habit-cue');
+    return HabitCueResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get current/longest streaks per logged behavior.
+  Future<List<HabitStreakResponse>> getHabitStreaks() async {
+    final response = await _dio.get('/api/v1/journal/streaks');
+    return (response.data as List)
+        .map((e) => HabitStreakResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Get LLM status.
   Future<LlmStatus> getLlmStatus() async {
     final response = await _dio.get('/api/v1/coach/status');
@@ -385,6 +400,68 @@ class LlmStatus {
     return LlmStatus(
       enabled: json['enabled'] as bool,
       mode: json['mode'] as String,
+    );
+  }
+}
+
+/// One specific habit suggestion triggered by today's worst real readiness
+/// factor. [present] false means there's honestly nothing to suggest —
+/// never fabricated.
+class HabitCueResponse {
+  final bool present;
+  final String? triggerFactor;
+  final double triggerContribution;
+  final String? suggestedCategory;
+  final String? suggestedBehavior;
+  final String reasoning;
+  final String confidence;
+
+  HabitCueResponse({
+    required this.present,
+    this.triggerFactor,
+    required this.triggerContribution,
+    this.suggestedCategory,
+    this.suggestedBehavior,
+    required this.reasoning,
+    required this.confidence,
+  });
+
+  factory HabitCueResponse.fromJson(Map<String, dynamic> json) {
+    return HabitCueResponse(
+      present: json['present'] as bool,
+      triggerFactor: json['triggerFactor'] as String?,
+      triggerContribution: (json['triggerContribution'] as num).toDouble(),
+      suggestedCategory: json['suggestedCategory'] as String?,
+      suggestedBehavior: json['suggestedBehavior'] as String?,
+      reasoning: json['reasoning'] as String,
+      confidence: json['confidence'] as String,
+    );
+  }
+}
+
+/// A logged behavior's consecutive-day streak.
+class HabitStreakResponse {
+  final String category;
+  final String behavior;
+  final int currentStreak;
+  final int longestStreak;
+  final String lastLoggedDate;
+
+  HabitStreakResponse({
+    required this.category,
+    required this.behavior,
+    required this.currentStreak,
+    required this.longestStreak,
+    required this.lastLoggedDate,
+  });
+
+  factory HabitStreakResponse.fromJson(Map<String, dynamic> json) {
+    return HabitStreakResponse(
+      category: json['category'] as String,
+      behavior: json['behavior'] as String,
+      currentStreak: json['currentStreak'] as int,
+      longestStreak: json['longestStreak'] as int,
+      lastLoggedDate: json['lastLoggedDate'] as String,
     );
   }
 }

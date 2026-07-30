@@ -21,6 +21,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   ReadinessResponse? _readiness;
   ScoreDiffResponse? _scoreDiff;
   InsightResponse? _insight;
+  HabitCueResponse? _habitCue;
   String? _displayName;
   bool _loading = true;
   String? _error;
@@ -41,15 +42,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       final insight = await _apiClient.getInsight();
       ScoreDiffResponse? diff;
       try { diff = await _apiClient.getScoreDiff(); } catch (_) { diff = null; }
-      // Best-effort — a missing/failed profile fetch shouldn't block the
-      // dashboard from loading, it's just the greeting.
+      // Best-effort — a missing/failed profile or cue fetch shouldn't block
+      // the dashboard from loading, they're secondary surfaces.
       String? name;
       try { name = (await _apiClient.getProfile()).displayName; } catch (_) { name = null; }
+      HabitCueResponse? cue;
+      try { cue = await _apiClient.getHabitCue(); } catch (_) { cue = null; }
       setState(() {
         _readiness = readiness;
         _insight = insight;
         _scoreDiff = diff;
         _displayName = name;
+        _habitCue = cue;
         _loading = false;
       });
     } catch (e) {
@@ -116,10 +120,64 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             _CoachCard(insight: i),
             const SizedBox(height: AppSpacing.lg),
           ],
+          if (_habitCue != null && _habitCue!.present) ...[
+            _HabitCueCard(cue: _habitCue!),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           _FactorsCard(readiness: r),
           const SizedBox(height: AppSpacing.lg),
           _DataQualityCard(readiness: r),
         ],
+      ),
+    );
+  }
+}
+
+/// A single, specific habit suggestion triggered by today's worst real
+/// readiness factor — the cue in a cue/response/reward loop, except the cue
+/// is a physiological signal from the wearable, not a fixed time or place.
+class _HabitCueCard extends StatelessWidget {
+  final HabitCueResponse cue;
+  const _HabitCueCard({required this.cue});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      color: theme.colorScheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.bolt_outlined, color: theme.colorScheme.onTertiaryContainer),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cue.suggestedBehavior ?? 'Try something today',
+                    style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onTertiaryContainer),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    cue.reasoning,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onTertiaryContainer),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () => context.go('/journal'),
+                      child: const Text('Log it'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

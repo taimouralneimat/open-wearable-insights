@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.insights;
 
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine;
+import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.HabitCue;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.Insight;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.WhyAnswer;
 import com.openwearableinsights.api.readiness.application.ReadinessCalculator;
@@ -146,5 +147,59 @@ class DeterministicInsightEngineTest {
                 .toList();
         List<Double> sorted = contributions.stream().sorted(Comparator.reverseOrder()).toList();
         assertThat(contributions).isEqualTo(sorted);
+    }
+
+    @Test
+    void suggestHabitCue_noNegativeFactors_reportsHonestlyNotPresent() {
+        ReadinessScore score = calculator.calculate(new ReadinessInputs(
+                Optional.of(15.0), Optional.of(-3.0), Optional.of(8.0), Optional.of(7.5),
+                Optional.of(200.0), Optional.of(250.0), Optional.of(20.0),
+                0.95, 30
+        ));
+
+        HabitCue cue = engine.suggestHabitCue(score);
+
+        assertThat(cue.present()).isFalse();
+        assertThat(cue.triggerFactor()).isNull();
+        assertThat(cue.reasoning()).isNotBlank();
+    }
+
+    @Test
+    void suggestHabitCue_worstNegativeFactor_drivesTheSuggestion() {
+        // Training load (ACWR) driven strongly negative: acute far above chronic.
+        // Every other input is at or above baseline (zero or positive
+        // contribution) so ACWR is unambiguously the single worst factor.
+        ReadinessScore score = calculator.calculate(new ReadinessInputs(
+                Optional.of(5.0), Optional.of(-1.0), Optional.of(7.5), Optional.of(7.5),
+                Optional.of(500.0), Optional.of(200.0), Optional.of(10.0),
+                0.95, 30
+        ));
+
+        HabitCue cue = engine.suggestHabitCue(score);
+
+        assertThat(cue.present()).isTrue();
+        assertThat(cue.triggerFactor()).isEqualTo("Training load (ACWR)");
+        assertThat(cue.triggerContribution()).isNegative();
+        assertThat(cue.suggestedCategory()).isNotBlank();
+        assertThat(cue.suggestedBehavior()).isNotBlank();
+        assertThat(cue.reasoning()).contains("Training load (ACWR)");
+    }
+
+    @Test
+    void suggestHabitCue_allFactorsNegative_picksTheSingleWorstOne() {
+        ReadinessScore score = calculator.calculate(new ReadinessInputs(
+                Optional.of(-10.0), Optional.of(3.0), Optional.of(5.0), Optional.of(7.5),
+                Optional.of(350.0), Optional.of(250.0), Optional.of(80.0),
+                0.95, 30
+        ));
+
+        HabitCue cue = engine.suggestHabitCue(score);
+
+        assertThat(cue.present()).isTrue();
+        double worstContribution = score.factors().stream()
+                .filter(f -> f.direction() == com.openwearableinsights.api.readiness.domain.FactorContribution.Direction.NEGATIVE)
+                .mapToDouble(com.openwearableinsights.api.readiness.domain.FactorContribution::contribution)
+                .min().orElseThrow();
+        assertThat(cue.triggerContribution()).isEqualTo(worstContribution);
     }
 }

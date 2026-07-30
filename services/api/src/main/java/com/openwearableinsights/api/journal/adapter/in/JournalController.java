@@ -4,6 +4,7 @@ import com.openwearableinsights.api.journal.application.CorrelationService;
 import com.openwearableinsights.api.journal.application.JournalService;
 import com.openwearableinsights.api.journal.domain.BehaviorCategory;
 import com.openwearableinsights.api.journal.domain.BehaviorCorrelation;
+import com.openwearableinsights.api.journal.domain.HabitStreak;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,6 +62,13 @@ public class JournalController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate since
     ) {
         return journalService.listEntries(DEFAULT_ACCOUNT_ID, since);
+    }
+
+    @GetMapping("/streaks")
+    @Operation(summary = "Get current and longest streaks per logged behavior",
+            description = "Consecutive-day streaks for every behavior the account has ever logged, sorted by current streak descending. currentStreak is 0 once a day is missed, even if longestStreak was higher before.")
+    public List<HabitStreak> getStreaks() {
+        return journalService.getStreaks(DEFAULT_ACCOUNT_ID);
     }
 
     @GetMapping("/correlations")

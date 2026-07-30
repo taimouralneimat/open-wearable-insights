@@ -182,6 +182,76 @@ public class DeterministicInsightEngine {
     }
 
     /**
+     * Maps a readiness factor to a specific journal behavior worth logging
+     * today — the "cue" half of a cue/craving/response/reward loop (Atomic
+     * Habits framing), except the cue here is a real physiological signal
+     * from the wearable, not a fixed time or location. See
+     * journal.application.JournalService's taxonomy for the exact category
+     * names these must match.
+     *
+     * <p>Only fires on the single worst NEGATIVE factor (most negative
+     * contribution) — one specific, actionable suggestion, not a checklist.
+     * Returns {@code present = false} rather than guessing when there's no
+     * negative factor or not enough data to trust one, consistent with this
+     * engine's "never fabricate, say so honestly" convention elsewhere.
+     */
+    public HabitCue suggestHabitCue(ReadinessScore score) {
+        Optional<FactorContribution> worst = score.factors().stream()
+                .filter(f -> f.direction() == Direction.NEGATIVE)
+                .min(Comparator.comparingDouble(FactorContribution::contribution));
+
+        if (worst.isEmpty()) {
+            return new HabitCue(false, null, 0, null, null,
+                    "No specific cue right now — nothing stands out as the clear factor to act on today.",
+                    score.confidence());
+        }
+
+        FactorContribution f = worst.get();
+        Suggestion suggestion = SUGGESTIONS.getOrDefault(f.name(),
+                new Suggestion("Recovery", "Full rest day"));
+
+        String reasoning = String.format(
+                "%s (%s) is pulling your score down the most today — %s might help.",
+                f.name(), formatValue(f), suggestion.behavior().toLowerCase()
+        );
+
+        return new HabitCue(true, f.name(), f.contribution(),
+                suggestion.category(), suggestion.behavior(), reasoning, score.confidence());
+    }
+
+    /**
+     * Deliberately small and hand-picked, not exhaustive — one reasonable
+     * suggestion per factor. Category/behavior strings must exist in
+     * journal.application.JournalService's TAXONOMY (not enforced by a
+     * shared type across modules; keep them in sync by hand, same as the
+     * journal taxonomy itself is a suggested/free-text list, not an enum).
+     */
+    private static final java.util.Map<String, Suggestion> SUGGESTIONS = java.util.Map.of(
+            "HRV deviation", new Suggestion("Mental wellbeing", "Meditation/mindfulness"),
+            "RHR deviation", new Suggestion("Recovery", "Active recovery session"),
+            "Sleep duration vs. need", new Suggestion("Sleep", "Consistent bedtime"),
+            "Training load (ACWR)", new Suggestion("Recovery", "Full rest day"),
+            "Stress", new Suggestion("Mental wellbeing", "Time in nature")
+    );
+
+    private record Suggestion(String category, String behavior) {}
+
+    /**
+     * A single, specific habit suggestion triggered by today's worst real
+     * readiness factor — not a static tip list. {@code present = false}
+     * means there's honestly nothing to suggest right now.
+     */
+    public record HabitCue(
+            boolean present,
+            String triggerFactor,
+            double triggerContribution,
+            String suggestedCategory,
+            String suggestedBehavior,
+            String reasoning,
+            String confidence
+    ) {}
+
+    /**
      * A grounded answer to a "why" question, citing the actual factors that
      * produced it. Never generic advice.
      */

@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.journal.application;
 
 import com.openwearableinsights.api.journal.domain.BehaviorCategory;
+import com.openwearableinsights.api.journal.domain.HabitStreak;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +11,13 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Manages journal entries and the curated behavior taxonomy.
@@ -142,6 +147,63 @@ public class JournalService {
             log.warn("Failed to list journal entries for account {}: {}", accountId, e.getMessage(), e);
             return List.of();
         }
+    }
+
+    /**
+     * Consecutive-day streaks for every distinct behavior the account has
+     * ever logged — the "don't break the chain" mechanic. A day counts if
+     * the behavior was logged at least once that day (its own calendar
+     * day in UTC, matching how the rest of this service stores/reads time).
+     *
+     * <p>currentStreak resets to 0 the moment a day is missed — it only
+     * stays alive if the most recent logged day is today or yesterday
+     * (yesterday still "alive" since today may not be over yet).
+     */
+    public List<HabitStreak> getStreaks(Long accountId) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT behavior, time FROM journal_entries WHERE account_id = ? ORDER BY time",
+                    accountId
+            );
+
+            // behavior (raw "category::name" string) -> sorted distinct log days
+            Map<String, TreeSet<LocalDate>> daysByBehavior = new LinkedHashMap<>();
+            for (Map<String, Object> row : rows) {
+                String behavior = (String) row.get("behavior");
+                LocalDate day = ((Timestamp) row.get("time")).toInstant().atZone(ZoneOffset.UTC).toLocalDate();
+                daysByBehavior.computeIfAbsent(behavior, b -> new TreeSet<>()).add(day);
+            }
+
+            LocalDate today = LocalDate.now(ZoneOffset.UTC);
+            List<HabitStreak> streaks = new ArrayList<>();
+            for (Map.Entry<String, TreeSet<LocalDate>> entry : daysByBehavior.entrySet()) {
+                String[] parts = parseBehavior(entry.getKey());
+                streaks.add(toHabitStreak(parts[0], parts[1], entry.getValue(), today));
+            }
+
+            streaks.sort(Comparator.comparingInt(HabitStreak::currentStreak).reversed());
+            return streaks;
+        } catch (Exception e) {
+            log.warn("Failed to compute habit streaks for account {}: {}", accountId, e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    private HabitStreak toHabitStreak(String category, String behavior, TreeSet<LocalDate> days, LocalDate today) {
+        int longest = 0;
+        int run = 0;
+        LocalDate prev = null;
+        for (LocalDate day : days) {
+            run = (prev != null && day.equals(prev.plusDays(1))) ? run + 1 : 1;
+            longest = Math.max(longest, run);
+            prev = day;
+        }
+
+        LocalDate lastLogged = days.last();
+        boolean stillAlive = !lastLogged.isBefore(today.minusDays(1));
+        int current = stillAlive ? run : 0;
+
+        return new HabitStreak(category, behavior, current, longest, lastLogged.toString());
     }
 
     // The schema stores a single `behavior` text column; encode
