@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.readiness.application;
 
 import com.openwearableinsights.api.readiness.domain.CurrentMetrics;
+import com.openwearableinsights.api.trainingload.application.TrainingLoadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,9 +35,11 @@ public class CurrentMetricsService {
     private static final double MAX_PLAUSIBLE_SLEEP_HOURS = 14.0;
 
     private final JdbcTemplate jdbcTemplate;
+    private final TrainingLoadService trainingLoadService;
 
-    public CurrentMetricsService(JdbcTemplate jdbcTemplate) {
+    public CurrentMetricsService(JdbcTemplate jdbcTemplate, TrainingLoadService trainingLoadService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.trainingLoadService = trainingLoadService;
     }
 
     /**
@@ -55,15 +58,18 @@ public class CurrentMetricsService {
         Optional<Double> stress = fetchLatestMetric(accountId, "stress", todayStart);
         Optional<Double> sleepDuration = fetchSleepDuration(accountId, todayStart);
 
-        // Training load: sum of steps for acute (7d) and chronic (28d) windows
-        double acuteLoad = fetchStepsSum(accountId, Instant.now().minus(7, ChronoUnit.DAYS));
-        double chronicLoad = fetchStepsSum(accountId, Instant.now().minus(28, ChronoUnit.DAYS));
+        // Training load: real HR-zone-weighted load from workout sessions
+        // (trainingload.application.TrainingLoadService), averaged per
+        // active day over the 7-day (acute) and 28-day (chronic) windows.
+        // Replaces the step-count proxy this used before that module existed.
+        double acuteLoad = trainingLoadService.fetchAcuteLoad(accountId);
+        double chronicLoad = trainingLoadService.fetchChronicLoad(accountId);
 
         // Sleep need: default 7.5h if not specified
         Optional<Double> sleepNeed = Optional.of(7.5);
 
         // Data completeness: fraction of expected metrics present
-        int expectedMetrics = 5; // hrv, rhr, stress, sleep, steps
+        int expectedMetrics = 5; // hrv, rhr, stress, sleep, training load
         int presentMetrics = 0;
         if (hrv.isPresent()) presentMetrics++;
         if (rhr.isPresent()) presentMetrics++;
@@ -123,23 +129,5 @@ public class CurrentMetricsService {
             log.warn("Failed to fetch sleep duration for account {}: {}", accountId, e.getMessage(), e);
         }
         return Optional.empty();
-    }
-
-    private double fetchStepsSum(Long accountId, Instant since) {
-        try {
-            Double avg = jdbcTemplate.queryForObject(
-                    "SELECT AVG(daily_steps) FROM (" +
-                    "  SELECT DATE(time) as d, SUM(value) as daily_steps " +
-                    "  FROM measurements " +
-                    "  WHERE account_id = ? AND metric_type = ? AND time >= ? " +
-                    "  GROUP BY DATE(time)" +
-                    ") sub",
-                    Double.class, accountId, "steps", Timestamp.from(since)
-            );
-            return avg != null ? avg : 0.0;
-        } catch (Exception e) {
-            log.warn("Failed to fetch steps sum for account {}: {}", accountId, e.getMessage(), e);
-            return 0.0;
-        }
     }
 }
