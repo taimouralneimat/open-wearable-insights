@@ -6,12 +6,41 @@ import 'package:dio/dio.dart';
 class ApiClient {
   final Dio _dio;
 
+  // TEMPORARY (2026-07-30): the backend now requires X-Local-Api-Token on
+  // every /api/v1/** request (ADR-0008). This hardcodes the current local
+  // dev token so the app keeps working today. Real fix (tracked, not done
+  // yet): read this from flutter_secure_storage via a one-time local
+  // pairing screen instead of a compiled-in constant.
+  static const String _devLocalApiToken = 'Tw7sEXiTGHqK8Q4G6Ne5c9vENCPd9EUdRKPxJQdT1Hc';
+
   ApiClient()
       : _dio = Dio(BaseOptions(
           baseUrl: 'http://127.0.0.1:8080',
           connectTimeout: const Duration(seconds: 5),
           receiveTimeout: const Duration(seconds: 10),
+          headers: {'X-Local-Api-Token': _devLocalApiToken},
         ));
+
+  /// Get the local account's profile (display name, primary goal).
+  Future<ProfileResponse> getProfile() async {
+    final response = await _dio.get('/api/v1/profile');
+    return ProfileResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Update the local account's profile.
+  Future<ProfileResponse> updateProfile({String? displayName, String? primaryGoal}) async {
+    final response = await _dio.put('/api/v1/profile', data: {
+      'displayName': displayName,
+      'primaryGoal': primaryGoal,
+    });
+    return ProfileResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get suggested primary-goal options for the profile editor.
+  Future<List<String>> getGoalOptions() async {
+    final response = await _dio.get('/api/v1/profile/goal-options');
+    return (response.data as List).cast<String>();
+  }
 
   /// Get the latest readiness score.
   Future<ReadinessResponse> getLatestReadiness() async {
@@ -1039,6 +1068,31 @@ class BehaviorCorrelationResponse {
       difference: (json['difference'] as num).toDouble(),
       confidence: json['confidence'] as String,
       limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+/// The local account's profile — display name and primary goal. Both
+/// nullable: a fresh account has neither set yet.
+class ProfileResponse {
+  final int accountId;
+  final String email;
+  final String? displayName;
+  final String? primaryGoal;
+
+  ProfileResponse({
+    required this.accountId,
+    required this.email,
+    this.displayName,
+    this.primaryGoal,
+  });
+
+  factory ProfileResponse.fromJson(Map<String, dynamic> json) {
+    return ProfileResponse(
+      accountId: json['accountId'] as int,
+      email: json['email'] as String,
+      displayName: json['displayName'] as String?,
+      primaryGoal: json['primaryGoal'] as String?,
     );
   }
 }

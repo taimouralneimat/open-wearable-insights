@@ -21,6 +21,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   ReadinessResponse? _readiness;
   ScoreDiffResponse? _scoreDiff;
   InsightResponse? _insight;
+  String? _displayName;
   bool _loading = true;
   String? _error;
 
@@ -40,10 +41,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       final insight = await _apiClient.getInsight();
       ScoreDiffResponse? diff;
       try { diff = await _apiClient.getScoreDiff(); } catch (_) { diff = null; }
+      // Best-effort — a missing/failed profile fetch shouldn't block the
+      // dashboard from loading, it's just the greeting.
+      String? name;
+      try { name = (await _apiClient.getProfile()).displayName; } catch (_) { name = null; }
       setState(() {
         _readiness = readiness;
         _insight = insight;
         _scoreDiff = diff;
+        _displayName = name;
         _loading = false;
       });
     } catch (e) {
@@ -56,9 +62,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final title = (_displayName != null && _displayName!.isNotEmpty) ? 'Hi, $_displayName' : 'Today';
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Today'),
+        title: Text(title),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

@@ -8,6 +8,7 @@ import 'package:open_wearable_insights/features/activities/activities_page.dart'
 import 'package:open_wearable_insights/features/activities/activity_session_detail_page.dart';
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 import 'package:open_wearable_insights/features/journal/journal_page.dart';
+import 'package:open_wearable_insights/features/profile/profile_page.dart';
 
 /// Open Wearable Insights — app shell with routing.
 ///
@@ -66,6 +67,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
       GoRoute(
         path: '/data-quality',
         builder: (context, state) => const DataQualityPage(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfilePage(),
       ),
     ],
   );
@@ -130,6 +135,14 @@ class MoreMenuButton extends StatelessWidget {
       icon: const Icon(Icons.more_vert),
       onSelected: (value) => context.push('/$value'),
       itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: 'profile',
+          child: ListTile(
+            leading: Icon(Icons.person_outline),
+            title: Text('Profile'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
         PopupMenuItem(
           value: 'import',
           child: ListTile(
