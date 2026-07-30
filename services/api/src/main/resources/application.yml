@@ -33,6 +33,10 @@ spring:
 # Local app-data directory for raw imported files (OUTSIDE the repo).
 owi:
   import-dir: ${OWI_IMPORT_DIR:~/.open-wearable-insights/imports}
+  # Persistent local API token file (ADR-0008). Generated once on first boot,
+  # reused on every subsequent boot. Clients send it via the X-Local-Api-Token
+  # header on all /api/v1/** requests.
+  local-api-token-file: ${OWI_LOCAL_API_TOKEN_FILE:~/.open-wearable-insights/local-api-token}
   llm:
     enabled: ${OWI_LLM_ENABLED:false}
     model: ${OWI_LLM_MODEL:qwen3:8b}
