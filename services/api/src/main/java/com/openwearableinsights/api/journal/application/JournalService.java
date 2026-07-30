@@ -30,36 +30,57 @@ public class JournalService {
     private static final Logger log = LoggerFactory.getLogger(JournalService.class);
 
     /**
-     * Curated taxonomy, deliberately broader than the original 6-behavior
-     * stub (caffeine, meals, travel, alcohol, RPE, soreness) but not
-     * attempting to match the ~140-behavior breadth some competitor
-     * products offer — start meaningfully broader, grow based on what
-     * users actually log, per the product backlog note on this exit
-     * criterion.
+     * Curated taxonomy. Widened 2026-07-30 in direct response to user
+     * feedback that the original 6-category/34-behavior list read as thin
+     * next to competitor journal breadth (parity-matrix row #27). Every
+     * entry here is a real, specific, loggable behavior — not padding to
+     * hit a count. Deliberately does NOT add a menstrual-cycle/hormonal
+     * category yet: parity row #21 flags that as needing its own
+     * consent/privacy design pass, not a same-list bolt-on.
      */
     private static final List<BehaviorCategory> TAXONOMY = List.of(
             new BehaviorCategory("Sleep", List.of(
                     "Used sleep aid", "Screen time before bed", "Consistent bedtime",
-                    "Nap taken", "Room temperature comfortable", "Caffeine after 2pm"
+                    "Nap taken", "Room temperature comfortable", "Caffeine after 2pm",
+                    "Went to bed later than usual", "Woke during the night", "Used blue-light filter/glasses",
+                    "Blackout curtains / dark room", "White noise or earplugs used", "Read before bed (no screen)",
+                    "Shorter sleep than usual (<6h)", "Longer sleep than usual (>9h)"
             )),
             new BehaviorCategory("Nutrition", List.of(
                     "Alcohol", "Late meal (within 2h of bed)", "High-carb meal",
-                    "Skipped a meal", "Hydration goal met", "Fasted >12h"
+                    "Skipped a meal", "Hydration goal met", "Fasted >12h",
+                    "Large meal", "High-sugar intake", "Mostly processed food today", "Mostly whole foods today",
+                    "Under-ate today", "Overate / binge", "New or unfamiliar food", "Dined out",
+                    "High-sodium meal", "High-protein day", "Low-fiber day"
             )),
             new BehaviorCategory("Recovery", List.of(
                     "Stretching/mobility work", "Cold exposure", "Sauna/heat exposure",
-                    "Massage", "Active recovery session", "Full rest day"
+                    "Massage", "Active recovery session", "Full rest day",
+                    "Foam rolling", "Compression garments used", "Contrast therapy (hot/cold)",
+                    "Breathwork session", "Yoga / light movement", "Deload week"
             )),
             new BehaviorCategory("Mental wellbeing", List.of(
                     "High stress day", "Meditation/mindfulness", "Social connection",
-                    "Work overload", "Travel/timezone change", "Illness/feeling unwell"
+                    "Work overload", "Travel/timezone change", "Illness/feeling unwell",
+                    "Anxious mood", "Low mood / down day", "Felt calm and content", "Journaling done",
+                    "Time in nature", "Heavy screen-time day", "Conflict or argument", "Major life event",
+                    "Deep-focus / flow-state work"
             )),
             new BehaviorCategory("Training", List.of(
                     "RPE (rate of perceived exertion)", "Muscle soreness",
-                    "New/unfamiliar exercise", "Injury/pain flag"
+                    "New/unfamiliar exercise", "Injury/pain flag",
+                    "Missed planned workout", "Exceeded planned intensity", "Felt strong during training",
+                    "Felt flat / low energy during training", "Two-a-day session", "Taper / reduced-volume day",
+                    "Trained in the heat", "Trained fasted"
             )),
             new BehaviorCategory("Supplements", List.of(
-                    "Magnesium", "Melatonin", "Creatine", "Caffeine/pre-workout", "Other supplement"
+                    "Magnesium", "Melatonin", "Creatine", "Caffeine/pre-workout", "Other supplement",
+                    "Vitamin D", "Omega-3 / fish oil", "Ashwagandha", "Electrolytes", "Protein supplement",
+                    "Zinc", "Probiotic"
+            )),
+            new BehaviorCategory("Environment", List.of(
+                    "Poor air quality day", "Altitude change", "Extreme heat exposure", "Extreme cold exposure",
+                    "Noisy sleep environment", "Illness in household"
             ))
     );
 
