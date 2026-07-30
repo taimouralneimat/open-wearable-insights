@@ -94,12 +94,56 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
           ConfidenceBanner(confidence: s.confidence, limitations: s.limitations),
           _ActivitySummaryCard(summary: s),
           const SizedBox(height: AppSpacing.lg),
+          _TrainingLoadEntryCard(),
+          const SizedBox(height: AppSpacing.lg),
           if (_trends != null) _ActivityTrendsCard(trends: _trends!),
           if (_sessions.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.lg),
             _RecentSessionsCard(sessions: _sessions),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Lightweight entry point into the full training-load view — fetches its
+/// own summary so it can show a live at-a-glance status without coupling
+/// to the parent page's load sequence.
+class _TrainingLoadEntryCard extends StatefulWidget {
+  @override
+  State<_TrainingLoadEntryCard> createState() => _TrainingLoadEntryCardState();
+}
+
+class _TrainingLoadEntryCardState extends State<_TrainingLoadEntryCard> {
+  final _apiClient = ApiClient();
+  TrainingLoadSummaryResponse? _summary;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient.getTrainingLoadSummary().then((s) {
+      if (mounted) setState(() => _summary = s);
+    }).catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final summary = _summary;
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.speed_outlined, color: theme.colorScheme.primary),
+        title: const Text('Training load'),
+        subtitle: Text(
+          summary != null
+              ? (summary.acwr != null
+                  ? 'ACWR ${summary.acwr!.toStringAsFixed(2)} · ${summary.loadStatus}'
+                  : 'Not enough recent activity data yet')
+              : 'Loading…',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/activities/training-load'),
       ),
     );
   }

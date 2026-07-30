@@ -162,6 +162,20 @@ class ApiClient {
     return ActivitySessionResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Get the current training-load (ACWR) summary.
+  Future<TrainingLoadSummaryResponse> getTrainingLoadSummary() async {
+    final response = await _dio.get('/api/v1/trainingload/summary');
+    return TrainingLoadSummaryResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get daily training-load trend (up to 28 days, active days only).
+  Future<List<TrainingLoadTrendPointResponse>> getTrainingLoadTrends() async {
+    final response = await _dio.get('/api/v1/trainingload/trends');
+    return (response.data as List)
+        .map((e) => TrainingLoadTrendPointResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Get score diff vs prior day.
   Future<ScoreDiffResponse> getScoreDiff() async {
     final response = await _dio.get("/api/v1/readiness/diff");
@@ -213,6 +227,21 @@ class ApiClient {
     return (response.data as List)
         .map((e) => BehaviorCorrelationResponse.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// Fetch the complete local data export as raw JSON text, plus the
+  /// server-suggested filename from Content-Disposition. Returns the raw
+  /// body rather than parsing it — this is a pass-through to a file
+  /// download, not data the app itself needs to read.
+  Future<(String body, String filename)> fetchFullExport() async {
+    final response = await _dio.get<String>(
+      '/api/v1/export/full',
+      options: Options(responseType: ResponseType.plain),
+    );
+    final disposition = response.headers.value('content-disposition') ?? '';
+    final match = RegExp(r'filename="([^"]+)"').firstMatch(disposition);
+    final filename = match?.group(1) ?? 'open-wearable-insights-export.json';
+    return (response.data ?? '', filename);
   }
 }
 
@@ -929,6 +958,56 @@ class ActivitySessionResponse {
       maxHeartRate: json['maxHeartRate'] as int?,
       calories: json['calories'] as int?,
       hrZoneSeconds: (json['hrZoneSeconds'] as List?)?.map((e) => (e as num).toDouble()).toList() ?? const [],
+    );
+  }
+}
+
+/// Current training-load (ACWR) snapshot. acuteLoad/chronicLoad/acwr are
+/// null when there isn't enough recent activity — never a fabricated zero.
+class TrainingLoadSummaryResponse {
+  final double? acuteLoad;
+  final double? chronicLoad;
+  final double? acwr;
+  final String loadStatus;
+  final String algorithmVersion;
+  final String confidence;
+  final List<String> limitations;
+
+  TrainingLoadSummaryResponse({
+    this.acuteLoad,
+    this.chronicLoad,
+    this.acwr,
+    required this.loadStatus,
+    required this.algorithmVersion,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory TrainingLoadSummaryResponse.fromJson(Map<String, dynamic> json) {
+    return TrainingLoadSummaryResponse(
+      acuteLoad: (json['acuteLoad'] as num?)?.toDouble(),
+      chronicLoad: (json['chronicLoad'] as num?)?.toDouble(),
+      acwr: (json['acwr'] as num?)?.toDouble(),
+      loadStatus: json['loadStatus'] as String,
+      algorithmVersion: json['algorithmVersion'] as String,
+      confidence: json['confidence'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+/// A single day's total training load. Only days with an activity appear —
+/// rest days are omitted, not zero-filled.
+class TrainingLoadTrendPointResponse {
+  final String date;
+  final double load;
+
+  TrainingLoadTrendPointResponse({required this.date, required this.load});
+
+  factory TrainingLoadTrendPointResponse.fromJson(Map<String, dynamic> json) {
+    return TrainingLoadTrendPointResponse(
+      date: json['date'] as String,
+      load: (json['load'] as num).toDouble(),
     );
   }
 }

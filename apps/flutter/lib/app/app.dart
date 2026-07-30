@@ -6,6 +6,7 @@ import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/sleep/sleep_page.dart';
 import 'package:open_wearable_insights/features/activities/activities_page.dart';
 import 'package:open_wearable_insights/features/activities/activity_session_detail_page.dart';
+import 'package:open_wearable_insights/features/activities/training_load_page.dart';
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 import 'package:open_wearable_insights/features/journal/journal_page.dart';
 import 'package:open_wearable_insights/features/profile/profile_page.dart';
@@ -50,6 +51,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
                     builder: (context, state) => ActivitySessionDetailPage(
                       id: int.parse(state.pathParameters['id']!),
                     ),
+                  ),
+                  GoRoute(
+                    path: 'training-load',
+                    builder: (context, state) => const TrainingLoadPage(),
                   ),
                 ],
               ),

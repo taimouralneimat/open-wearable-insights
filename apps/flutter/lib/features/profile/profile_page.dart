@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../../data/api_client.dart';
+import '../../data/web_download.dart';
 import '../../widgets/state_views.dart';
 
 /// Profile page — the local account's display name and primary goal.
@@ -21,6 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
   IdentityVotesResponse? _votes;
   bool _loading = true;
   bool _saving = false;
+  bool _exporting = false;
   String? _error;
 
   final _nameController = TextEditingController();
@@ -88,6 +90,20 @@ class _ProfilePageState extends State<ProfilePage> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
+    }
+  }
+
+  Future<void> _exportData() async {
+    setState(() => _exporting = true);
+    try {
+      final (body, filename) = await _apiClient.fetchFullExport();
+      downloadTextAsFile(body, filename);
+      if (!mounted) return;
+      setState(() => _exporting = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _exporting = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export failed: $e')));
     }
   }
 
@@ -161,6 +177,22 @@ class _ProfilePageState extends State<ProfilePage> {
           child: _saving
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : const Text('Save'),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        Text('Your data', style: theme.textTheme.titleMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'Download everything stored locally for this account — measurements, activities, '
+          'journal entries, readiness history, and more — as a single JSON file.',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        OutlinedButton.icon(
+          onPressed: _exporting ? null : _exportData,
+          icon: _exporting
+              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.download_outlined, size: 18),
+          label: Text(_exporting ? 'Preparing export…' : 'Export all my data'),
         ),
       ],
     );
