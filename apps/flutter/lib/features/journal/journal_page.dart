@@ -73,7 +73,11 @@ class _JournalPageState extends State<JournalPage> {
     final added = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _AddEntrySheet(taxonomy: _taxonomy!, apiClient: _apiClient),
+      builder: (context) => _AddEntrySheet(
+        taxonomy: _taxonomy!,
+        apiClient: _apiClient,
+        correlations: _correlations,
+      ),
     );
     if (added == true) {
       _loadData();
@@ -293,7 +297,8 @@ class _EntryTile extends StatelessWidget {
 class _AddEntrySheet extends StatefulWidget {
   final List<BehaviorCategory> taxonomy;
   final ApiClient apiClient;
-  const _AddEntrySheet({required this.taxonomy, required this.apiClient});
+  final List<BehaviorCorrelationResponse> correlations;
+  const _AddEntrySheet({required this.taxonomy, required this.apiClient, this.correlations = const []});
 
   @override
   State<_AddEntrySheet> createState() => _AddEntrySheetState();
@@ -336,6 +341,13 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
         _error = 'Could not save: $e';
       });
     }
+  }
+
+  BehaviorCorrelationResponse? _findCorrelation(String behavior) {
+    for (final c in widget.correlations) {
+      if (c.behavior == behavior) return c;
+    }
+    return null;
   }
 
   @override
@@ -392,6 +404,13 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
                 );
               }).toList(),
             ),
+            if (_selectedBehavior != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _RewardPreview(
+                behavior: _selectedBehavior!,
+                correlation: _findCorrelation(_selectedBehavior!),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             TextField(
               controller: _valueController,
@@ -418,6 +437,68 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Shows the behavior's real, existing correlation with readiness right at
+/// the point of logging it — the "reward" law made visible instead of
+/// buried in a separate card you might never open. Never fabricates a
+/// number: behaviors without enough history honestly say so.
+class _RewardPreview extends StatelessWidget {
+  final String behavior;
+  final BehaviorCorrelationResponse? correlation;
+  const _RewardPreview({required this.behavior, required this.correlation});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    final c = correlation;
+
+    if (c == null) {
+      return Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.hourglass_empty, size: 16, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                'Not enough history yet to show a payoff for this — log it a few more times to find out.',
+                style: theme.textTheme.bodySmall,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final worse = c.difference < 0;
+    final color = worse ? status.poor : status.good;
+    final bg = worse ? status.poorContainer : status.goodContainer;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(AppRadius.md)),
+      child: Row(
+        children: [
+          Icon(worse ? Icons.trending_down : Icons.trending_up, size: 16, color: color),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'On days you\'ve logged this, readiness averaged '
+              '${c.avgReadinessWhenLogged.toStringAsFixed(0)} vs '
+              '${c.avgReadinessWhenNotLogged.toStringAsFixed(0)} otherwise '
+              '(${c.loggedDayCount} logged days, ${c.confidence} confidence). Correlation, not causation.',
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+        ],
       ),
     );
   }
