@@ -1,6 +1,8 @@
 package com.openwearableinsights.api.trainingload.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openwearableinsights.api.trainingload.domain.TrainingLoadSummary;
+import com.openwearableinsights.api.trainingload.domain.TrainingLoadTrendPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -80,6 +82,36 @@ public class TrainingLoadService {
     // 0-indexed), i.e. "moderate" intensity. See class Javadoc.
     private static final double FALLBACK_ZONE_WEIGHT = 3.0;
 
+    // loadStatus thresholds for /trainingload/summary. These follow a common
+    // sports-science convention for the acute:chronic workload ratio (ACWR)
+    // — roughly 0.8-1.3 as a "sweet spot", above 1.5 as elevated-risk
+    // territory — but this is stated here as a wellness heuristic, not a
+    // clinical claim: this app is wellness/fitness analytics, not a medical
+    // device (docs/product/vision.md principle 4), the ratio is computed
+    // from a single-source, v1, non-personalized load formula (see class
+    // Javadoc), and the thresholds are not derived from this user's own
+    // data. See TrainingLoadSummary's Javadoc and #classifyLoadStatus.
+    private static final double LOAD_STATUS_LOW_MAX = 0.8;
+    private static final double LOAD_STATUS_OPTIMAL_MAX = 1.3;
+    private static final double LOAD_STATUS_ELEVATED_MAX = 1.5;
+
+    private static final List<String> LOAD_STATUS_LIMITATIONS = List.of(
+            "loadStatus is a wellness heuristic based on a common sports-science "
+                    + "ACWR convention (roughly 0.8-1.3 considered a \"sweet spot\", "
+                    + "above 1.5 considered elevated-risk territory in some training "
+                    + "literature) applied to this app's own v1 HR-zone load formula "
+                    + "(" + ALGORITHM_VERSION + "). It is not a medical or clinical "
+                    + "assessment, is not personalized to this user, and is not a "
+                    + "prediction or guarantee of injury risk or its absence."
+    );
+
+    private static final List<String> NO_DATA_LIMITATIONS = List.of(
+            "Not enough recent activity data to compute acute/chronic training "
+                    + "load or ACWR — needs at least one activity in the last "
+                    + ACUTE_WINDOW_DAYS + " days and at least one in the last "
+                    + CHRONIC_WINDOW_DAYS + " days."
+    );
+
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
 
@@ -96,6 +128,82 @@ public class TrainingLoadService {
     /** Average daily training load over the last {@value #CHRONIC_WINDOW_DAYS} days. */
     public double fetchChronicLoad(Long accountId) {
         return fetchAverageDailyLoad(accountId, Instant.now().minus(CHRONIC_WINDOW_DAYS, ChronoUnit.DAYS));
+    }
+
+    /**
+     * Per-day training load history for the last {@code days} days, sorted
+     * oldest-first. Reuses the same per-day GROUP-BY aggregation that
+     * {@link #fetchAverageDailyLoad} averages down to a single number — this
+     * just returns the intermediate per-day map instead of collapsing it.
+     *
+     * <p>Only days with at least one activity row are included; rest days
+     * are omitted, not zero-filled or interpolated (same convention as the
+     * acute/chronic averages — see class Javadoc).
+     */
+    public List<TrainingLoadTrendPoint> fetchDailyLoadHistory(Long accountId, int days) {
+        Map<LocalDate, Double> loadByDay = fetchDailyLoad(accountId, Instant.now().minus(days, ChronoUnit.DAYS));
+        return loadByDay.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(e -> new TrainingLoadTrendPoint(e.getKey().toString(), e.getValue()))
+                .toList();
+    }
+
+    /**
+     * Current acute/chronic/ACWR snapshot for {@code /trainingload/summary}.
+     *
+     * <p>{@code acwr} is {@code acuteLoad / chronicLoad} — the exact formula
+     * {@code ReadinessCalculator} uses for the "Training load (ACWR)"
+     * factor. Following the same presence convention
+     * {@code CurrentMetricsService} already uses when feeding that factor
+     * (an average of zero is indistinguishable from "no qualifying activity
+     * in the window" for this average-over-active-days aggregation), both
+     * loads must be strictly positive before a ratio is reported — otherwise
+     * this returns an honest "not enough data" summary rather than a
+     * fabricated 0 or 1.0.
+     */
+    public TrainingLoadSummary computeSummary(Long accountId) {
+        double acute = fetchAcuteLoad(accountId);
+        double chronic = fetchChronicLoad(accountId);
+
+        if (acute <= 0 || chronic <= 0) {
+            return new TrainingLoadSummary(
+                    acute > 0 ? acute : null,
+                    chronic > 0 ? chronic : null,
+                    null,
+                    "unknown",
+                    ALGORITHM_VERSION,
+                    "none",
+                    NO_DATA_LIMITATIONS
+            );
+        }
+
+        double acwr = acute / chronic;
+        return new TrainingLoadSummary(
+                acute, chronic, acwr,
+                classifyLoadStatus(acwr),
+                ALGORITHM_VERSION,
+                "medium",
+                LOAD_STATUS_LIMITATIONS
+        );
+    }
+
+    /**
+     * Plain-language load-status band from the ACWR ratio. See the
+     * {@code LOAD_STATUS_*} constants' Javadoc for the sports-science
+     * convention this is based on and why it's a wellness heuristic, not a
+     * clinical claim.
+     */
+    private String classifyLoadStatus(double acwr) {
+        if (acwr < LOAD_STATUS_LOW_MAX) {
+            return "low";
+        }
+        if (acwr <= LOAD_STATUS_OPTIMAL_MAX) {
+            return "optimal";
+        }
+        if (acwr <= LOAD_STATUS_ELEVATED_MAX) {
+            return "elevated";
+        }
+        return "high";
     }
 
     /**
@@ -137,15 +245,27 @@ public class TrainingLoadService {
     }
 
     private double fetchAverageDailyLoad(Long accountId, Instant since) {
+        Map<LocalDate, Double> loadByDay = fetchDailyLoad(accountId, since);
+        if (loadByDay.isEmpty()) {
+            return 0.0;
+        }
+        return loadByDay.values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+    }
+
+    /**
+     * Shared per-day aggregation: sums each day's session loads into one
+     * {@code load-by-day} map for all activity rows since {@code since}.
+     * {@link #fetchAverageDailyLoad} collapses this to a single average;
+     * {@link #fetchDailyLoadHistory} returns it (sorted) as-is. Kept as one
+     * query + one GROUP-BY loop so the two callers can't drift.
+     */
+    private Map<LocalDate, Double> fetchDailyLoad(Long accountId, Instant since) {
         try {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                     "SELECT start_time, duration_seconds, hr_zone_seconds FROM activities " +
                     "WHERE account_id = ? AND start_time >= ?",
                     accountId, Timestamp.from(since)
             );
-            if (rows.isEmpty()) {
-                return 0.0;
-            }
 
             Map<LocalDate, Double> loadByDay = new HashMap<>();
             for (Map<String, Object> row : rows) {
@@ -155,11 +275,10 @@ public class TrainingLoadService {
                 double sessionLoad = computeSessionLoad(hrZoneSeconds, durationSeconds);
                 loadByDay.merge(day, sessionLoad, Double::sum);
             }
-
-            return loadByDay.values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+            return loadByDay;
         } catch (Exception e) {
             log.warn("Failed to fetch training load for account {}: {}", accountId, e.getMessage(), e);
-            return 0.0;
+            return Map.of();
         }
     }
 

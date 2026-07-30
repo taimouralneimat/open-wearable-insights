@@ -2,11 +2,14 @@ package com.openwearableinsights.api.trainingload;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openwearableinsights.api.trainingload.application.TrainingLoadService;
+import com.openwearableinsights.api.trainingload.domain.TrainingLoadSummary;
+import com.openwearableinsights.api.trainingload.domain.TrainingLoadTrendPoint;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -153,5 +156,165 @@ class TrainingLoadServiceTest {
         TrainingLoadService service = serviceWithRows(jdbc);
 
         assertThat(service.fetchAcuteLoad(1L)).isEqualTo(0.0);
+    }
+
+    // --- per-day load history (fetchDailyLoadHistory) ---
+
+    @Test
+    void fetchDailyLoadHistory_returnsSortedOldestFirst_summedPerDay() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        Instant day1 = Instant.now().minus(5, ChronoUnit.DAYS);
+        Instant day2 = Instant.now().minus(2, ChronoUnit.DAYS);
+
+        // Rows deliberately returned out of chronological order, and day2
+        // has two sessions that must be summed into one point.
+        when(jdbc.queryForList(anyString(), anyLong(), any(Timestamp.class))).thenReturn(List.of(
+                sessionRow(day2, 60.0, "[60.0,0.0,0.0,0.0,0.0]"), // load 1.0
+                sessionRow(day2, 60.0, "[60.0,0.0,0.0,0.0,0.0]"), // load 1.0 -> day2 total 2.0
+                sessionRow(day1, 120.0, "[0.0,120.0,0.0,0.0,0.0]") // load 2 * 2 = 4.0
+        ));
+
+        TrainingLoadService service = serviceWithRows(jdbc);
+        List<TrainingLoadTrendPoint> history = service.fetchDailyLoadHistory(1L, 28);
+
+        assertThat(history).hasSize(2);
+        assertThat(history.get(0).date()).isEqualTo(day1.atZone(ZoneOffset.UTC).toLocalDate().toString());
+        assertThat(history.get(0).load()).isEqualTo(4.0);
+        assertThat(history.get(1).date()).isEqualTo(day2.atZone(ZoneOffset.UTC).toLocalDate().toString());
+        assertThat(history.get(1).load()).isEqualTo(2.0);
+    }
+
+    @Test
+    void fetchDailyLoadHistory_noRows_returnsEmptyList() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(anyString(), anyLong(), any(Timestamp.class))).thenReturn(List.of());
+
+        TrainingLoadService service = serviceWithRows(jdbc);
+
+        assertThat(service.fetchDailyLoadHistory(1L, 28)).isEmpty();
+    }
+
+    @Test
+    void fetchDailyLoadHistory_dbFailure_returnsEmptyListRatherThanThrowing() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(anyString(), anyLong(), any(Timestamp.class)))
+                .thenThrow(new RuntimeException("connection lost"));
+
+        TrainingLoadService service = serviceWithRows(jdbc);
+
+        assertThat(service.fetchDailyLoadHistory(1L, 28)).isEmpty();
+    }
+
+    // --- summary (computeSummary) ---
+
+    /**
+     * Mocks separate acute (7d) vs. chronic (28d) query results by
+     * inspecting the "since" timestamp each fetch call is made with,
+     * exactly the way TrainingLoadService's real SQL WHERE clause would
+     * filter, so acute-only load differs from chronic-only load.
+     */
+    private static TrainingLoadSummary computeSummaryWithRows(
+            List<Map<String, Object>> acuteWindowRows, List<Map<String, Object>> chronicWindowRows) {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(anyString(), anyLong(), any(Timestamp.class))).thenAnswer(invocation -> {
+            Timestamp since = invocation.getArgument(2);
+            boolean isAcuteWindow = since.toInstant().isAfter(Instant.now().minus(10, ChronoUnit.DAYS));
+            return isAcuteWindow ? acuteWindowRows : chronicWindowRows;
+        });
+        return serviceWithRows(jdbc).computeSummary(1L);
+    }
+
+    @Test
+    void computeSummary_noActivityData_reportsUnknownStatusHonestly() {
+        TrainingLoadSummary summary = computeSummaryWithRows(List.of(), List.of());
+
+        assertThat(summary.acuteLoad()).isNull();
+        assertThat(summary.chronicLoad()).isNull();
+        assertThat(summary.acwr()).isNull();
+        assertThat(summary.loadStatus()).isEqualTo("unknown");
+        assertThat(summary.confidence()).isEqualTo("none");
+        assertThat(summary.algorithmVersion()).isEqualTo(TrainingLoadService.ALGORITHM_VERSION);
+    }
+
+    @Test
+    void computeSummary_acwrAroundOne_classifiedOptimal_andMatchesReadinessFormula() {
+        Instant recent = Instant.now().minus(1, ChronoUnit.DAYS);
+        List<Map<String, Object>> singleDayLoadOne = List.of(
+                sessionRow(recent, 60.0, "[60.0,0.0,0.0,0.0,0.0]") // load 1.0
+        );
+
+        // Same single day in both windows -> acute == chronic == 1.0 -> acwr == 1.0
+        TrainingLoadSummary summary = computeSummaryWithRows(singleDayLoadOne, singleDayLoadOne);
+
+        assertThat(summary.acuteLoad()).isEqualTo(1.0);
+        assertThat(summary.chronicLoad()).isEqualTo(1.0);
+        // Identical to ReadinessCalculator's "chronic > 0 ? acute / chronic : 1.0" branch.
+        assertThat(summary.acwr()).isEqualTo(1.0);
+        assertThat(summary.loadStatus()).isEqualTo("optimal"); // 0.8 <= 1.0 <= 1.3
+        assertThat(summary.confidence()).isEqualTo("medium");
+    }
+
+    @Test
+    void computeSummary_acuteFarAboveChronic_classifiedHigh() {
+        Instant recent = Instant.now().minus(1, ChronoUnit.DAYS);
+        Instant older = Instant.now().minus(20, ChronoUnit.DAYS);
+
+        List<Map<String, Object>> acuteRows = List.of(
+                sessionRow(recent, 1800.0, "[0.0,0.0,0.0,0.0,1800.0]") // load 5 * 30 = 150.0
+        );
+        List<Map<String, Object>> chronicRows = List.of(
+                sessionRow(recent, 1800.0, "[0.0,0.0,0.0,0.0,1800.0]"), // load 150.0
+                sessionRow(older, 60.0, "[60.0,0.0,0.0,0.0,0.0]")       // load 1.0
+        );
+        // chronic average = (150.0 + 1.0) / 2 active days = 75.5
+
+        TrainingLoadSummary summary = computeSummaryWithRows(acuteRows, chronicRows);
+
+        assertThat(summary.acuteLoad()).isEqualTo(150.0);
+        assertThat(summary.chronicLoad()).isEqualTo(75.5);
+        assertThat(summary.acwr()).isEqualTo(150.0 / 75.5);
+        assertThat(summary.loadStatus()).isEqualTo("high"); // acwr ~1.99 > 1.5
+    }
+
+    @Test
+    void computeSummary_acuteFarBelowChronic_classifiedLow() {
+        Instant recent = Instant.now().minus(1, ChronoUnit.DAYS);
+        Instant older = Instant.now().minus(20, ChronoUnit.DAYS);
+
+        List<Map<String, Object>> acuteRows = List.of(
+                sessionRow(recent, 60.0, "[60.0,0.0,0.0,0.0,0.0]") // load 1.0
+        );
+        List<Map<String, Object>> chronicRows = List.of(
+                sessionRow(recent, 60.0, "[60.0,0.0,0.0,0.0,0.0]"),      // load 1.0
+                sessionRow(older, 1800.0, "[0.0,0.0,0.0,0.0,1800.0]")    // load 150.0
+        );
+        // chronic average = (1.0 + 150.0) / 2 active days = 75.5
+
+        TrainingLoadSummary summary = computeSummaryWithRows(acuteRows, chronicRows);
+
+        assertThat(summary.acuteLoad()).isEqualTo(1.0);
+        assertThat(summary.chronicLoad()).isEqualTo(75.5);
+        assertThat(summary.acwr()).isEqualTo(1.0 / 75.5);
+        assertThat(summary.loadStatus()).isEqualTo("low"); // acwr ~0.013 < 0.8
+    }
+
+    @Test
+    void computeSummary_onlyAcuteDataPresent_stillReportsUnknownAndNoneConfidence() {
+        Instant recent = Instant.now().minus(1, ChronoUnit.DAYS);
+        List<Map<String, Object>> acuteRows = List.of(
+                sessionRow(recent, 60.0, "[60.0,0.0,0.0,0.0,0.0]") // load 1.0
+        );
+
+        // No chronic-window data at all -> can't compute a ratio, even
+        // though acute has a real value; mirrors CurrentMetricsService's
+        // Optional.empty() treatment for the readiness "Training load
+        // (ACWR)" factor in this same situation.
+        TrainingLoadSummary summary = computeSummaryWithRows(acuteRows, List.of());
+
+        assertThat(summary.acuteLoad()).isEqualTo(1.0);
+        assertThat(summary.chronicLoad()).isNull();
+        assertThat(summary.acwr()).isNull();
+        assertThat(summary.loadStatus()).isEqualTo("unknown");
+        assertThat(summary.confidence()).isEqualTo("none");
     }
 }
