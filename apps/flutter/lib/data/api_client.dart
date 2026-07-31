@@ -156,6 +156,12 @@ class ApiClient {
     return SleepDebtResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Get tonight's bedtime recommendation.
+  Future<SleepPlanResponse> getSleepPlan() async {
+    final response = await _dio.get('/api/v1/sleep/plan');
+    return SleepPlanResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get activity summary.
   Future<ActivitySummary> getActivitySummary() async {
     final response = await _dio.get('/api/v1/activities/summary');
@@ -879,6 +885,40 @@ class SleepDebtResponse {
       accumulatedHours: (json['accumulatedHours'] as num?)?.toDouble(),
       nightsConsidered: json['nightsConsidered'] as int,
       windowDays: json['windowDays'] as int,
+      confidence: json['confidence'] as String,
+      limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
+    );
+  }
+}
+
+/// Tonight's bedtime recommendation — see SleepInsightService.computeSleepPlan
+/// on the backend. Both time fields null when there isn't enough history.
+class SleepPlanResponse {
+  final String? recommendedBedtime;
+  final String? targetWakeTime;
+  final double? targetSleepHours;
+  final double debtRepaymentHours;
+  final String reasoning;
+  final String confidence;
+  final List<String> limitations;
+
+  SleepPlanResponse({
+    this.recommendedBedtime,
+    this.targetWakeTime,
+    this.targetSleepHours,
+    required this.debtRepaymentHours,
+    required this.reasoning,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory SleepPlanResponse.fromJson(Map<String, dynamic> json) {
+    return SleepPlanResponse(
+      recommendedBedtime: json['recommendedBedtime'] as String?,
+      targetWakeTime: json['targetWakeTime'] as String?,
+      targetSleepHours: (json['targetSleepHours'] as num?)?.toDouble(),
+      debtRepaymentHours: (json['debtRepaymentHours'] as num).toDouble(),
+      reasoning: json['reasoning'] as String,
       confidence: json['confidence'] as String,
       limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
     );

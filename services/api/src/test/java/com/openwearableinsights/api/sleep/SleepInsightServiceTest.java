@@ -4,6 +4,7 @@ import com.openwearableinsights.api.readiness.application.BaselineService;
 import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import com.openwearableinsights.api.sleep.application.SleepInsightService;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
+import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -114,6 +115,56 @@ class SleepInsightServiceTest {
 
         assertThat(summary.sleepNeedHours()).isNull();
         assertThat(summary.limitations()).anyMatch(l -> l.contains("default target"));
+    }
+
+    @Test
+    void computeSleepPlan_noBaselineOrWakeTimeData_reportsHonestEmptyState() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepPlan plan = service.computeSleepPlan(1L);
+
+        assertThat(plan.recommendedBedtime()).isNull();
+        assertThat(plan.targetWakeTime()).isNull();
+        assertThat(plan.confidence()).isEqualTo("none");
+    }
+
+    @Test
+    void computeSleepPlan_withRealData_recommendsBedtimeIncludingDebtRepayment() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(baselineWithSleepNeed(8.0));
+
+        LocalDate night1 = LocalDate.of(2026, 7, 20);
+        LocalDate night2 = LocalDate.of(2026, 7, 21);
+        LocalDate night3 = LocalDate.of(2026, 7, 22);
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), anyInt()))
+                .thenReturn(List.of(night1, night2, night3));
+        mockNight(jdbc, 1L, night1, 24); // 6.0h -> 2.0h deficit
+        mockNight(jdbc, 1L, night2, 32); // 8.0h -> 0.0h deficit
+        mockNight(jdbc, 1L, night3, 20); // 5.0h -> 3.0h deficit (accumulated = 5.0h)
+
+        // Wake-time query: 3 nights, last reading each at 07:00 UTC.
+        Instant wakeBase = Instant.parse("2026-07-22T07:00:00Z");
+        List<Map<String, Object>> wakeRows = List.of(
+                Map.of("d", night1, "last_reading", Timestamp.from(wakeBase)),
+                Map.of("d", night2, "last_reading", Timestamp.from(wakeBase)),
+                Map.of("d", night3, "last_reading", Timestamp.from(wakeBase))
+        );
+        when(jdbc.queryForList(anyString(), eq(1L), eq(7))).thenReturn(wakeRows);
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepPlan plan = service.computeSleepPlan(1L);
+
+        assertThat(plan.targetWakeTime()).isEqualTo("07:00");
+        // accumulated debt = 2.0 + 0.0 + 3.0 = 5.0h -> repayment = min(5.0/7, 1.0) = 0.7143h (not capped)
+        assertThat(plan.debtRepaymentHours()).isEqualTo(5.0 / 7, org.assertj.core.data.Offset.offset(0.01));
+        assertThat(plan.targetSleepHours()).isEqualTo(8.0 + 5.0 / 7, org.assertj.core.data.Offset.offset(0.01));
+        // 07:00 - ~8h43m = ~22:17 the night before
+        assertThat(plan.recommendedBedtime()).isEqualTo("22:17");
+        assertThat(plan.reasoning()).contains("catch up");
     }
 
     /** Stubs the two per-night queries computeSummaryForDate issues for a given date. */

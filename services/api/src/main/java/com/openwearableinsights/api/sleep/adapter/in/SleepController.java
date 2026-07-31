@@ -2,6 +2,7 @@ package com.openwearableinsights.api.sleep.adapter.in;
 
 import com.openwearableinsights.api.sleep.application.SleepInsightService;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
+import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
 import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,5 +58,12 @@ public class SleepController {
             description = "Returns the account's personal sleep need (rolling baseline, same figure the readiness score uses) and accumulated debt/surplus over the last 14 nights with real data. Honest empty state when there isn't enough history yet — never a fabricated need.")
     public SleepDebt getDebt() {
         return sleepInsightService.computeSleepDebt(DEFAULT_ACCOUNT_ID);
+    }
+
+    @GetMapping("/plan")
+    @Operation(summary = "Get tonight's bedtime recommendation",
+            description = "Recommends a bedtime based on the account's inferred usual wake time, personal sleep need, and a capped gradual repayment of accumulated debt — with the reasoning shown, not just a number. Honest empty state when there isn't enough real history for either input.")
+    public SleepPlan getPlan() {
+        return sleepInsightService.computeSleepPlan(DEFAULT_ACCOUNT_ID);
     }
 }

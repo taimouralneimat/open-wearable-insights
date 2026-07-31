@@ -19,6 +19,7 @@ class _SleepPageState extends State<SleepPage> {
   SleepSummary? _summary;
   List<SleepTrendPoint>? _trends;
   SleepDebtResponse? _debt;
+  SleepPlanResponse? _plan;
   bool _loading = true;
   String? _error;
 
@@ -40,10 +41,13 @@ class _SleepPageState extends State<SleepPage> {
       // main sleep summary from loading.
       SleepDebtResponse? debt;
       try { debt = await _apiClient.getSleepDebt(); } catch (_) { debt = null; }
+      SleepPlanResponse? plan;
+      try { plan = await _apiClient.getSleepPlan(); } catch (_) { plan = null; }
       setState(() {
         _summary = summary;
         _trends = trends;
         _debt = debt;
+        _plan = plan;
         _loading = false;
       });
     } catch (e) {
@@ -95,6 +99,10 @@ class _SleepPageState extends State<SleepPage> {
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           ConfidenceBanner(confidence: s.confidence, limitations: s.limitations),
+          if (_plan != null && _plan!.recommendedBedtime != null) ...[
+            _SleepPlanCard(plan: _plan!),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           _SleepScoreCard(summary: s),
           const SizedBox(height: AppSpacing.lg),
           _SleepStagesCard(summary: s),
@@ -105,6 +113,47 @@ class _SleepPageState extends State<SleepPage> {
           ],
           if (_trends != null) _SleepTrendsCard(trends: _trends!),
         ],
+      ),
+    );
+  }
+}
+
+/// Tonight's bedtime recommendation — parity row #20. Reasoning is always
+/// shown alongside the time, not just a bare number.
+class _SleepPlanCard extends StatelessWidget {
+  final SleepPlanResponse plan;
+  const _SleepPlanCard({required this.plan});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      color: theme.colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.bedtime, color: theme.colorScheme.onPrimaryContainer),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tonight: be asleep by ${plan.recommendedBedtime}',
+                    style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    plan.reasoning,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

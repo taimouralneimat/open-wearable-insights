@@ -2,6 +2,7 @@ package com.openwearableinsights.api.sleep.application;
 
 import com.openwearableinsights.api.readiness.application.BaselineService;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
+import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
 import com.openwearableinsights.api.sleep.domain.SleepSummary.SleepStagePoint;
 import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
@@ -11,7 +12,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +52,16 @@ public class SleepInsightService {
     // Rolling window for accumulated sleep debt (docs/analytics/sleep-methodology.md:
     // "deficit/surplus accumulated over a recent window").
     private static final int DEBT_WINDOW_DAYS = 14;
+
+    // Sleep Planner (parity row #20): how many recent nights inform the
+    // inferred "usual wake time", and how debt gets repaid.
+    private static final int WAKE_TIME_WINDOW_DAYS = 7;
+    private static final int MIN_NIGHTS_FOR_WAKE_TIME = 3;
+    // Repay debt gradually rather than recommending one huge catch-up night —
+    // a week's worth of accumulated debt spread across a week, capped so a
+    // large debt never turns into an absurd "sleep for 14 hours" suggestion.
+    private static final double DEBT_REPAYMENT_FRACTION = 1.0 / 7.0;
+    private static final double MAX_DEBT_REPAYMENT_HOURS = 1.0;
 
     private final JdbcTemplate jdbcTemplate;
     private final BaselineService baselineService;
@@ -122,6 +135,95 @@ public class SleepInsightService {
         }
 
         return new SleepDebt(personalNeed, accumulated, dates.size(), DEBT_WINDOW_DAYS, confidence, limitations);
+    }
+
+    /**
+     * Tonight's bedtime recommendation (parity row #20) — a direct
+     * extension of {@link #computeSleepDebt}: the target wake time is
+     * inferred from the account's own recent pattern (average time-of-day
+     * of the last sleep_stage reading each night), the target sleep
+     * duration is personal need plus a capped, gradual debt repayment, and
+     * the recommended bedtime is simply wake time minus that duration.
+     * Honest empty state — never a fabricated bedtime — when there isn't
+     * enough history for either the need or the wake-time pattern.
+     */
+    public SleepPlan computeSleepPlan(Long accountId) {
+        Double personalNeed = personalSleepNeedHours(accountId);
+        LocalTime targetWakeTime = inferUsualWakeTime(accountId);
+
+        List<String> limitations = new ArrayList<>();
+        limitations.add("Estimate only, not a clinical or circadian-rhythm-validated " +
+                "recommendation — treat as a starting point, not a prescription.");
+
+        if (personalNeed == null || targetWakeTime == null) {
+            limitations.add(personalNeed == null
+                    ? "Not enough sleep history yet for a personal need estimate."
+                    : "Not enough recent nights (need at least " + MIN_NIGHTS_FOR_WAKE_TIME +
+                            ") to infer your usual wake time.");
+            return new SleepPlan(null, null, null, 0.0,
+                    "Not enough sleep history yet to recommend a bedtime — keep the app importing sleep data.",
+                    "none", limitations);
+        }
+
+        SleepDebt debt = computeSleepDebt(accountId);
+        double debtHours = debt.accumulatedHours() != null ? debt.accumulatedHours() : 0.0;
+        double debtRepayment = clamp(Math.max(0, debtHours) * DEBT_REPAYMENT_FRACTION, 0, MAX_DEBT_REPAYMENT_HOURS);
+        double targetSleepHours = personalNeed + debtRepayment;
+
+        LocalTime recommendedBedtime = targetWakeTime.minusMinutes(Math.round(targetSleepHours * 60));
+
+        String reasoning = debtRepayment > 0.05
+                ? String.format(
+                        "Based on your usual wake time of ~%s and your personal need of ~%.1fh, plus %.1fh " +
+                        "extra tonight to gradually catch up on accumulated sleep debt, aim to be asleep by %s.",
+                        targetWakeTime, personalNeed, debtRepayment, recommendedBedtime)
+                : String.format(
+                        "Based on your usual wake time of ~%s and your personal need of ~%.1fh, aim to be asleep by %s.",
+                        targetWakeTime, personalNeed, recommendedBedtime);
+
+        String confidence = "high".equals(debt.confidence()) || "medium".equals(debt.confidence()) ? "medium" : "low";
+
+        return new SleepPlan(
+                recommendedBedtime.toString(), targetWakeTime.toString(),
+                targetSleepHours, debtRepayment, reasoning, confidence, limitations
+        );
+    }
+
+    /**
+     * Average time-of-day of the last sleep_stage reading across recent
+     * nights with data — a proxy for "usual wake time" from real behavior,
+     * not asked for explicitly. Simple mean of minutes-since-midnight; not
+     * circular-mean-corrected, so this is unreliable for wake times very
+     * close to midnight (an honest, minor, documented limitation — typical
+     * wake times are nowhere near that boundary).
+     */
+    private LocalTime inferUsualWakeTime(Long accountId) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT DATE(time) as d, MAX(time) as last_reading FROM measurements " +
+                    "WHERE account_id = ? AND metric_type = 'sleep_stage' " +
+                    "GROUP BY DATE(time) ORDER BY DATE(time) DESC LIMIT ?",
+                    accountId, WAKE_TIME_WINDOW_DAYS
+            );
+            if (rows.size() < MIN_NIGHTS_FOR_WAKE_TIME) {
+                return null;
+            }
+            int totalMinutes = 0;
+            for (Map<String, Object> row : rows) {
+                Instant lastReading = ((Timestamp) row.get("last_reading")).toInstant();
+                LocalTime t = lastReading.atZone(ZoneOffset.UTC).toLocalTime();
+                totalMinutes += t.getHour() * 60 + t.getMinute();
+            }
+            int avgMinutes = totalMinutes / rows.size();
+            return LocalTime.of(avgMinutes / 60, avgMinutes % 60);
+        } catch (Exception e) {
+            log.warn("Failed to infer usual wake time for account {}: {}", accountId, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     /**
