@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'token_store.dart';
 
 /// Typed API client for Open Wearable Insights.
 ///
@@ -6,20 +7,36 @@ import 'package:dio/dio.dart';
 class ApiClient {
   final Dio _dio;
 
-  // TEMPORARY (2026-07-30): the backend now requires X-Local-Api-Token on
-  // every /api/v1/** request (ADR-0008). This hardcodes the current local
-  // dev token so the app keeps working today. Real fix (tracked, not done
-  // yet): read this from flutter_secure_storage via a one-time local
-  // pairing screen instead of a compiled-in constant.
-  static const String _devLocalApiToken = 'Tw7sEXiTGHqK8Q4G6Ne5c9vENCPd9EUdRKPxJQdT1Hc';
-
   ApiClient()
       : _dio = Dio(BaseOptions(
           baseUrl: 'http://127.0.0.1:8080',
           connectTimeout: const Duration(seconds: 5),
           receiveTimeout: const Duration(seconds: 10),
-          headers: {'X-Local-Api-Token': _devLocalApiToken},
-        ));
+        )) {
+    // Real local API token auth (ADR-0008), replacing the compile-time
+    // constant this used to hardcode. The token is read fresh per request
+    // rather than cached on the client so a mid-session pairing (or
+    // re-pairing after a 401 below) takes effect immediately.
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await TokenStore.read();
+        if (token != null && token.isNotEmpty) {
+          options.headers['X-Local-Api-Token'] = token;
+        }
+        handler.next(options);
+      },
+      onError: (error, handler) {
+        if (error.response?.statusCode == 401) {
+          // Token is wrong or was rotated server-side. Clear it — this
+          // flips TokenStore.paired, which go_router's redirect (wired via
+          // refreshListenable in app.dart) picks up and routes back to the
+          // pairing screen automatically.
+          TokenStore.clear();
+        }
+        handler.next(error);
+      },
+    ));
+  }
 
   /// Get the local account's profile (display name, primary goal).
   Future<ProfileResponse> getProfile() async {

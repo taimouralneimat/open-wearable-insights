@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../../data/api_client.dart';
+import '../../data/token_store.dart';
 import '../../data/web_download.dart';
 import '../../widgets/state_views.dart';
 
@@ -193,6 +194,21 @@ class _ProfilePageState extends State<ProfilePage> {
               ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
               : const Icon(Icons.download_outlined, size: 18),
           label: Text(_exporting ? 'Preparing export…' : 'Export all my data'),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        Text('Local connection', style: theme.textTheme.titleMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          "If this app was ever paired with a token that's no longer valid "
+          '(e.g. the backend was reinstalled), disconnect and re-enter the '
+          'current one from ~/.open-wearable-insights/local-api-token.',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        OutlinedButton.icon(
+          onPressed: () => TokenStore.clear(),
+          icon: const Icon(Icons.link_off, size: 18),
+          label: const Text('Disconnect / change token'),
         ),
       ],
     );

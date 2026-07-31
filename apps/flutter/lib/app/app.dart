@@ -10,6 +10,8 @@ import 'package:open_wearable_insights/features/activities/training_load_page.da
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 import 'package:open_wearable_insights/features/journal/journal_page.dart';
 import 'package:open_wearable_insights/features/profile/profile_page.dart';
+import 'package:open_wearable_insights/features/pairing/pairing_page.dart';
+import 'package:open_wearable_insights/data/token_store.dart';
 
 /// Open Wearable Insights — app shell with routing.
 ///
@@ -30,7 +32,23 @@ class OpenWearableInsightsApp extends StatelessWidget {
 
   static final GoRouter _router = GoRouter(
     initialLocation: '/',
+    // Gates every route on TokenStore.paired (ADR-0008 local API token).
+    // refreshListenable re-runs this whenever paired changes — including
+    // when ApiClient's 401 handler clears a rotated/wrong token mid-session,
+    // which routes straight back to pairing without any manual navigation.
+    refreshListenable: TokenStore.paired,
+    redirect: (context, state) {
+      final paired = TokenStore.paired.value;
+      final onPairingScreen = state.matchedLocation == '/pair';
+      if (!paired && !onPairingScreen) return '/pair';
+      if (paired && onPairingScreen) return '/';
+      return null;
+    },
     routes: [
+      GoRoute(
+        path: '/pair',
+        builder: (context, state) => const PairingPage(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
         branches: [
