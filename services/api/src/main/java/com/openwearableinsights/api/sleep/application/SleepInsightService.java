@@ -1,5 +1,7 @@
 package com.openwearableinsights.api.sleep.application;
 
+import com.openwearableinsights.api.readiness.application.BaselineService;
+import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
 import com.openwearableinsights.api.sleep.domain.SleepSummary.SleepStagePoint;
 import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
@@ -44,10 +46,16 @@ public class SleepInsightService {
     private static final int LOW_CONFIDENCE_READING_THRESHOLD = 16;
     private static final int HIGH_CONFIDENCE_READING_THRESHOLD = 28;
 
-    private final JdbcTemplate jdbcTemplate;
+    // Rolling window for accumulated sleep debt (docs/analytics/sleep-methodology.md:
+    // "deficit/surplus accumulated over a recent window").
+    private static final int DEBT_WINDOW_DAYS = 14;
 
-    public SleepInsightService(JdbcTemplate jdbcTemplate) {
+    private final JdbcTemplate jdbcTemplate;
+    private final BaselineService baselineService;
+
+    public SleepInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.baselineService = baselineService;
     }
 
     /**
@@ -56,7 +64,8 @@ public class SleepInsightService {
      */
     public Optional<SleepSummary> computeLatestSummary(Long accountId) {
         Optional<LocalDate> latestDate = findMostRecentSleepDate(accountId);
-        return latestDate.map(date -> computeSummaryForDate(accountId, date));
+        Double personalNeed = personalSleepNeedHours(accountId);
+        return latestDate.map(date -> computeSummaryForDate(accountId, date, personalNeed));
     }
 
     /**
@@ -66,9 +75,10 @@ public class SleepInsightService {
      */
     public List<SleepTrendPoint> computeTrends(Long accountId, int days) {
         List<LocalDate> dates = findRecentSleepDates(accountId, days);
+        Double personalNeed = personalSleepNeedHours(accountId);
         List<SleepTrendPoint> trends = new ArrayList<>();
         for (LocalDate date : dates) {
-            SleepSummary s = computeSummaryForDate(accountId, date);
+            SleepSummary s = computeSummaryForDate(accountId, date, personalNeed);
             trends.add(new SleepTrendPoint(
                     date.toString(), s.totalHours(), s.deepHours(), s.remHours(),
                     s.lightHours(), s.awakeHours(), s.sleepScore()
@@ -77,7 +87,54 @@ public class SleepInsightService {
         return trends;
     }
 
-    private SleepSummary computeSummaryForDate(Long accountId, LocalDate date) {
+    /**
+     * Accumulated sleep debt/surplus over the last {@value #DEBT_WINDOW_DAYS}
+     * days: sum of (personal need - actual) across nights with real data.
+     * Positive = net debt, negative = net surplus. Nights with no data are
+     * skipped entirely, never assumed to be zero — a sparse history simply
+     * reduces nightsConsidered and confidence, rather than corrupting the sum.
+     */
+    public SleepDebt computeSleepDebt(Long accountId) {
+        Double personalNeed = personalSleepNeedHours(accountId);
+        List<String> limitations = new ArrayList<>();
+        limitations.add("Need is your own rolling average actual sleep duration, not a " +
+                "physiological requirement — an estimate, not a clinical recommendation.");
+
+        if (personalNeed == null) {
+            limitations.add("Not enough sleep history yet to estimate a personal need — " +
+                    "keep the app importing sleep data and this will populate.");
+            return new SleepDebt(null, null, 0, DEBT_WINDOW_DAYS, "none", limitations);
+        }
+
+        List<LocalDate> dates = findRecentSleepDates(accountId, DEBT_WINDOW_DAYS);
+        double accumulated = 0.0;
+        for (LocalDate date : dates) {
+            SleepSummary s = computeSummaryForDate(accountId, date, personalNeed);
+            if (s.totalHours() > 0) {
+                accumulated += (personalNeed - s.totalHours());
+            }
+        }
+
+        String confidence = dates.size() >= 10 ? "medium" : dates.size() >= 4 ? "low" : "none";
+        if (dates.size() < DEBT_WINDOW_DAYS) {
+            limitations.add(String.format("Only %d of the last %d nights have real sleep data.",
+                    dates.size(), DEBT_WINDOW_DAYS));
+        }
+
+        return new SleepDebt(personalNeed, accumulated, dates.size(), DEBT_WINDOW_DAYS, confidence, limitations);
+    }
+
+    /**
+     * The account's personal rolling-baseline sleep need — reuses
+     * BaselineService's "sleep_duration" baseline directly rather than
+     * recomputing it a second, potentially divergent way, so this always
+     * agrees with what the readiness score itself uses for the same figure.
+     */
+    private Double personalSleepNeedHours(Long accountId) {
+        return baselineService.computeBaseline(accountId).baselineFor("sleep_duration").orElse(null);
+    }
+
+    private SleepSummary computeSummaryForDate(Long accountId, LocalDate date, Double personalNeedHours) {
         try {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                     "SELECT value FROM measurements " +
@@ -112,7 +169,7 @@ public class SleepInsightService {
 
             int readingCount = rows.size();
             String confidence = computeConfidence(readingCount);
-            int sleepScore = computeSleepScore(totalHours, deepHours, remHours);
+            int sleepScore = computeSleepScore(totalHours, deepHours, remHours, personalNeedHours);
 
             List<String> limitations = new ArrayList<>();
             limitations.add("Stage duration is approximated from reading density " +
@@ -123,15 +180,19 @@ public class SleepInsightService {
                         "intervals) — this is a partial/sparse sample, not a full session.",
                         readingCount));
             }
+            if (personalNeedHours == null) {
+                limitations.add("Sleep score uses a " + TARGET_SLEEP_HOURS + "h default target — " +
+                        "not enough history yet for a personal need estimate.");
+            }
 
             return new SleepSummary(
                     totalHours, deepHours, remHours, lightHours, awakeHours,
-                    sleepScore, stages, confidence, limitations
+                    sleepScore, personalNeedHours, stages, confidence, limitations
             );
         } catch (Exception e) {
             log.warn("Failed to compute sleep summary for account {} on {}: {}",
                     accountId, date, e.getMessage(), e);
-            return new SleepSummary(0, 0, 0, 0, 0, 0, List.of(), "none",
+            return new SleepSummary(0, 0, 0, 0, 0, 0, null, List.of(), "none",
                     List.of("Failed to compute sleep summary: " + e.getMessage()));
         }
     }
@@ -173,13 +234,19 @@ public class SleepInsightService {
 
     /**
      * v0.1 original methodology — not a reproduction of any vendor formula.
-     * Half weight on duration vs. a 7.5h target, half weight on the
-     * proportion of sleep spent in deep/REM (commonly considered the more
-     * restorative stages in general sleep science, not a proprietary claim).
+     * Half weight on duration vs. the target, half weight on the proportion
+     * of sleep spent in deep/REM (commonly considered the more restorative
+     * stages in general sleep science, not a proprietary claim).
+     *
+     * @param personalNeedHours the account's real rolling-baseline need;
+     *                          falls back to {@link #TARGET_SLEEP_HOURS} only
+     *                          when null (not enough history yet) — never a
+     *                          permanent flat target once real data exists.
      */
-    private int computeSleepScore(double totalHours, double deepHours, double remHours) {
+    private int computeSleepScore(double totalHours, double deepHours, double remHours, Double personalNeedHours) {
         if (totalHours <= 0) return 0;
-        double durationRatio = Math.min(totalHours / TARGET_SLEEP_HOURS, 1.0);
+        double target = personalNeedHours != null ? personalNeedHours : TARGET_SLEEP_HOURS;
+        double durationRatio = Math.min(totalHours / target, 1.0);
         double restorativeRatio = (deepHours + remHours) / totalHours;
         double score = 100 * (0.5 * durationRatio + 0.5 * restorativeRatio);
         return (int) Math.round(Math.max(0, Math.min(100, score)));

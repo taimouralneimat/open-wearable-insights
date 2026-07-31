@@ -150,6 +150,12 @@ class ApiClient {
         .toList();
   }
 
+  /// Get accumulated sleep debt/surplus and personal sleep need.
+  Future<SleepDebtResponse> getSleepDebt() async {
+    final response = await _dio.get('/api/v1/sleep/debt');
+    return SleepDebtResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get activity summary.
   Future<ActivitySummary> getActivitySummary() async {
     final response = await _dio.get('/api/v1/activities/summary');
@@ -811,6 +817,7 @@ class SleepSummary {
   final double lightHours;
   final double awakeHours;
   final int sleepScore;
+  final double? sleepNeedHours;
   final List<SleepStagePoint> stages;
   final String confidence;
   final List<String> limitations;
@@ -822,6 +829,7 @@ class SleepSummary {
     required this.lightHours,
     required this.awakeHours,
     required this.sleepScore,
+    this.sleepNeedHours,
     required this.stages,
     required this.confidence,
     required this.limitations,
@@ -835,10 +843,43 @@ class SleepSummary {
       lightHours: (json['lightHours'] as num).toDouble(),
       awakeHours: (json['awakeHours'] as num).toDouble(),
       sleepScore: json['sleepScore'] as int,
+      sleepNeedHours: (json['sleepNeedHours'] as num?)?.toDouble(),
       stages: (json['stages'] as List)
           .map((e) => SleepStagePoint.fromJson(e as Map<String, dynamic>))
           .toList(),
       confidence: json['confidence'] as String? ?? 'none',
+      limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
+    );
+  }
+}
+
+/// Accumulated sleep debt/surplus over a recent window — see
+/// SleepInsightService.computeSleepDebt on the backend. Both fields null
+/// when there isn't enough history yet for a personal need estimate.
+class SleepDebtResponse {
+  final double? neededHoursPerNight;
+  final double? accumulatedHours;
+  final int nightsConsidered;
+  final int windowDays;
+  final String confidence;
+  final List<String> limitations;
+
+  SleepDebtResponse({
+    this.neededHoursPerNight,
+    this.accumulatedHours,
+    required this.nightsConsidered,
+    required this.windowDays,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory SleepDebtResponse.fromJson(Map<String, dynamic> json) {
+    return SleepDebtResponse(
+      neededHoursPerNight: (json['neededHoursPerNight'] as num?)?.toDouble(),
+      accumulatedHours: (json['accumulatedHours'] as num?)?.toDouble(),
+      nightsConsidered: json['nightsConsidered'] as int,
+      windowDays: json['windowDays'] as int,
+      confidence: json['confidence'] as String,
       limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
     );
   }

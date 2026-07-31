@@ -65,8 +65,15 @@ public class CurrentMetricsService {
         double acuteLoad = trainingLoadService.fetchAcuteLoad(accountId);
         double chronicLoad = trainingLoadService.fetchChronicLoad(accountId);
 
-        // Sleep need: default 7.5h if not specified
-        Optional<Double> sleepNeed = Optional.of(7.5);
+        // Sleep need: intentionally empty here, not a hardcoded default.
+        // ReadinessCalculator.calculate(CurrentMetrics, PersonalBaseline) already
+        // falls back to the account's real "sleep_duration" rolling baseline
+        // (BaselineService) when this is empty — that fallback was previously
+        // dead code because this was always Optional.of(7.5), silently feeding
+        // the same flat number into every user's readiness score regardless of
+        // their own history. See sleep.application.SleepInsightService for the
+        // same baseline reused (and finally surfaced) on the Sleep view itself.
+        Optional<Double> sleepNeed = Optional.empty();
 
         // Data completeness: fraction of expected metrics present
         int expectedMetrics = 5; // hrv, rhr, stress, sleep, training load

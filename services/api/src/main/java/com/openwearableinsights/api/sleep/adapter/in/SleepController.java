@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.sleep.adapter.in;
 
 import com.openwearableinsights.api.sleep.application.SleepInsightService;
+import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
 import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +40,7 @@ public class SleepController {
     public SleepSummary getSummary() {
         return sleepInsightService.computeLatestSummary(DEFAULT_ACCOUNT_ID)
                 .orElseGet(() -> new SleepSummary(
-                        0, 0, 0, 0, 0, 0, List.of(), "none",
+                        0, 0, 0, 0, 0, 0, null, List.of(), "none",
                         List.of("No sleep data has been imported yet.")
                 ));
     }
@@ -49,5 +50,12 @@ public class SleepController {
             description = "Returns sleep trend data for up to the last 7 nights with real data. Returns fewer points if less history exists.")
     public List<SleepTrendPoint> getTrends() {
         return sleepInsightService.computeTrends(DEFAULT_ACCOUNT_ID, TREND_DAYS);
+    }
+
+    @GetMapping("/debt")
+    @Operation(summary = "Get accumulated sleep debt",
+            description = "Returns the account's personal sleep need (rolling baseline, same figure the readiness score uses) and accumulated debt/surplus over the last 14 nights with real data. Honest empty state when there isn't enough history yet — never a fabricated need.")
+    public SleepDebt getDebt() {
+        return sleepInsightService.computeSleepDebt(DEFAULT_ACCOUNT_ID);
     }
 }

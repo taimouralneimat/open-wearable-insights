@@ -18,6 +18,7 @@ class _SleepPageState extends State<SleepPage> {
   final _apiClient = ApiClient();
   SleepSummary? _summary;
   List<SleepTrendPoint>? _trends;
+  SleepDebtResponse? _debt;
   bool _loading = true;
   String? _error;
 
@@ -35,9 +36,14 @@ class _SleepPageState extends State<SleepPage> {
     try {
       final summary = await _apiClient.getSleepSummary();
       final trends = await _apiClient.getSleepTrends();
+      // Best-effort — debt is a secondary surface, shouldn't block the
+      // main sleep summary from loading.
+      SleepDebtResponse? debt;
+      try { debt = await _apiClient.getSleepDebt(); } catch (_) { debt = null; }
       setState(() {
         _summary = summary;
         _trends = trends;
+        _debt = debt;
         _loading = false;
       });
     } catch (e) {
@@ -93,6 +99,10 @@ class _SleepPageState extends State<SleepPage> {
           const SizedBox(height: AppSpacing.lg),
           _SleepStagesCard(summary: s),
           const SizedBox(height: AppSpacing.lg),
+          if (_debt != null) ...[
+            _SleepDebtCard(debt: _debt!),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           if (_trends != null) _SleepTrendsCard(trends: _trends!),
         ],
       ),
@@ -125,7 +135,12 @@ class _SleepScoreCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text('${summary.totalHours.toStringAsFixed(1)}h total sleep', style: theme.textTheme.bodyLarge),
+            Text(
+              summary.sleepNeedHours != null
+                  ? '${summary.totalHours.toStringAsFixed(1)}h total sleep · need ~${summary.sleepNeedHours!.toStringAsFixed(1)}h'
+                  : '${summary.totalHours.toStringAsFixed(1)}h total sleep',
+              style: theme.textTheme.bodyLarge,
+            ),
           ],
         ),
       ),
@@ -190,6 +205,79 @@ class _StageBar extends StatelessWidget {
                 style: theme.textTheme.labelLarge, textAlign: TextAlign.right),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Accumulated sleep debt/surplus over the last N nights — your own rolling
+/// average as "need" vs. what you actually got, not a generic 8-hour rule.
+class _SleepDebtCard extends StatelessWidget {
+  final SleepDebtResponse debt;
+  const _SleepDebtCard({required this.debt});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    final need = debt.neededHoursPerNight;
+    final accumulated = debt.accumulatedHours;
+
+    if (need == null || accumulated == null) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Icon(Icons.hourglass_empty, size: 20, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  debt.limitations.isNotEmpty
+                      ? debt.limitations.first
+                      : 'Not enough sleep history yet for a personal need estimate.',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final isDebt = accumulated > 0;
+    final color = isDebt ? status.poor : status.good;
+    final bg = isDebt ? status.poorContainer : status.goodContainer;
+    final onBg = isDebt ? status.onPoorContainer : status.onGoodContainer;
+
+    return Card(
+      color: bg,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(isDebt ? Icons.trending_down : Icons.trending_up, color: color),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  isDebt
+                      ? '${accumulated.abs().toStringAsFixed(1)}h sleep debt'
+                      : '${accumulated.abs().toStringAsFixed(1)}h sleep surplus',
+                  style: theme.textTheme.titleMedium?.copyWith(color: onBg),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Your personal need is ~${need.toStringAsFixed(1)}h/night (your own rolling average, '
+              'not a generic target) — accumulated over ${debt.nightsConsidered} of the last '
+              '${debt.windowDays} nights with real data.',
+              style: theme.textTheme.bodySmall?.copyWith(color: onBg),
+            ),
+          ],
+        ),
       ),
     );
   }
