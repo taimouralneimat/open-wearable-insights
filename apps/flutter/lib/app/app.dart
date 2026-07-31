@@ -10,6 +10,7 @@ import 'package:open_wearable_insights/features/activities/training_load_page.da
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 import 'package:open_wearable_insights/features/journal/journal_page.dart';
 import 'package:open_wearable_insights/features/profile/profile_page.dart';
+import 'package:open_wearable_insights/features/privacy/privacy_page.dart';
 import 'package:open_wearable_insights/features/pairing/pairing_page.dart';
 import 'package:open_wearable_insights/data/token_store.dart';
 
@@ -95,6 +96,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
         path: '/profile',
         builder: (context, state) => const ProfilePage(),
       ),
+      GoRoute(
+        path: '/privacy',
+        builder: (context, state) => const PrivacyPage(),
+      ),
     ],
   );
 }
@@ -179,6 +184,14 @@ class MoreMenuButton extends StatelessWidget {
           child: ListTile(
             leading: Icon(Icons.fact_check_outlined),
             title: Text('Data quality'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        PopupMenuItem(
+          value: 'privacy',
+          child: ListTile(
+            leading: Icon(Icons.privacy_tip_outlined),
+            title: Text('Privacy'),
             contentPadding: EdgeInsets.zero,
           ),
         ),
