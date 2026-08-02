@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../data/api_client.dart';
 import '../../widgets/state_views.dart';
@@ -28,6 +29,7 @@ class _ImportPageState extends State<ImportPage> {
   List<ImportBatchResponse> _batches = [];
   List<GarminExpressDeviceResponse> _garminExpressDevices = [];
   String? _stagingDeviceId;
+  GarminConnectStatusResponse? _garminConnectStatus;
   bool _loading = true;
   bool _validating = false;
   bool _importing = false;
@@ -38,6 +40,17 @@ class _ImportPageState extends State<ImportPage> {
     super.initState();
     _scanDirectory();
     _discoverGarminExpress();
+    _loadGarminConnectStatus();
+  }
+
+  Future<void> _loadGarminConnectStatus() async {
+    try {
+      final status = await _apiClient.getGarminConnectStatus();
+      if (!mounted) return;
+      setState(() => _garminConnectStatus = status);
+    } catch (_) {
+      // Best-effort — shown as "not connected" if the status call itself fails.
+    }
   }
 
   Future<void> _discoverGarminExpress() async {
@@ -185,7 +198,18 @@ class _ImportPageState extends State<ImportPage> {
           const SizedBox(width: AppSpacing.xs),
         ],
       ),
-      body: _buildBody(),
+      body: Column(
+        children: [
+          _GarminConnectBanner(
+            status: _garminConnectStatus,
+            onTap: () async {
+              await context.push('/import/garmin-connect');
+              _loadGarminConnectStatus();
+            },
+          ),
+          Expanded(child: _buildBody()),
+        ],
+      ),
     );
   }
 
@@ -368,6 +392,83 @@ class _ImportPageState extends State<ImportPage> {
         ],
         const _PrivacyNoteCard(),
       ],
+    );
+  }
+}
+
+/// Always-visible entry point to the real Garmin Connect connector — the
+/// only path in this app to actual historical data (Garmin Express only
+/// ever holds a transient sync buffer; Garmin's official Health API is
+/// closed to individual developers). Shown above the file-scan results
+/// regardless of import-directory state, since a fresh install has no
+/// import directory but should still be able to connect an account.
+class _GarminConnectBanner extends StatelessWidget {
+  final GarminConnectStatusResponse? status;
+  final VoidCallback onTap;
+  const _GarminConnectBanner({required this.status, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final s = status;
+    final IconData icon;
+    final Color color;
+    final String title;
+    final String subtitle;
+
+    if (s == null) {
+      icon = Icons.sync_outlined;
+      color = theme.colorScheme.outline;
+      title = 'Garmin Connect';
+      subtitle = 'Checking connection…';
+    } else if (s.status == 'connected') {
+      icon = Icons.check_circle_outline;
+      color = theme.status.good;
+      title = 'Garmin Connect — connected';
+      subtitle = s.lastSyncAt != null
+          ? '${s.email} · last synced ${s.lastSyncAt}'
+          : '${s.email} · not synced yet — tap to pull your history';
+    } else if (s.status == 'mfa_required') {
+      icon = Icons.pin_outlined;
+      color = theme.status.fair;
+      title = 'Garmin Connect — verification needed';
+      subtitle = 'Enter the code Garmin sent to finish connecting';
+    } else if (s.status == 'error') {
+      icon = Icons.error_outline;
+      color = theme.status.poor;
+      title = 'Garmin Connect — connection issue';
+      subtitle = s.lastError ?? 'Tap to try again';
+    } else {
+      icon = Icons.link_outlined;
+      color = theme.colorScheme.primary;
+      title = 'Connect Garmin Connect';
+      subtitle = 'Log in with your real Garmin account to pull your full history';
+    }
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          child: Row(
+            children: [
+              Icon(icon, color: color),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: theme.textTheme.titleSmall),
+                    Text(subtitle, style: theme.textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

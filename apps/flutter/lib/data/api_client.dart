@@ -152,6 +152,44 @@ class ApiClient {
     return (response.data as Map<String, dynamic>)['filesCopied'] as int;
   }
 
+  /// Get the current Garmin Connect connection status.
+  Future<GarminConnectStatusResponse> getGarminConnectStatus() async {
+    final response = await _dio.get('/api/v1/garmin-connect/status');
+    return GarminConnectStatusResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Log in to Garmin Connect with the account's real credentials. The
+  /// password is sent once, directly to this endpoint, and never stored —
+  /// only the resulting session tokens are.
+  Future<GarminConnectConnectResponse> garminConnectLogin(String email, String password) async {
+    final response = await _dio.post('/api/v1/garmin-connect/connect', data: {
+      'email': email,
+      'password': password,
+    });
+    return GarminConnectConnectResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Submit the MFA code Garmin sent, to complete an in-progress login.
+  Future<GarminConnectConnectResponse> garminConnectSubmitMfa(String code) async {
+    final response = await _dio.post('/api/v1/garmin-connect/mfa', data: {'code': code});
+    return GarminConnectConnectResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Disconnect Garmin Connect and discard stored tokens.
+  Future<void> garminConnectDisconnect() async {
+    await _dio.delete('/api/v1/garmin-connect');
+  }
+
+  /// Fetch real historical sleep/HRV/stress/RHR/steps data for a date range.
+  Future<GarminConnectSyncResultResponse> garminConnectSync(DateTime startDate, DateTime endDate) async {
+    String iso(DateTime d) => d.toIso8601String().split('T').first;
+    final response = await _dio.post('/api/v1/garmin-connect/sync', data: {
+      'startDate': iso(startDate),
+      'endDate': iso(endDate),
+    });
+    return GarminConnectSyncResultResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get sleep summary.
   Future<SleepSummary> getSleepSummary() async {
     final response = await _dio.get('/api/v1/sleep/summary');
@@ -1439,6 +1477,84 @@ class ProfileResponse {
       email: json['email'] as String,
       displayName: json['displayName'] as String?,
       primaryGoal: json['primaryGoal'] as String?,
+    );
+  }
+}
+
+/// The real Garmin Connect connection state — a from-scratch Java port of
+/// Garmin's unofficial mobile-app login flow, used to pull real historical
+/// data directly from the user's own Garmin Connect account. See
+/// GarminConnectAuthClient on the backend for why this exists.
+class GarminConnectStatusResponse {
+  final String status; // disconnected/mfa_required/connected/error
+  final String? email;
+  final String? lastError;
+  final String? connectedAt;
+  final String? lastSyncAt;
+
+  GarminConnectStatusResponse({
+    required this.status,
+    this.email,
+    this.lastError,
+    this.connectedAt,
+    this.lastSyncAt,
+  });
+
+  factory GarminConnectStatusResponse.fromJson(Map<String, dynamic> json) {
+    return GarminConnectStatusResponse(
+      status: json['status'] as String,
+      email: json['email'] as String?,
+      lastError: json['lastError'] as String?,
+      connectedAt: json['connectedAt'] as String?,
+      lastSyncAt: json['lastSyncAt'] as String?,
+    );
+  }
+}
+
+/// Result of a login or MFA-submission attempt.
+class GarminConnectConnectResponse {
+  final String status; // connected/mfa_required/error
+  final String? email;
+  final String? mfaMethod;
+  final String? message;
+
+  GarminConnectConnectResponse({
+    required this.status,
+    this.email,
+    this.mfaMethod,
+    this.message,
+  });
+
+  factory GarminConnectConnectResponse.fromJson(Map<String, dynamic> json) {
+    return GarminConnectConnectResponse(
+      status: json['status'] as String,
+      email: json['email'] as String?,
+      mfaMethod: json['mfaMethod'] as String?,
+      message: json['message'] as String?,
+    );
+  }
+}
+
+/// Result of a historical sync run.
+class GarminConnectSyncResultResponse {
+  final int daysAttempted;
+  final int daysWithData;
+  final int measurementsWritten;
+  final List<String> errors;
+
+  GarminConnectSyncResultResponse({
+    required this.daysAttempted,
+    required this.daysWithData,
+    required this.measurementsWritten,
+    required this.errors,
+  });
+
+  factory GarminConnectSyncResultResponse.fromJson(Map<String, dynamic> json) {
+    return GarminConnectSyncResultResponse(
+      daysAttempted: json['daysAttempted'] as int,
+      daysWithData: json['daysWithData'] as int,
+      measurementsWritten: json['measurementsWritten'] as int,
+      errors: (json['errors'] as List).cast<String>(),
     );
   }
 }
