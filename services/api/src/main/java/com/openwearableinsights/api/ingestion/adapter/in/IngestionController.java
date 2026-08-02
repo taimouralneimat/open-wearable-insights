@@ -2,12 +2,14 @@ package com.openwearableinsights.api.ingestion.adapter.in;
 
 import com.openwearableinsights.api.ingestion.application.DryRunValidator;
 import com.openwearableinsights.api.ingestion.application.DryRunValidator.DryRunSummary;
+import com.openwearableinsights.api.ingestion.application.GarminExpressLocator;
 import com.openwearableinsights.api.ingestion.application.ImportBatchRepository;
 import com.openwearableinsights.api.ingestion.application.ImportService;
 import com.openwearableinsights.api.ingestion.application.ImportService.ImportProgress;
 import com.openwearableinsights.api.ingestion.application.ImportService.UndoResult;
 import com.openwearableinsights.api.ingestion.application.ImportDirectoryScanner;
 import com.openwearableinsights.api.ingestion.application.ImportDirectoryScanner.ImportScanResult;
+import com.openwearableinsights.api.ingestion.domain.GarminExpressDevice;
 import com.openwearableinsights.api.ingestion.domain.ImportBatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,15 +34,18 @@ public class IngestionController {
     private final ImportDirectoryScanner scanner;
     private final DryRunValidator validator;
     private final ImportService importService;
+    private final GarminExpressLocator garminExpressLocator;
 
     public IngestionController(
             ImportDirectoryScanner scanner,
             DryRunValidator validator,
-            ImportService importService
+            ImportService importService,
+            GarminExpressLocator garminExpressLocator
     ) {
         this.scanner = scanner;
         this.validator = validator;
         this.importService = importService;
+        this.garminExpressLocator = garminExpressLocator;
     }
 
     @GetMapping("/scan")
@@ -77,4 +82,21 @@ public class IngestionController {
     public List<ImportBatch> listBatches() {
         return importService.listBatches();
     }
+
+    @GetMapping("/garmin-express/devices")
+    @Operation(summary = "Discover real data staged by Garmin Express",
+            description = "Read-only: lists Garmin devices registered with the local Garmin Express desktop app and how many real wellness/activity files are staged locally per category (Monitor, Sleep, Metrics, HRVStatus, Activity), before Express uploads them to Garmin Connect's cloud. Makes no changes. Garmin Connect's web export doesn't offer daily wellness data at all — this is the real path to it without official API access.")
+    public List<GarminExpressDevice> discoverGarminExpressDevices() {
+        return garminExpressLocator.discover();
+    }
+
+    @PostMapping("/garmin-express/devices/{deviceId}/stage")
+    @Operation(summary = "Copy a device's real files into the import folder",
+            description = "Copies (never moves) every discovered file for this device from Garmin Express's local folder into the configured import directory, skipping any file already present there by name. Source files in Express's own folder are left untouched. This only stages files for review — run dry-run and import separately to actually persist anything.")
+    public StageResult stageGarminExpressDevice(@PathVariable String deviceId) {
+        int copied = garminExpressLocator.stageForImport(deviceId);
+        return new StageResult(copied);
+    }
+
+    public record StageResult(int filesCopied) {}
 }

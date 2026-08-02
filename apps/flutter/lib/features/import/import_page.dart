@@ -26,6 +26,8 @@ class _ImportPageState extends State<ImportPage> {
   DryRunSummary? _dryRunResult;
   ImportProgress? _importProgress;
   List<ImportBatchResponse> _batches = [];
+  List<GarminExpressDeviceResponse> _garminExpressDevices = [];
+  String? _stagingDeviceId;
   bool _loading = true;
   bool _validating = false;
   bool _importing = false;
@@ -35,6 +37,38 @@ class _ImportPageState extends State<ImportPage> {
   void initState() {
     super.initState();
     _scanDirectory();
+    _discoverGarminExpress();
+  }
+
+  Future<void> _discoverGarminExpress() async {
+    try {
+      final devices = await _apiClient.getGarminExpressDevices();
+      if (!mounted) return;
+      setState(() => _garminExpressDevices = devices);
+    } catch (_) {
+      // Best-effort — Garmin Express may not be installed at all, which is
+      // a completely normal state, not an error worth surfacing.
+    }
+  }
+
+  Future<void> _stageGarminExpressDevice(String deviceId) async {
+    setState(() => _stagingDeviceId = deviceId);
+    try {
+      final copied = await _apiClient.stageGarminExpressDevice(deviceId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(
+              copied > 0 ? 'Copied $copied real files into the import folder.' : 'Already up to date — nothing new to copy.')),
+        );
+      }
+      await _scanDirectory();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Copy failed: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _stagingDeviceId = null);
+    }
   }
 
   Future<void> _scanDirectory() async {
@@ -226,6 +260,24 @@ class _ImportPageState extends State<ImportPage> {
 
   Widget _buildNoFiles() {
     final dir = _scanResult?.directory ?? 'unknown';
+    if (_garminExpressDevices.isNotEmpty) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final device in _garminExpressDevices) ...[
+              _GarminExpressCard(
+                device: device,
+                staging: _stagingDeviceId == device.deviceId,
+                onStage: () => _stageGarminExpressDevice(device.deviceId),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
+          ],
+        ),
+      );
+    }
     return EmptyView(
       icon: Icons.folder_open_outlined,
       title: 'No files found',
@@ -244,6 +296,17 @@ class _ImportPageState extends State<ImportPage> {
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         _DirectoryInfoCard(directory: result.directory),
+        if (_garminExpressDevices.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.lg),
+          for (final device in _garminExpressDevices) ...[
+            _GarminExpressCard(
+              device: device,
+              staging: _stagingDeviceId == device.deviceId,
+              onStage: () => _stageGarminExpressDevice(device.deviceId),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ],
         const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
@@ -305,6 +368,83 @@ class _ImportPageState extends State<ImportPage> {
         ],
         const _PrivacyNoteCard(),
       ],
+    );
+  }
+}
+
+/// Real wellness data already staged locally by Garmin Express, before it
+/// uploads to Garmin Connect's cloud — the only real path to sleep/steps/
+/// stress/HRV data, since Garmin Connect's web export doesn't offer daily
+/// wellness data at all, only per-activity workout files. Every action here
+/// is an explicit button the user presses — nothing is copied automatically.
+class _GarminExpressCard extends StatelessWidget {
+  final GarminExpressDeviceResponse device;
+  final bool staging;
+  final VoidCallback onStage;
+  const _GarminExpressCard({required this.device, required this.staging, required this.onStage});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    return Card(
+      color: status.infoContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.watch_outlined, color: status.onInfoContainer),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'Real data found: Garmin Express',
+                    style: theme.textTheme.titleMedium?.copyWith(color: status.onInfoContainer),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              '${device.totalFiles} real file${device.totalFiles == 1 ? '' : 's'} staged locally by Garmin '
+              'Express, not yet copied here.',
+              style: theme.textTheme.bodySmall?.copyWith(color: status.onInfoContainer),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              children: device.categories.map((c) {
+                return Chip(
+                  label: Text('${c.name}: ${c.fileCount}'),
+                  backgroundColor: status.info.withValues(alpha: 0.15),
+                  labelStyle: theme.textTheme.labelMedium?.copyWith(color: status.onInfoContainer),
+                  side: BorderSide.none,
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: staging ? null : onStage,
+                icon: staging
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.copy_outlined, size: 18),
+                label: Text(staging ? 'Copying…' : 'Copy to import folder'),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Only copies (never moves) — your original files stay in Garmin Express untouched. '
+              'You still choose when to dry-run and import below.',
+              style: theme.textTheme.bodySmall?.copyWith(color: status.onInfoContainer.withValues(alpha: 0.8)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

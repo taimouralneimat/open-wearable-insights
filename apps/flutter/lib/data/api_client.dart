@@ -136,6 +136,22 @@ class ApiClient {
         .toList();
   }
 
+  /// Discover real wellness data already staged locally by Garmin Express,
+  /// before it uploads to Garmin Connect's cloud. Read-only.
+  Future<List<GarminExpressDeviceResponse>> getGarminExpressDevices() async {
+    final response = await _dio.get('/api/v1/ingestion/garmin-express/devices');
+    return (response.data as List)
+        .map((e) => GarminExpressDeviceResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Copies (never moves) a device's real files from Garmin Express's local
+  /// folder into the import directory. Returns how many were newly copied.
+  Future<int> stageGarminExpressDevice(String deviceId) async {
+    final response = await _dio.post('/api/v1/ingestion/garmin-express/devices/$deviceId/stage');
+    return (response.data as Map<String, dynamic>)['filesCopied'] as int;
+  }
+
   /// Get sleep summary.
   Future<SleepSummary> getSleepSummary() async {
     final response = await _dio.get('/api/v1/sleep/summary');
@@ -810,6 +826,47 @@ class ImportBatchResponse {
       undoAt: json['undoAt'] as String?,
       fileName: json['fileName'] as String?,
       recordCount: json['recordCount'] as int,
+    );
+  }
+}
+
+/// A Garmin device with real wellness data staged locally by Garmin
+/// Express, before it uploads to Garmin Connect's cloud. See
+/// GarminExpressLocator on the backend — Garmin Connect's web export
+/// doesn't offer daily wellness data (sleep/steps/stress/HRV) at all, so
+/// this is the real path to it without official Garmin API access.
+class GarminExpressDeviceResponse {
+  final String deviceId;
+  final List<GarminExpressCategoryResponse> categories;
+  final int totalFiles;
+
+  GarminExpressDeviceResponse({
+    required this.deviceId,
+    required this.categories,
+    required this.totalFiles,
+  });
+
+  factory GarminExpressDeviceResponse.fromJson(Map<String, dynamic> json) {
+    return GarminExpressDeviceResponse(
+      deviceId: json['deviceId'] as String,
+      categories: (json['categories'] as List)
+          .map((e) => GarminExpressCategoryResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      totalFiles: json['totalFiles'] as int,
+    );
+  }
+}
+
+class GarminExpressCategoryResponse {
+  final String name;
+  final int fileCount;
+
+  GarminExpressCategoryResponse({required this.name, required this.fileCount});
+
+  factory GarminExpressCategoryResponse.fromJson(Map<String, dynamic> json) {
+    return GarminExpressCategoryResponse(
+      name: json['name'] as String,
+      fileCount: json['fileCount'] as int,
     );
   }
 }

@@ -33,6 +33,10 @@ spring:
 # Local app-data directory for raw imported files (OUTSIDE the repo).
 owi:
   import-dir: ${OWI_IMPORT_DIR:~/.open-wearable-insights/imports}
+  # Garmin Express desktop app's local sync folder (macOS) — the real path to
+  # daily wellness data (sleep/steps/stress/HRV), which Garmin Connect's web
+  # export doesn't offer at all. See GarminExpressLocator.
+  garmin-express-dir: ${OWI_GARMIN_EXPRESS_DIR:~/Library/Application Support/Garmin/Express}
   # Persistent local API token file (ADR-0008). Generated once on first boot,
   # reused on every subsequent boot. Clients send it via the X-Local-Api-Token
   # header on all /api/v1/** requests.
