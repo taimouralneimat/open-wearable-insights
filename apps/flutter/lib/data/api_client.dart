@@ -181,12 +181,24 @@ class ApiClient {
   }
 
   /// Fetch real historical sleep/HRV/stress/RHR/steps data for a date range.
+  ///
+  /// Backed by a deliberately throttled sync (see GarminConnectSyncService —
+  /// ~300ms between days plus real network calls to Garmin, to avoid
+  /// tripping Garmin's abuse detection), so this one call can legitimately
+  /// take minutes for a large range. Uses a much longer receive timeout than
+  /// the client's 10s default, which exists for normal fast local-API calls
+  /// and would otherwise report a spurious failure while the backend keeps
+  /// working to completion regardless.
   Future<GarminConnectSyncResultResponse> garminConnectSync(DateTime startDate, DateTime endDate) async {
     String iso(DateTime d) => d.toIso8601String().split('T').first;
-    final response = await _dio.post('/api/v1/garmin-connect/sync', data: {
-      'startDate': iso(startDate),
-      'endDate': iso(endDate),
-    });
+    final response = await _dio.post(
+      '/api/v1/garmin-connect/sync',
+      data: {
+        'startDate': iso(startDate),
+        'endDate': iso(endDate),
+      },
+      options: Options(receiveTimeout: const Duration(minutes: 15)),
+    );
     return GarminConnectSyncResultResponse.fromJson(response.data as Map<String, dynamic>);
   }
 

@@ -353,6 +353,12 @@ class _GarminConnectorPageState extends State<GarminConnectorPage> {
           'below, directly from your Garmin Connect account.',
           style: theme.textTheme.bodySmall,
         ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Deliberately throttled to avoid tripping Garmin\'s rate limits — a large range can '
+          'take several minutes. It\'s still working even if nothing seems to change for a while.',
+          style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+        ),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
