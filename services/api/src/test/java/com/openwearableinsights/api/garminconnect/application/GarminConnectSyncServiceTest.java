@@ -25,7 +25,7 @@ class GarminConnectSyncServiceTest {
 
     // Dependencies are unused by reconstructSleepStages (pure function, no I/O).
     private final GarminConnectSyncService service =
-            new GarminConnectSyncService(null, null, null, null, null);
+            new GarminConnectSyncService(null, null, null, null, null, null);
 
     @Test
     void reconstructsCorrectRowCountPerStage_fromRealAggregateSeconds() throws Exception {

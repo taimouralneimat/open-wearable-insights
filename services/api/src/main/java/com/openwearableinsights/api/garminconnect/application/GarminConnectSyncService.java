@@ -9,7 +9,8 @@ import com.openwearableinsights.api.ingestion.domain.ImportBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -47,30 +48,50 @@ public class GarminConnectSyncService {
     private static final Logger log = LoggerFactory.getLogger(GarminConnectSyncService.class);
     private static final long MS_PER_15_MIN = 15L * 60 * 1000;
     private static final int MAX_REFRESH_RETRIES = 1;
+    private static final int MAX_CONSECUTIVE_RATE_LIMITS = 3;
+    // A day costs 3 real HTTP calls to Garmin's API tier (summary/sleep/hrv).
+    // This is deliberate throttling, not a performance concern — hammering
+    // Garmin's servers with zero delay risks tripping their abuse detection
+    // and getting the user's real Garmin account temporarily rate-limited
+    // or flagged, which would be a much worse outcome than a slower sync.
+    private static final long SYNC_DELAY_BETWEEN_DAYS_MS = 300;
 
     private final GarminConnectAccountRepository accountRepository;
     private final GarminConnectAuthClient authClient;
     private final GarminConnectDataClient dataClient;
     private final ImportBatchRepository importBatchRepository;
     private final MeasurementRepository measurementRepository;
+    private final TransactionTemplate requiresNewTx;
 
     public GarminConnectSyncService(
             GarminConnectAccountRepository accountRepository,
             GarminConnectAuthClient authClient,
             GarminConnectDataClient dataClient,
             ImportBatchRepository importBatchRepository,
-            MeasurementRepository measurementRepository
+            MeasurementRepository measurementRepository,
+            PlatformTransactionManager txManager
     ) {
         this.accountRepository = accountRepository;
         this.authClient = authClient;
         this.dataClient = dataClient;
         this.importBatchRepository = importBatchRepository;
         this.measurementRepository = measurementRepository;
+        this.requiresNewTx = new TransactionTemplate(txManager);
+        this.requiresNewTx.setPropagationBehavior(
+                org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW
+        );
     }
 
     public record SyncResult(int daysAttempted, int daysWithData, int measurementsWritten, List<String> errors) {}
 
-    @Transactional
+    /**
+     * Not {@code @Transactional} — this loop makes many real, deliberately
+     * throttled HTTP calls to Garmin (see SYNC_DELAY_BETWEEN_DAYS_MS) and can
+     * run for minutes on a large date range. Holding a DB transaction open
+     * for that whole time would tie up a pooled connection needlessly; only
+     * the final persist step needs one (see ImportService for the same
+     * per-batch REQUIRES_NEW pattern).
+     */
     public SyncResult sync(Long accountId, LocalDate start, LocalDate end) {
         Optional<GarminTokens> stored = accountRepository.findTokens(accountId);
         if (stored.isEmpty()) {
@@ -96,6 +117,7 @@ public class GarminConnectSyncService {
         }
 
         long totalDays = end.toEpochDay() - start.toEpochDay() + 1;
+        int consecutiveRateLimits = 0;
         for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
             try {
                 List<ParsedMeasurement> dayMeasurements = syncOneDay(accountId, tokens, displayName, date);
@@ -103,28 +125,53 @@ public class GarminConnectSyncService {
                     daysWithData++;
                     all.addAll(dayMeasurements);
                 }
+                consecutiveRateLimits = 0;
             } catch (GarminConnectApiException e) {
                 errors.add(date + ": " + e.getMessage());
                 log.warn("Garmin Connect sync failed for {}: {}", date, e.getMessage());
+                if (e.statusCode == 429) {
+                    consecutiveRateLimits++;
+                    if (consecutiveRateLimits >= MAX_CONSECUTIVE_RATE_LIMITS) {
+                        errors.add("Stopped early after " + consecutiveRateLimits
+                                + " consecutive rate-limited days — Garmin is throttling this account. Try a smaller "
+                                + "date range, or wait a while before syncing again.");
+                        log.warn("Garmin Connect sync for account {} stopped early at {} after {} consecutive 429s",
+                                accountId, date, consecutiveRateLimits);
+                        break;
+                    }
+                } else {
+                    consecutiveRateLimits = 0;
+                }
             }
+            sleepBetweenDays();
         }
 
         int written = 0;
         if (!all.isEmpty()) {
-            ImportBatch batch = new ImportBatch(
-                    accountId, "vendor_api",
-                    "garmin-connect-" + start + "-" + end + "-" + Instant.now().toEpochMilli(),
-                    "garmin-connect-sync-" + start + "-to-" + end,
-                    all.size()
-            );
-            ImportBatch saved = importBatchRepository.save(batch);
-            written = measurementRepository.persist(accountId, saved.getId(), "garmin-connect", all);
+            written = requiresNewTx.execute(status -> {
+                ImportBatch batch = new ImportBatch(
+                        accountId, "vendor_api",
+                        "garmin-connect-" + start + "-" + end + "-" + Instant.now().toEpochMilli(),
+                        "garmin-connect-sync-" + start + "-to-" + end,
+                        all.size()
+                );
+                ImportBatch saved = importBatchRepository.save(batch);
+                return measurementRepository.persist(accountId, saved.getId(), "garmin-connect", all);
+            });
         }
 
         accountRepository.saveLastSync(accountId, Instant.now());
         log.info("Garmin Connect sync for account {}: {}/{} days had data, {} measurements written",
                 accountId, daysWithData, totalDays, written);
         return new SyncResult((int) totalDays, daysWithData, written, errors);
+    }
+
+    private void sleepBetweenDays() {
+        try {
+            Thread.sleep(SYNC_DELAY_BETWEEN_DAYS_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private List<ParsedMeasurement> syncOneDay(Long accountId, AtomicReference<GarminTokens> tokens,
