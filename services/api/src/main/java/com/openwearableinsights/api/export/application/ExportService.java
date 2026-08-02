@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -16,9 +17,11 @@ import java.util.Optional;
 
 /**
  * Assembles a single, complete, per-account JSON export of every table that
- * holds personal data (see docs/security/privacy-model.md, "User rights" —
- * this covers the "complete local data export" half; deletion is a separate,
- * out-of-scope feature).
+ * holds personal data, and — its GDPR-symmetric counterpart — deletes that
+ * same data on explicit request (see docs/security/privacy-model.md, "User
+ * rights"). Both operations share the same table list and account-scoping
+ * rules deliberately, so they can never silently drift apart (e.g. a table
+ * added to one but not the other).
  *
  * <p>Format is versioned as {@code EXPORT_VERSION}, matching this project's
  * convention of versioning algorithm/output formats (e.g. readiness's
@@ -153,6 +156,64 @@ public class ExportService {
 
         log.info("Built export for account {}: {}", accountId, recordCounts);
         return Optional.of(export);
+    }
+
+    /**
+     * Permanently deletes every personal-data table's rows for one account —
+     * everything {@link #buildExport} would have returned, except the
+     * {@code accounts} row itself (kept, so the app stays paired and usable
+     * afterward) and {@code algorithm_versions} (a global reference catalog,
+     * not personal data). Irreversible; callers are responsible for whatever
+     * confirmation is appropriate before invoking this (see
+     * {@code ExportController}, which requires an explicit confirmation
+     * phrase — this method itself does not re-prompt).
+     *
+     * <p>Deletion order respects foreign keys (children before parents) —
+     * see the migration files for the real constraint graph this mirrors.
+     *
+     * @return the same {@code recordCounts}-shaped map {@link #buildExport}
+     * produces, but counting rows actually deleted, or {@link Optional#empty()}
+     * if no account with that id exists.
+     */
+    @Transactional
+    public Optional<Map<String, Integer>> deleteAllData(Long accountId) {
+        Integer accountExists = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM accounts WHERE id = ?", Integer.class, accountId);
+        if (accountExists == null || accountExists == 0) {
+            return Optional.empty();
+        }
+
+        Map<String, Integer> deletedCounts = new LinkedHashMap<>();
+        deletedCounts.put("measurements", jdbcTemplate.update(
+                "DELETE FROM measurements WHERE account_id = ?", accountId));
+        deletedCounts.put("activities", jdbcTemplate.update(
+                "DELETE FROM activities WHERE account_id = ?", accountId));
+        deletedCounts.put("rawPayloads", jdbcTemplate.update(
+                "DELETE FROM raw_payloads WHERE batch_id IN (SELECT id FROM import_batches WHERE account_id = ?)",
+                accountId));
+        // Mirrors buildExport's scoping rule: a provenance row with a null
+        // import_batch_id is still this account's data in a single-user system.
+        deletedCounts.put("provenance", jdbcTemplate.update(
+                "DELETE FROM provenance WHERE import_batch_id IS NULL " +
+                "OR import_batch_id IN (SELECT id FROM import_batches WHERE account_id = ?)",
+                accountId));
+        deletedCounts.put("derivedMetrics", jdbcTemplate.update(
+                "DELETE FROM derived_metrics WHERE account_id = ?", accountId));
+        deletedCounts.put("journalEntries", jdbcTemplate.update(
+                "DELETE FROM journal_entries WHERE account_id = ?", accountId));
+        deletedCounts.put("llmOutputs", jdbcTemplate.update(
+                "DELETE FROM llm_outputs WHERE account_id = ?", accountId));
+        deletedCounts.put("readinessScoreHistory", jdbcTemplate.update(
+                "DELETE FROM readiness_score_history WHERE account_id = ?", accountId));
+        deletedCounts.put("garminConnectAccount", jdbcTemplate.update(
+                "DELETE FROM garmin_connect_account WHERE account_id = ?", accountId));
+        deletedCounts.put("importBatches", jdbcTemplate.update(
+                "DELETE FROM import_batches WHERE account_id = ?", accountId));
+        deletedCounts.put("devices", jdbcTemplate.update(
+                "DELETE FROM devices WHERE account_id = ?", accountId));
+
+        log.warn("Deleted all personal data for account {}: {}", accountId, deletedCounts);
+        return Optional.of(deletedCounts);
     }
 
     private List<Map<String, Object>> query(String sql, Object... args) {

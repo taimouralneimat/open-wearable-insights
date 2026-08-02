@@ -179,11 +179,27 @@ public class GarminConnectSyncService {
         List<ParsedMeasurement> out = new ArrayList<>();
         Instant anchor = date.atTime(12, 0).toInstant(ZoneOffset.UTC);
 
+        // The daily-summary call below is one HTTP request that already carries far
+        // more than steps/RHR/stress — every field pulled out here is real data
+        // Garmin already sent us, at zero extra API cost. Field names/units match
+        // DailyStats in cyberjunky/python-garminconnect's typed models exactly.
         JsonNode summary = callWithRefresh(accountId, tokens, t -> dataClient.fetchDailySummary(t, displayName, date));
         if (summary != null && !summary.isMissingNode() && !summary.isNull()) {
             addIfPresent(out, summary, "totalSteps", anchor, "steps", "count");
             addIfPresent(out, summary, "restingHeartRate", anchor, "rhr", "bpm");
             addIfPresent(out, summary, "averageStressLevel", anchor, "stress", "score");
+            addIfPresent(out, summary, "totalDistanceMeters", anchor, "distance", "meters");
+            addIfPresent(out, summary, "totalKilocalories", anchor, "calories", "kcal");
+            addIfPresent(out, summary, "activeKilocalories", anchor, "active_calories", "kcal");
+            addIfPresent(out, summary, "moderateIntensityMinutes", anchor, "intensity_minutes_moderate", "minutes");
+            addIfPresent(out, summary, "vigorousIntensityMinutes", anchor, "intensity_minutes_vigorous", "minutes");
+            addIfPresent(out, summary, "floorsAscended", anchor, "floors", "count");
+            addIfPresent(out, summary, "bodyBatteryChargedValue", anchor, "body_battery_charged", "score");
+            addIfPresent(out, summary, "bodyBatteryDrainedValue", anchor, "body_battery_drained", "score");
+            addIfPresent(out, summary, "bodyBatteryHighestValue", anchor, "body_battery_high", "score");
+            addIfPresent(out, summary, "bodyBatteryLowestValue", anchor, "body_battery_low", "score");
+            addIfPresent(out, summary, "maxStressLevel", anchor, "stress_max", "score");
+            addIfPresent(out, summary, "stressDuration", anchor, "stress_duration", "seconds");
         }
 
         JsonNode sleep = callWithRefresh(accountId, tokens, t -> dataClient.fetchSleepData(t, displayName, date));
@@ -196,6 +212,17 @@ public class GarminConnectSyncService {
         JsonNode hrvSummary = hrv != null ? hrv.path("hrvSummary") : null;
         if (hrvSummary != null && hrvSummary.hasNonNull("lastNightAvg")) {
             out.add(new ParsedMeasurement(anchor, "hrv", hrvSummary.get("lastNightAvg").asDouble(), "ms"));
+        }
+
+        // Garmin's own proprietary readiness score — kept as a distinct metric
+        // (not blended into ours) so it can be shown/cross-referenced alongside
+        // this app's own deterministic readiness score, not silently merged with it.
+        JsonNode readiness = callWithRefresh(accountId, tokens, t -> dataClient.fetchTrainingReadiness(t, date));
+        if (readiness != null && readiness.isArray() && readiness.size() > 0) {
+            JsonNode latest = readiness.get(0);
+            if (latest.hasNonNull("score")) {
+                out.add(new ParsedMeasurement(anchor, "garmin_training_readiness", latest.get("score").asDouble(), "score"));
+            }
         }
 
         return out;

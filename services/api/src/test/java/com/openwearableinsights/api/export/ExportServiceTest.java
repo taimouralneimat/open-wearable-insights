@@ -204,6 +204,68 @@ class ExportServiceTest {
         assertThat(algorithmVersions.get(0).get("name")).isEqualTo("readiness");
     }
 
+    @Test
+    void deleteAllData_unknownAccount_returnsEmpty() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForObject(anyString(), eq(Integer.class), eq(ACCOUNT_ID))).thenReturn(0);
+        ExportService service = new ExportService(jdbc, new ObjectMapper());
+
+        Optional<Map<String, Integer>> result = service.deleteAllData(ACCOUNT_ID);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void deleteAllData_knownAccount_deletesEveryPersonalDataTable_butNotAccountOrAlgorithmVersions() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForObject(anyString(), eq(Integer.class), eq(ACCOUNT_ID))).thenReturn(1);
+        when(jdbc.update(anyString(), eq(ACCOUNT_ID))).thenReturn(3);
+
+        ExportService service = new ExportService(jdbc, new ObjectMapper());
+        Map<String, Integer> deleted = service.deleteAllData(ACCOUNT_ID).orElseThrow();
+
+        assertThat(deleted.keySet()).containsExactlyInAnyOrder(
+                "measurements", "activities", "rawPayloads", "provenance", "derivedMetrics",
+                "journalEntries", "llmOutputs", "readinessScoreHistory", "garminConnectAccount",
+                "importBatches", "devices"
+        );
+        deleted.values().forEach(count -> assertThat(count).isEqualTo(3));
+
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(jdbc, atLeastOnce()).update(sqlCaptor.capture(), eq(ACCOUNT_ID));
+        List<String> deleteSql = sqlCaptor.getAllValues();
+
+        // The account row itself and the global algorithm_versions catalog
+        // must never be targeted by a DELETE — only the personal-data tables.
+        assertThat(deleteSql).noneMatch(sql -> sql.contains("DELETE FROM accounts"));
+        assertThat(deleteSql).noneMatch(sql -> sql.contains("DELETE FROM algorithm_versions"));
+        assertThat(deleteSql).anyMatch(sql -> sql.contains("DELETE FROM measurements"));
+        assertThat(deleteSql).anyMatch(sql -> sql.contains("DELETE FROM garmin_connect_account"));
+    }
+
+    @Test
+    void deleteAllData_provenanceQuery_matchesExportsNullImportBatchIdScopingRule() {
+        // Deletion must use the exact same "null import_batch_id still belongs
+        // to this account" rule buildExport uses (see that test) — otherwise
+        // export and delete would silently disagree about what "all my data"
+        // means, e.g. export includes a row deletion leaves behind.
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForObject(anyString(), eq(Integer.class), eq(ACCOUNT_ID))).thenReturn(1);
+        when(jdbc.update(anyString(), eq(ACCOUNT_ID))).thenReturn(0);
+
+        ExportService service = new ExportService(jdbc, new ObjectMapper());
+        service.deleteAllData(ACCOUNT_ID);
+
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(jdbc, atLeastOnce()).update(sqlCaptor.capture(), eq(ACCOUNT_ID));
+        List<String> provenanceDeletes = sqlCaptor.getAllValues().stream()
+                .filter(sql -> sql.contains("DELETE FROM provenance"))
+                .toList();
+
+        assertThat(provenanceDeletes).hasSize(1);
+        assertThat(provenanceDeletes.get(0)).contains("IS NULL");
+    }
+
     /** Stubs every account-scoped table query to return an empty list, and the account row to exist. */
     private void stubAccountFound(JdbcTemplate jdbc) {
         when(jdbc.queryForList(anyString(), eq(ACCOUNT_ID)))

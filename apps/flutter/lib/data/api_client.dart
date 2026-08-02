@@ -338,6 +338,19 @@ class ApiClient {
     final filename = match?.group(1) ?? 'open-wearable-insights-export.json';
     return (response.data ?? '', filename);
   }
+
+  /// Permanently deletes every personal-data table's rows for this account —
+  /// the GDPR-erasure counterpart to [fetchFullExport]. Irreversible. The
+  /// backend independently requires confirm=DELETE as its own safety check,
+  /// on top of whatever confirmation this app's own UI requires before ever
+  /// calling this.
+  Future<Map<String, int>> deleteAllData() async {
+    final response = await _dio.delete(
+      '/api/v1/export/all',
+      queryParameters: {'confirm': 'DELETE'},
+    );
+    return (response.data as Map<String, dynamic>).map((k, v) => MapEntry(k, v as int));
+  }
 }
 
 /// Readiness score response from the API.

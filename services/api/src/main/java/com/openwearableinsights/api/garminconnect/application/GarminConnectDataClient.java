@@ -56,6 +56,11 @@ class GarminConnectDataClient {
         return get("/hrv-service/hrv/" + date, tokens);
     }
 
+    /** GET Garmin's own Training Readiness snapshots (score, level, feedback) for one date. */
+    JsonNode fetchTrainingReadiness(GarminTokens tokens, LocalDate date) throws GarminConnectApiException {
+        return get("/metrics-service/metrics/trainingreadiness/" + date, tokens);
+    }
+
     private JsonNode get(String path, GarminTokens tokens) throws GarminConnectApiException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(CONNECT_API + path))

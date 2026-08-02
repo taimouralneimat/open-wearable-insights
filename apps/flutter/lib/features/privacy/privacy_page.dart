@@ -22,6 +22,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
   LlmStatus? _llmStatus;
   bool _loading = true;
   bool _exporting = false;
+  bool _deleting = false;
   String? _error;
 
   @override
@@ -62,6 +63,30 @@ class _PrivacyPageState extends State<PrivacyPage> {
       if (!mounted) return;
       setState(() => _exporting = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+    }
+  }
+
+  Future<void> _confirmAndDeleteAllData() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const _DeleteAllDataDialog(),
+    );
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    setState(() => _deleting = true);
+    try {
+      final deletedCounts = await _apiClient.deleteAllData();
+      if (!mounted) return;
+      setState(() => _deleting = false);
+      final totalDeleted = deletedCounts.values.fold(0, (a, b) => a + b);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Deleted $totalDeleted records. Your account is still paired — new data will start fresh.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _deleting = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Deletion failed: $e')));
     }
   }
 
@@ -126,6 +151,85 @@ class _PrivacyPageState extends State<PrivacyPage> {
               ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
               : const Icon(Icons.download_outlined, size: 18),
           label: Text(_exporting ? 'Preparing export…' : 'Export all my data'),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        Text('Delete your data', style: theme.textTheme.titleMedium?.copyWith(color: theme.status.poor)),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'Permanently deletes everything stored locally for this account — measurements, '
+          'activities, journal entries, readiness history, and any connected-account tokens. '
+          'This cannot be undone. Your pairing stays intact; the app keeps working with no data, '
+          'as if freshly installed.',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        OutlinedButton.icon(
+          onPressed: _deleting ? null : _confirmAndDeleteAllData,
+          style: OutlinedButton.styleFrom(foregroundColor: theme.status.poor),
+          icon: _deleting
+              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.delete_forever_outlined, size: 18),
+          label: Text(_deleting ? 'Deleting…' : 'Delete all my data'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Requires typing the literal word DELETE before the confirm button
+/// enables — a destructive, irreversible action deserves real friction, not
+/// a single tap a user could hit by accident.
+class _DeleteAllDataDialog extends StatefulWidget {
+  const _DeleteAllDataDialog();
+
+  @override
+  State<_DeleteAllDataDialog> createState() => _DeleteAllDataDialogState();
+}
+
+class _DeleteAllDataDialogState extends State<_DeleteAllDataDialog> {
+  final _controller = TextEditingController();
+  bool _confirmed = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      title: const Text('Delete all your data?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'This permanently deletes every measurement, activity, journal entry, and score '
+            'stored locally for this account. It cannot be undone — consider exporting first.',
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text('Type DELETE to confirm:', style: theme.textTheme.bodySmall),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+            onChanged: (value) => setState(() => _confirmed = value == 'DELETE'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _confirmed ? () => Navigator.of(context).pop(true) : null,
+          style: FilledButton.styleFrom(backgroundColor: theme.status.poor),
+          child: const Text('Delete everything'),
         ),
       ],
     );
