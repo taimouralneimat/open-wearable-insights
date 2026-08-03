@@ -21,6 +21,7 @@ class _JournalPageState extends State<JournalPage> {
   List<BehaviorCategory>? _taxonomy;
   List<JournalEntryResponse>? _entries;
   List<BehaviorCorrelationResponse> _correlations = [];
+  List<GarminSignalCorrelationResponse> _garminSignalCorrelations = [];
   List<HabitStreakResponse> _streaks = [];
   bool _loading = true;
   String? _error;
@@ -53,10 +54,18 @@ class _JournalPageState extends State<JournalPage> {
       } catch (_) {
         streaks = [];
       }
+      // Empty until a Garmin Connect sync has run — not an error.
+      List<GarminSignalCorrelationResponse> garminSignalCorrelations = [];
+      try {
+        garminSignalCorrelations = await _apiClient.getGarminSignalCorrelations();
+      } catch (_) {
+        garminSignalCorrelations = [];
+      }
       setState(() {
         _taxonomy = taxonomy;
         _entries = entries;
         _correlations = correlations;
+        _garminSignalCorrelations = garminSignalCorrelations;
         _streaks = streaks;
         _loading = false;
       });
@@ -129,6 +138,10 @@ class _JournalPageState extends State<JournalPage> {
           ],
           if (_correlations.isNotEmpty) ...[
             _CorrelationsCard(correlations: _correlations),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          if (_garminSignalCorrelations.isNotEmpty) ...[
+            _GarminSignalCorrelationsCard(correlations: _garminSignalCorrelations),
             const SizedBox(height: AppSpacing.lg),
           ],
           ...entries.map((e) => Padding(
@@ -249,6 +262,91 @@ class _CorrelationRow extends StatelessWidget {
                   '${correlation.behavior}: readiness averaged '
                   '${correlation.avgReadinessWhenLogged.toStringAsFixed(0)} on logged days vs. '
                   '${correlation.avgReadinessWhenNotLogged.toStringAsFixed(0)} otherwise',
+                  style: theme.textTheme.bodyMedium?.copyWith(color: status.onInfoContainer),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 24, top: 2),
+            child: Text(
+              '${correlation.loggedDayCount} logged / ${correlation.notLoggedDayCount} not logged · '
+              '${correlation.confidence} confidence',
+              style: theme.textTheme.bodySmall?.copyWith(color: status.onInfoContainer.withValues(alpha: 0.75)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Correlations against Garmin-exclusive signals (Body Battery, Garmin's
+/// own Training Readiness) instead of this app's own readiness score — a
+/// pattern neither Garmin's app nor a competitor's offers, since it needs
+/// both the richer Garmin data and a user's own logged behaviors together.
+class _GarminSignalCorrelationsCard extends StatelessWidget {
+  final List<GarminSignalCorrelationResponse> correlations;
+  const _GarminSignalCorrelationsCard({required this.correlations});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    return Card(
+      color: status.infoContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.watch_outlined, size: 20, color: status.onInfoContainer),
+                const SizedBox(width: AppSpacing.sm),
+                Text('Patterns with your Garmin data',
+                    style: theme.textTheme.titleMedium?.copyWith(color: status.onInfoContainer)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Correlation, not causation — many other factors vary day to day too.',
+              style: theme.textTheme.bodySmall?.copyWith(color: status.onInfoContainer, fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ...correlations.map((c) => _GarminSignalCorrelationRow(correlation: c)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GarminSignalCorrelationRow extends StatelessWidget {
+  final GarminSignalCorrelationResponse correlation;
+  const _GarminSignalCorrelationRow({required this.correlation});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    final worse = correlation.difference < 0;
+    final color = worse ? status.poor : status.good;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(worse ? Icons.trending_down : Icons.trending_up, size: 16, color: color),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  '${correlation.behavior}: ${correlation.signalName} averaged '
+                  '${correlation.avgSignalWhenLogged.toStringAsFixed(0)} on logged days vs. '
+                  '${correlation.avgSignalWhenNotLogged.toStringAsFixed(0)} otherwise',
                   style: theme.textTheme.bodyMedium?.copyWith(color: status.onInfoContainer),
                 ),
               ),

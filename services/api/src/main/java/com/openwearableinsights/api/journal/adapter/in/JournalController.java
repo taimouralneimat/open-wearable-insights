@@ -93,6 +93,13 @@ public class JournalController {
         return correlationService.computeCorrelations(DEFAULT_ACCOUNT_ID);
     }
 
+    @GetMapping("/correlations/garmin-signals")
+    @Operation(summary = "Get exploratory correlations between behaviors and Garmin-exclusive signals",
+            description = "Same methodology as /correlations, but against Body Battery and Garmin's own Training Readiness score instead of this app's readiness score. Only returns results once a Garmin Connect sync has provided that data.")
+    public List<com.openwearableinsights.api.journal.domain.GarminSignalCorrelation> getGarminSignalCorrelations() {
+        return correlationService.computeGarminSignalCorrelations(DEFAULT_ACCOUNT_ID);
+    }
+
     public record JournalEntryRequest(
             String category,
             @NotBlank String behavior,

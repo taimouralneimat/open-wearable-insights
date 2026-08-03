@@ -340,6 +340,16 @@ class ApiClient {
         .toList();
   }
 
+  /// Get exploratory correlations between behaviors and Garmin-exclusive
+  /// signals (Body Battery, Garmin's own Training Readiness score). Empty
+  /// until a Garmin Connect sync has provided that data.
+  Future<List<GarminSignalCorrelationResponse>> getGarminSignalCorrelations() async {
+    final response = await _dio.get('/api/v1/journal/correlations/garmin-signals');
+    return (response.data as List)
+        .map((e) => GarminSignalCorrelationResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Fetch the complete local data export as raw JSON text, plus the
   /// server-suggested filename from Content-Disposition. Returns the raw
   /// body rather than parsing it — this is a pass-through to a file
@@ -1490,6 +1500,50 @@ class BehaviorCorrelationResponse {
       notLoggedDayCount: json['notLoggedDayCount'] as int,
       avgReadinessWhenLogged: (json['avgReadinessWhenLogged'] as num).toDouble(),
       avgReadinessWhenNotLogged: (json['avgReadinessWhenNotLogged'] as num).toDouble(),
+      difference: (json['difference'] as num).toDouble(),
+      confidence: json['confidence'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+/// Same shape as [BehaviorCorrelationResponse], but against a Garmin-
+/// exclusive signal (Body Battery, Garmin's own Training Readiness) instead
+/// of this app's own readiness score.
+class GarminSignalCorrelationResponse {
+  final String signalName;
+  final String category;
+  final String behavior;
+  final int loggedDayCount;
+  final int notLoggedDayCount;
+  final double avgSignalWhenLogged;
+  final double avgSignalWhenNotLogged;
+  final double difference;
+  final String confidence;
+  final List<String> limitations;
+
+  GarminSignalCorrelationResponse({
+    required this.signalName,
+    required this.category,
+    required this.behavior,
+    required this.loggedDayCount,
+    required this.notLoggedDayCount,
+    required this.avgSignalWhenLogged,
+    required this.avgSignalWhenNotLogged,
+    required this.difference,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory GarminSignalCorrelationResponse.fromJson(Map<String, dynamic> json) {
+    return GarminSignalCorrelationResponse(
+      signalName: json['signalName'] as String,
+      category: json['category'] as String,
+      behavior: json['behavior'] as String,
+      loggedDayCount: json['loggedDayCount'] as int,
+      notLoggedDayCount: json['notLoggedDayCount'] as int,
+      avgSignalWhenLogged: (json['avgSignalWhenLogged'] as num).toDouble(),
+      avgSignalWhenNotLogged: (json['avgSignalWhenNotLogged'] as num).toDouble(),
       difference: (json['difference'] as num).toDouble(),
       confidence: json['confidence'] as String,
       limitations: (json['limitations'] as List).cast<String>(),

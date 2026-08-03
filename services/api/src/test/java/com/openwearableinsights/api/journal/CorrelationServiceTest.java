@@ -2,10 +2,12 @@ package com.openwearableinsights.api.journal;
 
 import com.openwearableinsights.api.journal.application.CorrelationService;
 import com.openwearableinsights.api.journal.domain.BehaviorCorrelation;
+import com.openwearableinsights.api.journal.domain.GarminSignalCorrelation;
 import com.openwearableinsights.api.readiness.application.ReadinessScoreHistoryRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -14,6 +16,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -192,5 +196,67 @@ class CorrelationServiceTest {
         assertThat(results).hasSize(2);
         assertThat(Math.abs(results.get(0).difference()))
                 .isGreaterThanOrEqualTo(Math.abs(results.get(1).difference()));
+    }
+
+    private static Map<String, Object> dailyMetricRow(LocalDate date, double value) {
+        return Map.of("d", Date.valueOf(date), "v", value);
+    }
+
+    @Test
+    void garminSignalCorrelations_computeCorrectGroupMeans() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        ReadinessScoreHistoryRepository history = mock(ReadinessScoreHistoryRepository.class);
+
+        LocalDate loggedA = LocalDate.of(2026, 7, 1);
+        LocalDate loggedB = LocalDate.of(2026, 7, 2);
+        LocalDate loggedC = LocalDate.of(2026, 7, 3);
+        LocalDate notLoggedA = LocalDate.of(2026, 7, 4);
+        LocalDate notLoggedB = LocalDate.of(2026, 7, 5);
+        LocalDate notLoggedC = LocalDate.of(2026, 7, 6);
+
+        // journal_entries fetch — single accountId bind param
+        when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(List.of(
+                journalRow("Recovery::Evening walk", loggedA),
+                journalRow("Recovery::Evening walk", loggedB),
+                journalRow("Recovery::Evening walk", loggedC)
+        ));
+        // Body Battery low fetch — accountId + metricType bind params.
+        // Logged days average 60, not-logged average 30 -> higher when logged.
+        when(jdbc.queryForList(anyString(), eq(1L), eq("body_battery_low"))).thenReturn(List.of(
+                dailyMetricRow(loggedA, 55), dailyMetricRow(loggedB, 60), dailyMetricRow(loggedC, 65),
+                dailyMetricRow(notLoggedA, 25), dailyMetricRow(notLoggedB, 30), dailyMetricRow(notLoggedC, 35)
+        ));
+        when(jdbc.queryForList(anyString(), eq(1L), eq("garmin_training_readiness"))).thenReturn(List.of());
+
+        CorrelationService service = new CorrelationService(jdbc, history);
+        List<GarminSignalCorrelation> results = service.computeGarminSignalCorrelations(1L);
+
+        assertThat(results).hasSize(1);
+        GarminSignalCorrelation c = results.get(0);
+        assertThat(c.signalName()).isEqualTo("Body Battery low");
+        assertThat(c.category()).isEqualTo("Recovery");
+        assertThat(c.behavior()).isEqualTo("Evening walk");
+        assertThat(c.avgSignalWhenLogged()).isEqualTo(60.0);
+        assertThat(c.avgSignalWhenNotLogged()).isEqualTo(30.0);
+        assertThat(c.difference()).isEqualTo(30.0);
+        assertThat(String.join(" ", c.limitations()).toLowerCase()).contains("not causation");
+    }
+
+    @Test
+    void garminSignalCorrelations_noSyncedGarminData_returnsEmptyNotError() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        ReadinessScoreHistoryRepository history = mock(ReadinessScoreHistoryRepository.class);
+
+        when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(List.of(
+                journalRow("Recovery::Evening walk", LocalDate.of(2026, 7, 1))
+        ));
+        // No Garmin Connect sync has ever run — both signals come back empty.
+        when(jdbc.queryForList(anyString(), eq(1L), eq("body_battery_low"))).thenReturn(List.of());
+        when(jdbc.queryForList(anyString(), eq(1L), eq("garmin_training_readiness"))).thenReturn(List.of());
+
+        CorrelationService service = new CorrelationService(jdbc, history);
+        List<GarminSignalCorrelation> results = service.computeGarminSignalCorrelations(1L);
+
+        assertThat(results).isEmpty();
     }
 }
