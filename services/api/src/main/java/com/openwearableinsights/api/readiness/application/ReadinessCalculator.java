@@ -29,15 +29,24 @@ import java.util.Optional;
  *   <li>Record missing-data treatment (exclusion; explicitly stated).</li>
  * </ol>
  *
- * <p>Weights (v0.1, documented, not empirically tuned):
+ * <p>Weights (v0.2, documented, not empirically tuned):
  * <ul>
  *   <li>HRV deviation: 0.30</li>
  *   <li>RHR deviation: 0.20</li>
  *   <li>Sleep duration vs. need: 0.25</li>
  *   <li>Training load (ACWR): 0.10</li>
- *   <li>Stress: 0.10</li>
+ *   <li>Stress: 0.05</li>
+ *   <li>Body Battery low (Garmin-exclusive): 0.05</li>
  *   <li>Data completeness: 0.05</li>
  * </ul>
+ *
+ * <p>v0.2 change: Stress dropped from 0.10 to 0.05 and a new Body Battery
+ * factor added at 0.05 — Body Battery is Garmin's own richer, multi-signal
+ * model of the same underlying "how depleted is this person" question
+ * Stress approximates cruder, so reallocating some weight to it when it's
+ * available is a deliberate, documented choice, not an arbitrary addition.
+ * Only present when a Garmin Connect sync has provided the data (see
+ * garminconnect module) — absent otherwise, exactly like every other factor.
  */
 @Service
 public class ReadinessCalculator {
@@ -46,7 +55,8 @@ public class ReadinessCalculator {
     private static final double W_RHR = 0.20;
     private static final double W_SLEEP = 0.25;
     private static final double W_LOAD = 0.10;
-    private static final double W_STRESS = 0.10;
+    private static final double W_STRESS = 0.05;
+    private static final double W_BODY_BATTERY = 0.05;
     private static final double W_COMPLETENESS = 0.05;
 
     private static final int PROVISIONAL_THRESHOLD_DAYS = 7;
@@ -77,6 +87,8 @@ public class ReadinessCalculator {
                 baseline.baselineFor("hrv").map(b -> h - b));
         Optional<Double> rhrDev = current.rhrBpm().flatMap(r ->
                 baseline.baselineFor("rhr").map(b -> r - b));
+        Optional<Double> bodyBatteryLowDev = current.bodyBatteryLow().flatMap(v ->
+                baseline.baselineFor("body_battery_low").map(b -> v - b));
 
         // Sleep need: use baseline sleep duration as the need if no explicit need
         Optional<Double> sleepNeed = current.sleepNeedHours().or(() ->
@@ -90,6 +102,7 @@ public class ReadinessCalculator {
                 current.acuteLoad(),
                 current.chronicLoad(),
                 current.stressScore(),
+                bodyBatteryLowDev,
                 current.dataCompleteness(),
                 baseline.baselineDays()
         );
@@ -184,6 +197,27 @@ public class ReadinessCalculator {
                     W_STRESS * stressScore, "app_computed"));
         } else {
             missing.add("Stress");
+        }
+
+        // Body Battery low, deviation from personal baseline (higher low =
+        // less depleted that day = good). Garmin-exclusive — see
+        // garminconnect module; only present after a sync has run. Unlike
+        // Stress above (fixed universal anchor), this follows the same
+        // personal-baseline-deviation approach as HRV/RHR, which Body
+        // Battery's richer, personalized modeling is a better fit for.
+        // Not added to `missing` when absent, unlike the factors above —
+        // it's a supplementary enrichment (requires a Garmin Connect sync),
+        // not a core expectation, so its absence shouldn't count against
+        // confidence/data-quality the way a missing core metric does (same
+        // reasoning as CurrentMetricsService excluding it from completeness).
+        if (inputs.bodyBatteryLowDeviation().isPresent()) {
+            double bbDev = inputs.bodyBatteryLowDeviation().get();
+            double bbScore = clamp(bbDev * 1.5, -25, 25);
+            weightedSum += W_BODY_BATTERY * bbScore;
+            factors.add(new FactorContribution(
+                    "Body Battery (Garmin)", bbDev, "score",
+                    bbScore > 0 ? Direction.POSITIVE : (bbScore < 0 ? Direction.NEGATIVE : Direction.NEUTRAL),
+                    W_BODY_BATTERY * bbScore, "garmin_connect"));
         }
 
         // Data completeness

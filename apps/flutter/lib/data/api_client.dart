@@ -202,6 +202,22 @@ class ApiClient {
     return GarminConnectSyncResultResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Get the most recent Body Battery and Garmin Training Readiness values —
+  /// Garmin-exclusive metrics this app doesn't blend into its own readiness
+  /// score, shown separately so the two stay distinct.
+  Future<GarminEnrichmentResponse> getGarminEnrichmentToday() async {
+    final response = await _dio.get('/api/v1/garmin-connect/enrichment/today');
+    return GarminEnrichmentResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get the last 14 days of Body Battery high/low values.
+  Future<List<BodyBatteryTrendPointResponse>> getBodyBatteryTrend() async {
+    final response = await _dio.get('/api/v1/garmin-connect/enrichment/body-battery/trend');
+    return (response.data as List)
+        .map((e) => BodyBatteryTrendPointResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Get sleep summary.
   Future<SleepSummary> getSleepSummary() async {
     final response = await _dio.get('/api/v1/sleep/summary');
@@ -1580,6 +1596,61 @@ class GarminConnectSyncResultResponse {
       daysWithData: json['daysWithData'] as int,
       measurementsWritten: json['measurementsWritten'] as int,
       errors: (json['errors'] as List).cast<String>(),
+    );
+  }
+}
+
+/// Garmin-exclusive Body Battery + Training Readiness — deliberately kept
+/// separate from this app's own readiness score. "As of" dates are shown
+/// because these are daily aggregates that lag behind real time, not live
+/// values — see GarminEnrichmentService.
+class GarminEnrichmentResponse {
+  final String? bodyBatteryAsOf;
+  final double? bodyBatteryHigh;
+  final double? bodyBatteryLow;
+  final double? bodyBatteryCharged;
+  final double? bodyBatteryDrained;
+  final String? trainingReadinessAsOf;
+  final int? garminTrainingReadiness;
+
+  GarminEnrichmentResponse({
+    this.bodyBatteryAsOf,
+    this.bodyBatteryHigh,
+    this.bodyBatteryLow,
+    this.bodyBatteryCharged,
+    this.bodyBatteryDrained,
+    this.trainingReadinessAsOf,
+    this.garminTrainingReadiness,
+  });
+
+  bool get hasBodyBattery => bodyBatteryHigh != null || bodyBatteryLow != null;
+  bool get hasTrainingReadiness => garminTrainingReadiness != null;
+
+  factory GarminEnrichmentResponse.fromJson(Map<String, dynamic> json) {
+    return GarminEnrichmentResponse(
+      bodyBatteryAsOf: json['bodyBatteryAsOf'] as String?,
+      bodyBatteryHigh: (json['bodyBatteryHigh'] as num?)?.toDouble(),
+      bodyBatteryLow: (json['bodyBatteryLow'] as num?)?.toDouble(),
+      bodyBatteryCharged: (json['bodyBatteryCharged'] as num?)?.toDouble(),
+      bodyBatteryDrained: (json['bodyBatteryDrained'] as num?)?.toDouble(),
+      trainingReadinessAsOf: json['trainingReadinessAsOf'] as String?,
+      garminTrainingReadiness: json['garminTrainingReadiness'] as int?,
+    );
+  }
+}
+
+class BodyBatteryTrendPointResponse {
+  final String date;
+  final double? high;
+  final double? low;
+
+  BodyBatteryTrendPointResponse({required this.date, this.high, this.low});
+
+  factory BodyBatteryTrendPointResponse.fromJson(Map<String, dynamic> json) {
+    return BodyBatteryTrendPointResponse(
+      date: json['date'] as String,
+      high: (json['high'] as num?)?.toDouble(),
+      low: (json['low'] as num?)?.toDouble(),
     );
   }
 }

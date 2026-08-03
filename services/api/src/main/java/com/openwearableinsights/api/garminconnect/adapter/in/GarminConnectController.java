@@ -3,6 +3,7 @@ package com.openwearableinsights.api.garminconnect.adapter.in;
 import com.openwearableinsights.api.garminconnect.application.GarminConnectService;
 import com.openwearableinsights.api.garminconnect.application.GarminConnectService.ConnectResult;
 import com.openwearableinsights.api.garminconnect.application.GarminConnectSyncService;
+import com.openwearableinsights.api.garminconnect.application.GarminEnrichmentService;
 import com.openwearableinsights.api.garminconnect.domain.GarminConnectAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,10 +31,16 @@ public class GarminConnectController {
 
     private final GarminConnectService connectService;
     private final GarminConnectSyncService syncService;
+    private final GarminEnrichmentService enrichmentService;
 
-    public GarminConnectController(GarminConnectService connectService, GarminConnectSyncService syncService) {
+    public GarminConnectController(
+            GarminConnectService connectService,
+            GarminConnectSyncService syncService,
+            GarminEnrichmentService enrichmentService
+    ) {
         this.connectService = connectService;
         this.syncService = syncService;
+        this.enrichmentService = enrichmentService;
     }
 
     @GetMapping("/status")
@@ -66,6 +73,22 @@ public class GarminConnectController {
     @Operation(summary = "Fetch real historical sleep/HRV/stress/RHR/steps data for a date range")
     public GarminConnectSyncService.SyncResult sync(@RequestBody SyncRequest request) {
         return syncService.sync(DEFAULT_ACCOUNT_ID, request.startDate(), request.endDate());
+    }
+
+    @GetMapping("/enrichment/today")
+    @Operation(summary = "Get the most recent Body Battery and Garmin Training Readiness values",
+            description = "Garmin-exclusive metrics not used by this app's own deterministic readiness score — " +
+                    "shown separately so Garmin's own opinion and this app's computed opinion stay distinct. " +
+                    "\"Today\" is really \"most recent day Garmin has data for\" (see asOf dates), since these " +
+                    "are daily aggregates that lag behind real time.")
+    public GarminEnrichmentService.TodaySnapshot enrichmentToday() {
+        return enrichmentService.today(DEFAULT_ACCOUNT_ID);
+    }
+
+    @GetMapping("/enrichment/body-battery/trend")
+    @Operation(summary = "Get the last 14 days of Body Battery high/low values")
+    public java.util.List<GarminEnrichmentService.BodyBatteryTrendPoint> bodyBatteryTrend() {
+        return enrichmentService.bodyBatteryTrend(DEFAULT_ACCOUNT_ID);
     }
 
     private ConnectResponse toResponse(ConnectResult result) {

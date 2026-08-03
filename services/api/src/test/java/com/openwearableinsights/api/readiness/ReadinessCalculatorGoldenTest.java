@@ -29,7 +29,7 @@ class ReadinessCalculatorGoldenTest {
 
         ReadinessScore score = calculator.calculate(inputs);
 
-        assertThat(score.algorithmVersion()).isEqualTo("0.1");
+        assertThat(score.algorithmVersion()).isEqualTo("0.2");
         assertThat(score.provisional()).isTrue();
         assertThat(score.confidence()).isEqualTo("low");
         assertThat(score.score()).isBetween(0, 100);

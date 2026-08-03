@@ -15,6 +15,9 @@ import java.util.Optional;
  * @param acuteLoad         acute training load (7-day)
  * @param chronicLoad       chronic training load (28-day)
  * @param stressScore       current stress score (0-100)
+ * @param bodyBatteryLow    most recent day's Body Battery low value (0-100,
+ *                          Garmin-exclusive — see garminconnect module).
+ *                          A higher "low" means less depletion that day.
  * @param dataCompleteness  fraction of expected metrics present (0.0-1.0)
  */
 public record CurrentMetrics(
@@ -25,6 +28,7 @@ public record CurrentMetrics(
         Optional<Double> acuteLoad,
         Optional<Double> chronicLoad,
         Optional<Double> stressScore,
+        Optional<Double> bodyBatteryLow,
         double dataCompleteness
 ) {
     public CurrentMetrics {

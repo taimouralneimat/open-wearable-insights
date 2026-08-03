@@ -94,6 +94,8 @@ public class BaselineService {
         computeSleepDurationBaseline(accountId, windowStart, metricBaselines, sampleSizes);
         // Steps baseline (for training load context)
         computeMetricBaseline(accountId, "steps", windowStart, metricBaselines, sampleSizes);
+        // Body Battery low baseline (Garmin-exclusive — see garminconnect module)
+        computeMetricBaseline(accountId, "body_battery_low", windowStart, metricBaselines, sampleSizes);
 
         String confidence = computeConfidence(windowDays, metricBaselines.size());
 

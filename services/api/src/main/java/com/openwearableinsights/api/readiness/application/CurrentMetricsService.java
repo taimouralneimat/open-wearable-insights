@@ -57,6 +57,10 @@ public class CurrentMetricsService {
         Optional<Double> rhr = fetchLatestMetric(accountId, "rhr", todayStart);
         Optional<Double> stress = fetchLatestMetric(accountId, "stress", todayStart);
         Optional<Double> sleepDuration = fetchSleepDuration(accountId, todayStart);
+        // Garmin-exclusive — see garminconnect module. Same "today only" rule
+        // as the other metrics above: if Garmin hasn't synced today's value
+        // yet, this is honestly missing rather than fed in stale.
+        Optional<Double> bodyBatteryLow = fetchLatestMetric(accountId, "body_battery_low", todayStart);
 
         // Training load: real HR-zone-weighted load from workout sessions
         // (trainingload.application.TrainingLoadService), averaged per
@@ -75,7 +79,11 @@ public class CurrentMetricsService {
         // same baseline reused (and finally surfaced) on the Sleep view itself.
         Optional<Double> sleepNeed = Optional.empty();
 
-        // Data completeness: fraction of expected metrics present
+        // Data completeness: fraction of expected metrics present. Body
+        // Battery is intentionally excluded from this count — it's an
+        // enrichment on top of the core metric set, not a core expectation,
+        // so accounts without it (no Garmin Connect sync yet) shouldn't be
+        // marked as having lower-quality data than they actually do.
         int expectedMetrics = 5; // hrv, rhr, stress, sleep, training load
         int presentMetrics = 0;
         if (hrv.isPresent()) presentMetrics++;
@@ -90,6 +98,7 @@ public class CurrentMetricsService {
                 acuteLoad > 0 ? Optional.of(acuteLoad) : Optional.empty(),
                 chronicLoad > 0 ? Optional.of(chronicLoad) : Optional.empty(),
                 stress,
+                bodyBatteryLow,
                 completeness
         );
     }

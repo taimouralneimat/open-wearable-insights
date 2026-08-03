@@ -26,7 +26,8 @@ public record ReadinessScore(
         String limitations,
         Instant computedAt
 ) {
-    public static final String ALGORITHM_VERSION = "0.1";
+    /** v0.2: added the Body Battery factor (see ReadinessCalculator) and rebalanced Stress's weight. */
+    public static final String ALGORITHM_VERSION = "0.2";
 
     public ReadinessScore {
         if (score < 0 || score > 100) {

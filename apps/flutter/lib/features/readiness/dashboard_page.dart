@@ -22,6 +22,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   ScoreDiffResponse? _scoreDiff;
   InsightResponse? _insight;
   HabitCueResponse? _habitCue;
+  GarminEnrichmentResponse? _garminEnrichment;
   String? _displayName;
   bool _loading = true;
   String? _error;
@@ -48,12 +49,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       try { name = (await _apiClient.getProfile()).displayName; } catch (_) { name = null; }
       HabitCueResponse? cue;
       try { cue = await _apiClient.getHabitCue(); } catch (_) { cue = null; }
+      // Best-effort — Garmin-exclusive enrichment isn't available until a
+      // Garmin Connect sync has run at least once; a missing/failed fetch
+      // just means those cards don't show, not a dashboard-wide error.
+      GarminEnrichmentResponse? enrichment;
+      try { enrichment = await _apiClient.getGarminEnrichmentToday(); } catch (_) { enrichment = null; }
       setState(() {
         _readiness = readiness;
         _insight = insight;
         _scoreDiff = diff;
         _displayName = name;
         _habitCue = cue;
+        _garminEnrichment = enrichment;
         _loading = false;
       });
     } catch (e) {
@@ -114,6 +121,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           if (_scoreDiff != null) ...[
             const SizedBox(height: AppSpacing.lg),
             _ScoreDiffCard(diff: _scoreDiff!),
+          ],
+          if (_garminEnrichment != null &&
+              (_garminEnrichment!.hasBodyBattery || _garminEnrichment!.hasTrainingReadiness)) ...[
+            const SizedBox(height: AppSpacing.lg),
+            _GarminEnrichmentCard(enrichment: _garminEnrichment!),
           ],
           const SizedBox(height: AppSpacing.lg),
           if (i != null) ...[
@@ -226,6 +238,79 @@ class _ScoreDiffCard extends StatelessWidget {
             Text(diff.summary, style: theme.textTheme.bodyMedium),
             const SizedBox(height: AppSpacing.md),
             ...diff.factorDiffs.where((f) => f.direction != 'unchanged').map((f) => _FactorDiffRow(diff: f)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Garmin-exclusive metrics — Body Battery and Garmin's own proprietary
+/// Training Readiness score. Deliberately not blended into this app's own
+/// readiness score above; shown here so Garmin's opinion and this app's
+/// computed opinion stay visibly distinct rather than merged into one
+/// number. "As of" dates are shown because these are daily aggregates that
+/// lag behind real time — see GarminEnrichmentService.
+class _GarminEnrichmentCard extends StatelessWidget {
+  final GarminEnrichmentResponse enrichment;
+  const _GarminEnrichmentCard({required this.enrichment});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.watch_outlined, size: 20, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.sm),
+                Text('From your Garmin', style: theme.textTheme.titleMedium),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (enrichment.hasBodyBattery) ...[
+              Row(
+                children: [
+                  Icon(Icons.battery_charging_full, size: 18, color: status.good),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: Text('Body Battery', style: theme.textTheme.bodyMedium)),
+                  Text(
+                    '${enrichment.bodyBatteryLow?.toInt() ?? '–'} – ${enrichment.bodyBatteryHigh?.toInt() ?? '–'}',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ],
+              ),
+              if (enrichment.bodyBatteryCharged != null || enrichment.bodyBatteryDrained != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Charged +${enrichment.bodyBatteryCharged?.toInt() ?? 0} · Drained -${enrichment.bodyBatteryDrained?.toInt() ?? 0}'
+                  '${enrichment.bodyBatteryAsOf != null ? ' · as of ${enrichment.bodyBatteryAsOf}' : ''}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+              if (enrichment.hasTrainingReadiness) const SizedBox(height: AppSpacing.md),
+            ],
+            if (enrichment.hasTrainingReadiness) ...[
+              Row(
+                children: [
+                  Icon(Icons.speed_outlined, size: 18, color: theme.colorScheme.primary),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: Text('Garmin Training Readiness', style: theme.textTheme.bodyMedium)),
+                  Text('${enrichment.garminTrainingReadiness}', style: theme.textTheme.titleMedium),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Garmin\'s own score — shown for comparison, not blended into your readiness score above'
+                '${enrichment.trainingReadinessAsOf != null ? ' · as of ${enrichment.trainingReadinessAsOf}' : ''}',
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
           ],
         ),
       ),
