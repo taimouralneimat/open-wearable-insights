@@ -20,6 +20,7 @@ class _SleepPageState extends State<SleepPage> {
   List<SleepTrendPoint>? _trends;
   SleepDebtResponse? _debt;
   SleepPlanResponse? _plan;
+  SleepConsistencyResponse? _consistency;
   int _trendWindowDays = 7;
   bool _loading = true;
   bool _trendsLoading = false;
@@ -45,11 +46,14 @@ class _SleepPageState extends State<SleepPage> {
       try { debt = await _apiClient.getSleepDebt(); } catch (_) { debt = null; }
       SleepPlanResponse? plan;
       try { plan = await _apiClient.getSleepPlan(); } catch (_) { plan = null; }
+      SleepConsistencyResponse? consistency;
+      try { consistency = await _apiClient.getSleepConsistency(); } catch (_) { consistency = null; }
       setState(() {
         _summary = summary;
         _trends = trends;
         _debt = debt;
         _plan = plan;
+        _consistency = consistency;
         _loading = false;
       });
     } catch (e) {
@@ -129,6 +133,10 @@ class _SleepPageState extends State<SleepPage> {
           const SizedBox(height: AppSpacing.lg),
           if (_debt != null) ...[
             _SleepDebtCard(debt: _debt!),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          if (_consistency != null && _consistency!.consistencyScore != null) ...[
+            _SleepConsistencyCard(consistency: _consistency!),
             const SizedBox(height: AppSpacing.lg),
           ],
           if (_trends != null)
@@ -350,6 +358,53 @@ class _SleepDebtCard extends StatelessWidget {
               'not a generic target) — accumulated over ${debt.nightsConsidered} of the last '
               '${debt.windowDays} nights.',
               style: theme.textTheme.bodySmall?.copyWith(color: onBg),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// How regular bed/wake times have been — distinct from duration/debt above,
+/// this is about *when*, not *how much*.
+class _SleepConsistencyCard extends StatelessWidget {
+  final SleepConsistencyResponse consistency;
+  const _SleepConsistencyCard({required this.consistency});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = theme.status;
+    final score = consistency.consistencyScore!;
+    final color = status.forScore(score, goodAt: 75, fairAt: 50);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Row(
+          children: [
+            Icon(Icons.schedule_outlined, size: 28, color: color),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text('Sleep consistency', style: theme.textTheme.titleMedium),
+                      const Spacer(),
+                      Text('$score', style: theme.textTheme.titleLarge?.copyWith(color: color)),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Avg bedtime ${consistency.avgBedtime} · avg wake ${consistency.avgWakeTime} '
+                    'over ${consistency.nightsConsidered} nights',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
           ],
         ),

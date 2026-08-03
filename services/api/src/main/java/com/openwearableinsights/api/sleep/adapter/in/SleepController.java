@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.sleep.adapter.in;
 
 import com.openwearableinsights.api.sleep.application.SleepInsightService;
+import com.openwearableinsights.api.sleep.domain.SleepConsistency;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
@@ -70,5 +71,12 @@ public class SleepController {
             description = "Recommends a bedtime based on the account's inferred usual wake time, personal sleep need, and a capped gradual repayment of accumulated debt — with the reasoning shown, not just a number. Honest empty state when there isn't enough real history for either input.")
     public SleepPlan getPlan() {
         return sleepInsightService.computeSleepPlan(DEFAULT_ACCOUNT_ID);
+    }
+
+    @GetMapping("/consistency")
+    @Operation(summary = "Get sleep consistency (bed/wake time regularity)",
+            description = "How regular bed/wake times have been over the last 14 nights — a 0-100 score plus average bed/wake times, distinct from sleep duration/debt. Honest empty state when there isn't enough recent history.")
+    public SleepConsistency getConsistency() {
+        return sleepInsightService.computeSleepConsistency(DEFAULT_ACCOUNT_ID);
     }
 }

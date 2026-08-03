@@ -3,6 +3,7 @@ package com.openwearableinsights.api.sleep;
 import com.openwearableinsights.api.readiness.application.BaselineService;
 import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import com.openwearableinsights.api.sleep.application.SleepInsightService;
+import com.openwearableinsights.api.sleep.domain.SleepConsistency;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
@@ -197,5 +198,92 @@ class SleepInsightServiceTest {
             ));
         }
         return rows;
+    }
+
+    private static Map<String, Object> consistencyRow(LocalDate date, String bedtimeHHmm, String wakeHHmm) {
+        return Map.of(
+                "bedtime", Timestamp.from(date.atTime(java.time.LocalTime.parse(bedtimeHHmm)).toInstant(ZoneOffset.UTC)),
+                "waketime", Timestamp.from(date.plusDays(1).atTime(java.time.LocalTime.parse(wakeHHmm)).toInstant(ZoneOffset.UTC))
+        );
+    }
+
+    @Test
+    void computeSleepConsistency_tooFewNights_returnsHonestEmptyState() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(List.of(
+                consistencyRow(LocalDate.of(2026, 8, 1), "23:00", "07:00"),
+                consistencyRow(LocalDate.of(2026, 8, 2), "23:15", "07:10")
+        ));
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepConsistency result = service.computeSleepConsistency(1L);
+
+        assertThat(result.consistencyScore()).isNull();
+        assertThat(result.confidence()).isEqualTo("none");
+        assertThat(result.nightsConsidered()).isEqualTo(2);
+        assertThat(String.join(" ", result.limitations())).contains("at least");
+    }
+
+    @Test
+    void computeSleepConsistency_veryRegularBedtimes_scoresHigh() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        // Same bed/wake time every night (down to the minute) — should score near 100.
+        List<Map<String, Object>> rows = new java.util.ArrayList<>();
+        LocalDate start = LocalDate.of(2026, 8, 1);
+        for (int i = 0; i < 7; i++) {
+            rows.add(consistencyRow(start.plusDays(i), "23:00", "07:00"));
+        }
+        when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepConsistency result = service.computeSleepConsistency(1L);
+
+        assertThat(result.consistencyScore()).isEqualTo(100);
+        assertThat(result.avgBedtime()).isEqualTo("23:00");
+        assertThat(result.avgWakeTime()).isEqualTo("07:00");
+        assertThat(result.bedtimeVarianceMinutes()).isEqualTo(0.0);
+    }
+
+    @Test
+    void computeSleepConsistency_bedtimesStraddlingMidnight_averageCorrectly() {
+        // Real-world case the noon-shift exists for: alternating 23:30 and 00:30
+        // bedtimes should average to ~midnight, NOT ~noon (which a naive
+        // minutes-since-midnight mean would produce).
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        List<Map<String, Object>> rows = new java.util.ArrayList<>();
+        LocalDate start = LocalDate.of(2026, 8, 1);
+        for (int i = 0; i < 6; i++) {
+            String bedtime = i % 2 == 0 ? "23:30" : "00:30";
+            rows.add(consistencyRow(start.plusDays(i), bedtime, "07:00"));
+        }
+        when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepConsistency result = service.computeSleepConsistency(1L);
+
+        // Midpoint of 23:30 and 00:30 is 00:00, not 12:00.
+        assertThat(result.avgBedtime()).isEqualTo("00:00");
+    }
+
+    @Test
+    void computeSleepConsistency_erraticBedtimes_scoresLow() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        List<Map<String, Object>> rows = List.of(
+                consistencyRow(LocalDate.of(2026, 8, 1), "21:00", "05:00"),
+                consistencyRow(LocalDate.of(2026, 8, 2), "23:45", "09:30"),
+                consistencyRow(LocalDate.of(2026, 8, 3), "01:30", "06:15"),
+                consistencyRow(LocalDate.of(2026, 8, 4), "22:15", "10:45"),
+                consistencyRow(LocalDate.of(2026, 8, 5), "00:50", "05:50")
+        );
+        when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepConsistency result = service.computeSleepConsistency(1L);
+
+        assertThat(result.consistencyScore()).isLessThan(70);
     }
 }

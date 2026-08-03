@@ -244,6 +244,12 @@ class ApiClient {
     return SleepPlanResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Get sleep consistency (bed/wake time regularity) over recent nights.
+  Future<SleepConsistencyResponse> getSleepConsistency() async {
+    final response = await _dio.get('/api/v1/sleep/consistency');
+    return SleepConsistencyResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get activity summary.
   Future<ActivitySummary> getActivitySummary() async {
     final response = await _dio.get('/api/v1/activities/summary');
@@ -1031,6 +1037,44 @@ class SleepDebtResponse {
       accumulatedHours: (json['accumulatedHours'] as num?)?.toDouble(),
       nightsConsidered: json['nightsConsidered'] as int,
       windowDays: json['windowDays'] as int,
+      confidence: json['confidence'] as String,
+      limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
+    );
+  }
+}
+
+/// How regular bed/wake times have been recently — see
+/// SleepInsightService.computeSleepConsistency on the backend. Distinct
+/// from sleep duration/debt: this is about *when*, not *how much*.
+class SleepConsistencyResponse {
+  final int? consistencyScore;
+  final String? avgBedtime;
+  final String? avgWakeTime;
+  final double? bedtimeVarianceMinutes;
+  final double? wakeTimeVarianceMinutes;
+  final int nightsConsidered;
+  final String confidence;
+  final List<String> limitations;
+
+  SleepConsistencyResponse({
+    this.consistencyScore,
+    this.avgBedtime,
+    this.avgWakeTime,
+    this.bedtimeVarianceMinutes,
+    this.wakeTimeVarianceMinutes,
+    required this.nightsConsidered,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory SleepConsistencyResponse.fromJson(Map<String, dynamic> json) {
+    return SleepConsistencyResponse(
+      consistencyScore: json['consistencyScore'] as int?,
+      avgBedtime: json['avgBedtime'] as String?,
+      avgWakeTime: json['avgWakeTime'] as String?,
+      bedtimeVarianceMinutes: (json['bedtimeVarianceMinutes'] as num?)?.toDouble(),
+      wakeTimeVarianceMinutes: (json['wakeTimeVarianceMinutes'] as num?)?.toDouble(),
+      nightsConsidered: json['nightsConsidered'] as int,
       confidence: json['confidence'] as String,
       limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],
     );

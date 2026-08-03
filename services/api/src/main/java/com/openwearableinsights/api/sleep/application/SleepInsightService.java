@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.sleep.application;
 
 import com.openwearableinsights.api.readiness.application.BaselineService;
+import com.openwearableinsights.api.sleep.domain.SleepConsistency;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
@@ -62,6 +63,15 @@ public class SleepInsightService {
     // large debt never turns into an absurd "sleep for 14 hours" suggestion.
     private static final double DEBT_REPAYMENT_FRACTION = 1.0 / 7.0;
     private static final double MAX_DEBT_REPAYMENT_HOURS = 1.0;
+
+    // Sleep consistency (parity row #3): wider window than wake-time
+    // inference above since it's now well-powered by real Garmin Connect
+    // history, not just recent FIT imports.
+    private static final int CONSISTENCY_WINDOW_DAYS = 14;
+    private static final int MIN_NIGHTS_FOR_CONSISTENCY = 5;
+    // Consistency score floor: 100+ minutes average deviation maps to 0.
+    private static final double CONSISTENCY_ZERO_AT_MINUTES = 100.0;
+    private static final int MEDIUM_CONFIDENCE_NIGHTS = 10;
 
     private final JdbcTemplate jdbcTemplate;
     private final BaselineService baselineService;
@@ -187,6 +197,89 @@ public class SleepInsightService {
                 recommendedBedtime.toString(), targetWakeTime.toString(),
                 targetSleepHours, debtRepayment, reasoning, confidence, limitations
         );
+    }
+
+    /**
+     * How consistent bed/wake times have been over the last
+     * {@value #CONSISTENCY_WINDOW_DAYS} nights (parity row #3) — a
+     * previously entirely-missing metric, distinct from duration/debt.
+     *
+     * <p>Bedtime and wake time are each represented as minutes-since-noon
+     * rather than minutes-since-midnight before averaging — a plain
+     * minutes-since-midnight mean breaks for values that straddle midnight
+     * (23:30 and 00:15 are 45 minutes apart, not ~23 hours), which is
+     * exactly where most real bedtimes cluster. Shifting the wrap-around
+     * point to noon (nobody's bed/wake time is anywhere near midday) avoids
+     * that without needing full circular statistics.
+     */
+    public SleepConsistency computeSleepConsistency(Long accountId) {
+        List<String> limitations = new ArrayList<>();
+        limitations.add("Not a medical measure — a description of how regular your logged " +
+                "bed/wake times have been, not a recommendation.");
+
+        List<Map<String, Object>> rows;
+        try {
+            rows = jdbcTemplate.queryForList(
+                    "SELECT MIN(time) as bedtime, MAX(time) as waketime FROM measurements " +
+                    "WHERE account_id = ? AND metric_type = 'sleep_stage' AND time >= ? " +
+                    "GROUP BY DATE(time)",
+                    accountId, Timestamp.from(Instant.now().minus(CONSISTENCY_WINDOW_DAYS, java.time.temporal.ChronoUnit.DAYS))
+            );
+        } catch (Exception e) {
+            log.warn("Failed to compute sleep consistency for account {}: {}", accountId, e.getMessage(), e);
+            rows = List.of();
+        }
+
+        if (rows.size() < MIN_NIGHTS_FOR_CONSISTENCY) {
+            limitations.add("Needs at least " + MIN_NIGHTS_FOR_CONSISTENCY + " nights of real sleep " +
+                    "data in the last " + CONSISTENCY_WINDOW_DAYS + " days — only " + rows.size() + " so far.");
+            return new SleepConsistency(null, null, null, null, null, rows.size(), "none", limitations);
+        }
+
+        List<Integer> bedtimeShifted = new ArrayList<>();
+        List<Integer> wakeShifted = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            bedtimeShifted.add(shiftedMinutesSinceNoon(((Timestamp) row.get("bedtime")).toInstant()));
+            wakeShifted.add(shiftedMinutesSinceNoon(((Timestamp) row.get("waketime")).toInstant()));
+        }
+
+        double avgBedtimeShifted = average(bedtimeShifted);
+        double avgWakeShifted = average(wakeShifted);
+        double bedtimeStdDev = standardDeviation(bedtimeShifted, avgBedtimeShifted);
+        double wakeStdDev = standardDeviation(wakeShifted, avgWakeShifted);
+
+        int consistencyScore = (int) Math.round(
+                clamp(100.0 * (1 - ((bedtimeStdDev + wakeStdDev) / 2.0) / CONSISTENCY_ZERO_AT_MINUTES), 0, 100));
+        String confidence = rows.size() >= MEDIUM_CONFIDENCE_NIGHTS ? "medium" : "low";
+
+        return new SleepConsistency(
+                consistencyScore,
+                unshiftToLocalTime(avgBedtimeShifted).toString(),
+                unshiftToLocalTime(avgWakeShifted).toString(),
+                bedtimeStdDev, wakeStdDev,
+                rows.size(), confidence, limitations
+        );
+    }
+
+    /** Minutes since midnight, then shifted so noon (not midnight) is the wrap-around point — see computeSleepConsistency. */
+    private int shiftedMinutesSinceNoon(Instant instant) {
+        LocalTime t = instant.atZone(ZoneOffset.UTC).toLocalTime();
+        int minutesSinceMidnight = t.getHour() * 60 + t.getMinute();
+        return (minutesSinceMidnight + 12 * 60) % (24 * 60);
+    }
+
+    private LocalTime unshiftToLocalTime(double shiftedMinutes) {
+        int minutesSinceMidnight = (((int) Math.round(shiftedMinutes)) + 12 * 60) % (24 * 60);
+        return LocalTime.of(minutesSinceMidnight / 60, minutesSinceMidnight % 60);
+    }
+
+    private double average(List<Integer> values) {
+        return values.stream().mapToInt(Integer::intValue).average().orElse(0);
+    }
+
+    private double standardDeviation(List<Integer> values, double mean) {
+        double variance = values.stream().mapToDouble(v -> Math.pow(v - mean, 2)).average().orElse(0);
+        return Math.sqrt(variance);
     }
 
     /**
