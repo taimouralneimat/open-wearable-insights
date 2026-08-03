@@ -969,7 +969,11 @@ class GarminExpressCategoryResponse {
 
 /// Sleep summary response.
 class SleepSummary {
+  /// Time in bed — deep + rem + light + awake. What sleep debt/plan and the
+  /// readiness score's baseline use; see [asleepHours] for true sleep time.
   final double totalHours;
+  /// Deep + rem + light only, excluding awake-in-bed time. Display only.
+  final double asleepHours;
   final double deepHours;
   final double remHours;
   final double lightHours;
@@ -982,6 +986,7 @@ class SleepSummary {
 
   SleepSummary({
     required this.totalHours,
+    required this.asleepHours,
     required this.deepHours,
     required this.remHours,
     required this.lightHours,
@@ -996,6 +1001,7 @@ class SleepSummary {
   factory SleepSummary.fromJson(Map<String, dynamic> json) {
     return SleepSummary(
       totalHours: (json['totalHours'] as num).toDouble(),
+      asleepHours: (json['asleepHours'] as num?)?.toDouble() ?? 0,
       deepHours: (json['deepHours'] as num).toDouble(),
       remHours: (json['remHours'] as num).toDouble(),
       lightHours: (json['lightHours'] as num).toDouble(),

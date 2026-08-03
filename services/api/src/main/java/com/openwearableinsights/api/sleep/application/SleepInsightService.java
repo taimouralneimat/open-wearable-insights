@@ -360,7 +360,8 @@ public class SleepInsightService {
             double remHours = hoursByStage[1];
             double lightHours = hoursByStage[2];
             double awakeHours = hoursByStage[3];
-            double totalHours = deepHours + remHours + lightHours + awakeHours;
+            double asleepHours = deepHours + remHours + lightHours;
+            double totalHours = asleepHours + awakeHours;
 
             int readingCount = rows.size();
             String confidence = computeConfidence(readingCount);
@@ -381,13 +382,13 @@ public class SleepInsightService {
             }
 
             return new SleepSummary(
-                    totalHours, deepHours, remHours, lightHours, awakeHours,
+                    totalHours, asleepHours, deepHours, remHours, lightHours, awakeHours,
                     sleepScore, personalNeedHours, stages, confidence, limitations
             );
         } catch (Exception e) {
             log.warn("Failed to compute sleep summary for account {} on {}: {}",
                     accountId, date, e.getMessage(), e);
-            return new SleepSummary(0, 0, 0, 0, 0, 0, null, List.of(), "none",
+            return new SleepSummary(0, 0, 0, 0, 0, 0, 0, null, List.of(), "none",
                     List.of("Failed to compute sleep summary: " + e.getMessage()));
         }
     }

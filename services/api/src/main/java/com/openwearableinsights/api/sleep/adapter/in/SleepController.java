@@ -46,7 +46,7 @@ public class SleepController {
     public SleepSummary getSummary() {
         return sleepInsightService.computeLatestSummary(DEFAULT_ACCOUNT_ID)
                 .orElseGet(() -> new SleepSummary(
-                        0, 0, 0, 0, 0, 0, null, List.of(), "none",
+                        0, 0, 0, 0, 0, 0, 0, null, List.of(), "none",
                         List.of("No sleep data has been imported yet.")
                 ));
     }

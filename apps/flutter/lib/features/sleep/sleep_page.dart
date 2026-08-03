@@ -220,10 +220,18 @@ class _SleepScoreCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               summary.sleepNeedHours != null
-                  ? '${summary.totalHours.toStringAsFixed(1)}h total sleep · need ~${summary.sleepNeedHours!.toStringAsFixed(1)}h'
-                  : '${summary.totalHours.toStringAsFixed(1)}h total sleep',
+                  ? '${summary.totalHours.toStringAsFixed(1)}h in bed · need ~${summary.sleepNeedHours!.toStringAsFixed(1)}h'
+                  : '${summary.totalHours.toStringAsFixed(1)}h in bed',
               style: theme.textTheme.bodyLarge,
             ),
+            if (summary.totalHours > 0) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '${summary.asleepHours.toStringAsFixed(1)}h actually asleep '
+                '(${(summary.asleepHours / summary.totalHours * 100).round()}% of time in bed)',
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ],
           ],
         ),
       ),
