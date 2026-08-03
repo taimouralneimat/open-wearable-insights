@@ -85,14 +85,41 @@ public class DeterministicInsightEngine {
                 .toList();
     }
 
+    /**
+     * Unlike the old version of this method, cites the actual factor behind
+     * the recommendation — the same rankedFactors approach explainReadiness
+     * uses — rather than a fixed pair of generic strings keyed only on which
+     * score bucket the number falls into. A recommendation with no reason
+     * attached isn't meaningfully different from a fixed rule; the point of
+     * this engine is that every output traces back to a real computed factor.
+     */
     private List<String> buildActions(ReadinessScore score) {
+        List<FactorContribution> rankedFactors = score.factors().stream()
+                .sorted(Comparator.comparingDouble((FactorContribution f) -> Math.abs(f.contribution())).reversed())
+                .toList();
+        Optional<FactorContribution> topPositive = rankedFactors.stream()
+                .filter(f -> f.direction() == Direction.POSITIVE).findFirst();
+        Optional<FactorContribution> topNegative = rankedFactors.stream()
+                .filter(f -> f.direction() == Direction.NEGATIVE).findFirst();
+
+        List<String> actions = new ArrayList<>();
         if (score.score() >= 75) {
-            return List.of("Consider a harder session today.", "You appear well-recovered.");
+            actions.add("Consider a harder session today.");
+            actions.add(topPositive
+                    .map(f -> "You appear well-recovered — " + f.name() + " (" + formatValue(f) + ") is your strongest factor.")
+                    .orElse("You appear well-recovered."));
+        } else if (score.score() >= 50) {
+            actions.add("Consider an easy or moderate session.");
+            actions.add(topNegative
+                    .map(f -> "Monitor how you feel during warm-up — " + f.name() + " (" + formatValue(f) + ") is holding you back a bit.")
+                    .orElse("Monitor how you feel during warm-up."));
+        } else {
+            actions.add("Consider rest or active recovery.");
+            actions.add(topNegative
+                    .map(f -> f.name() + " (" + formatValue(f) + ") is today's biggest drag — prioritize sleep tonight.")
+                    .orElse("Prioritize sleep tonight."));
         }
-        if (score.score() >= 50) {
-            return List.of("Consider an easy or moderate session.", "Monitor how you feel during warm-up.");
-        }
-        return List.of("Consider rest or active recovery.", "Prioritize sleep tonight.");
+        return actions;
     }
 
     private List<String> buildCautions(ReadinessScore score) {

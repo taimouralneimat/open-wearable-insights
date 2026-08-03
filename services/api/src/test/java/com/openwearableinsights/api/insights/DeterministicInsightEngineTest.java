@@ -48,6 +48,37 @@ class DeterministicInsightEngineTest {
     }
 
     @Test
+    void recommendedActions_citesTheActualDominantFactor_notJustAGenericScoreBucket() {
+        // Sleep deficit dominates: -3h vs need, dwarfing the small HRV/RHR/stress deviations.
+        ReadinessScore lowScore = calculator.calculate(new ReadinessInputs(
+                Optional.of(1.0), Optional.of(0.5), Optional.of(4.0), Optional.of(7.5),
+                Optional.of(250.0), Optional.of(250.0), Optional.of(52.0),
+                0.9, 30
+        ));
+        assertThat(lowScore.score()).isLessThan(50);
+
+        Insight insight = engine.generate(lowScore);
+
+        assertThat(insight.recommendedActions()).anySatisfy(action ->
+                assertThat(action).contains("Sleep duration vs. need"));
+    }
+
+    @Test
+    void recommendedActions_highScore_citesTheStrongestPositiveFactor() {
+        ReadinessScore highScore = calculator.calculate(new ReadinessInputs(
+                Optional.of(20.0), Optional.of(-4.0), Optional.of(8.5), Optional.of(7.5),
+                Optional.of(200.0), Optional.of(250.0), Optional.of(15.0),
+                0.95, 30
+        ));
+        assertThat(highScore.score()).isGreaterThanOrEqualTo(75);
+
+        Insight insight = engine.generate(highScore);
+
+        assertThat(insight.recommendedActions()).anySatisfy(action ->
+                assertThat(action).contains("strongest factor"));
+    }
+
+    @Test
     void headlineReflectsProvisionalState() {
         ReadinessScore provisional = calculator.calculate(new ReadinessInputs(
                 Optional.of(5.0), Optional.of(-1.0), Optional.of(7.0), Optional.of(7.5),
