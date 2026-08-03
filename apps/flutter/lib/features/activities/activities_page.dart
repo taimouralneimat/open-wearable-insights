@@ -19,7 +19,9 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
   ActivitySummary? _summary;
   List<ActivityTrendPoint>? _trends;
   List<ActivitySessionResponse> _sessions = [];
+  int _trendWindowDays = 7;
   bool _loading = true;
+  bool _trendsLoading = false;
   String? _error;
 
   @override
@@ -35,7 +37,7 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
     });
     try {
       final summary = await _apiClient.getActivitySummary();
-      final trends = await _apiClient.getActivityTrends();
+      final trends = await _apiClient.getActivityTrends(days: _trendWindowDays);
       final sessions = await _apiClient.getActivitySessions();
       setState(() {
         _summary = summary;
@@ -48,6 +50,24 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
         _error = e.toString();
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _changeTrendWindow(int days) async {
+    setState(() {
+      _trendWindowDays = days;
+      _trendsLoading = true;
+    });
+    try {
+      final trends = await _apiClient.getActivityTrends(days: days);
+      if (!mounted) return;
+      setState(() {
+        _trends = trends;
+        _trendsLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _trendsLoading = false);
     }
   }
 
@@ -96,7 +116,13 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
           const SizedBox(height: AppSpacing.lg),
           _TrainingLoadEntryCard(),
           const SizedBox(height: AppSpacing.lg),
-          if (_trends != null) _ActivityTrendsCard(trends: _trends!),
+          if (_trends != null)
+            _ActivityTrendsCard(
+              trends: _trends!,
+              windowDays: _trendWindowDays,
+              loading: _trendsLoading,
+              onWindowChanged: _changeTrendWindow,
+            ),
           if (_sessions.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.lg),
             _RecentSessionsCard(sessions: _sessions),
@@ -233,23 +259,97 @@ class _StatTile extends StatelessWidget {
 
 class _ActivityTrendsCard extends StatelessWidget {
   final List<ActivityTrendPoint> trends;
-  const _ActivityTrendsCard({required this.trends});
+  final int windowDays;
+  final bool loading;
+  final ValueChanged<int> onWindowChanged;
+
+  const _ActivityTrendsCard({
+    required this.trends,
+    required this.windowDays,
+    required this.loading,
+    required this.onWindowChanged,
+  });
+
+  static const List<int> _windowOptions = [7, 30, 90];
+  // Same reasoning as _SleepTrendsCard: a per-day bar list is only readable
+  // up to a couple weeks — beyond that the average above carries the signal.
+  static const int _maxRowsShown = 14;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final maxSteps = trends.map((t) => t.steps).reduce((a, b) => a > b ? a : b);
+    final shown = trends.length > _maxRowsShown
+        ? trends.sublist(trends.length - _maxRowsShown)
+        : trends;
+    final maxSteps = shown.isEmpty ? 0 : shown.map((t) => t.steps).reduce((a, b) => a > b ? a : b);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('7-day steps trend', style: theme.textTheme.titleMedium),
+            Row(
+              children: [
+                Text('Steps trend', style: theme.textTheme.titleMedium),
+                const Spacer(),
+                SegmentedButton<int>(
+                  segments: _windowOptions
+                      .map((d) => ButtonSegment(value: d, label: Text('${d}d')))
+                      .toList(),
+                  selected: {windowDays},
+                  showSelectedIcon: false,
+                  onSelectionChanged: loading ? null : (s) => onWindowChanged(s.first),
+                ),
+              ],
+            ),
             const SizedBox(height: AppSpacing.md),
-            ...trends.map((t) => _TrendBar(point: t, maxSteps: maxSteps)),
+            if (loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (trends.isEmpty)
+              Text('No days in this window yet.', style: theme.textTheme.bodySmall)
+            else ...[
+              if (windowDays > 7) ...[
+                _ActivityTrendSummaryRow(trends: trends),
+                const SizedBox(height: AppSpacing.md),
+                if (trends.length > _maxRowsShown)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: Text(
+                      'Most recent $_maxRowsShown of ${trends.length} days:',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+              ],
+              ...shown.map((t) => _TrendBar(point: t, maxSteps: maxSteps)),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ActivityTrendSummaryRow extends StatelessWidget {
+  final List<ActivityTrendPoint> trends;
+  const _ActivityTrendSummaryRow({required this.trends});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final avgSteps = trends.map((t) => t.steps).reduce((a, b) => a + b) / trends.length;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '${avgSteps.round()} avg steps/day over ${trends.length} days',
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }

@@ -15,13 +15,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Computes real activity summaries from step measurements.
+ * Computes real activity summaries from measurement data.
  *
- * <p>Calories, active minutes, and active zone minutes are NOT computed —
- * the data model has no measurement type for them yet. Rather than
- * fabricating estimates from steps (which would look like a real signal
- * but wouldn't be one), those fields are reported as unavailable, per the
- * same honesty discipline as the readiness score's missing-data handling.
+ * <p>Steps are always tracked (FIT and Garmin Connect both provide them).
+ * Calories and active minutes are only real when a Garmin Connect sync has
+ * run (see garminconnect module) — FIT import alone doesn't produce them.
+ * Active zone minutes (heart-rate-zone-weighted, distinct from raw active
+ * minutes) genuinely isn't tracked by either source yet; reported as
+ * unavailable rather than fabricated, per the same honesty discipline as
+ * the readiness score's missing-data handling.
  *
  * <p>Like SleepInsightService, "summary" means the most recent day with
  * real data rather than strictly today — more useful once data import lags
@@ -32,11 +34,9 @@ public class ActivityInsightService {
 
     private static final Logger log = LoggerFactory.getLogger(ActivityInsightService.class);
 
-    private static final List<String> UNTRACKED_METRICS_LIMITATION = List.of(
-            "Calories, active minutes, and active zone minutes are not yet " +
-            "tracked in the data model — only step counts are computed from " +
-            "real measurement data."
-    );
+    private static final String ACTIVE_ZONE_MINUTES_LIMITATION =
+            "Active zone minutes (heart-rate-zone-weighted) isn't tracked yet — " +
+            "active minutes above is moderate + vigorous intensity minutes, not zone-weighted.";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -47,16 +47,25 @@ public class ActivityInsightService {
     public ActivitySummary computeLatestSummary(Long accountId) {
         Optional<LocalDate> latestDate = findMostRecentStepsDate(accountId);
         if (latestDate.isEmpty()) {
-            List<String> limitations = new ArrayList<>();
-            limitations.add("No step data has been imported yet.");
-            limitations.addAll(UNTRACKED_METRICS_LIMITATION);
-            return new ActivitySummary(0, null, null, null, Instant.now().toString(), "none", limitations);
+            return new ActivitySummary(0, null, null, null, Instant.now().toString(), "none",
+                    List.of("No step data has been imported yet."));
         }
-        int steps = sumStepsForDate(accountId, latestDate.get());
+        LocalDate date = latestDate.get();
+        int steps = sumStepsForDate(accountId, date);
+        Integer calories = sumMetricForDate(accountId, "calories", date);
+        Integer activeMinutes = sumActiveMinutesForDate(accountId, date);
+
+        List<String> limitations = new ArrayList<>();
+        limitations.add(ACTIVE_ZONE_MINUTES_LIMITATION);
+        if (calories == null || activeMinutes == null) {
+            limitations.add("Calories and active minutes require a Garmin Connect sync — " +
+                    "not produced by a plain FIT file import.");
+        }
+
         return new ActivitySummary(
-                steps, null, null, null,
-                latestDate.get().atStartOfDay(ZoneOffset.UTC).toInstant().toString(),
-                "medium", UNTRACKED_METRICS_LIMITATION
+                steps, calories, activeMinutes, null,
+                date.atStartOfDay(ZoneOffset.UTC).toInstant().toString(),
+                "medium", limitations
         );
     }
 
@@ -110,5 +119,32 @@ public class ActivityInsightService {
             log.warn("Failed to sum steps for account {} on {}: {}", accountId, date, e.getMessage(), e);
             return 0;
         }
+    }
+
+    /** Null (not zero) when the metric has no rows that day — distinguishes "0" from "unavailable". */
+    private Integer sumMetricForDate(Long accountId, String metricType, LocalDate date) {
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM measurements WHERE account_id = ? AND metric_type = ? AND DATE(time) = ?",
+                    Integer.class, accountId, metricType, date
+            );
+            if (count == null || count == 0) return null;
+            Double sum = jdbcTemplate.queryForObject(
+                    "SELECT SUM(value) FROM measurements WHERE account_id = ? AND metric_type = ? AND DATE(time) = ?",
+                    Double.class, accountId, metricType, date
+            );
+            return sum != null ? (int) Math.round(sum) : null;
+        } catch (Exception e) {
+            log.warn("Failed to sum '{}' for account {} on {}: {}", metricType, accountId, date, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /** Moderate + vigorous intensity minutes — see ACTIVE_ZONE_MINUTES_LIMITATION for what this isn't. */
+    private Integer sumActiveMinutesForDate(Long accountId, LocalDate date) {
+        Integer moderate = sumMetricForDate(accountId, "intensity_minutes_moderate", date);
+        Integer vigorous = sumMetricForDate(accountId, "intensity_minutes_vigorous", date);
+        if (moderate == null && vigorous == null) return null;
+        return (moderate != null ? moderate : 0) + (vigorous != null ? vigorous : 0);
     }
 }

@@ -5,10 +5,10 @@ import java.util.List;
 /**
  * A day's activity summary.
  *
- * <p>Only steps are currently computed from real measurement data — the
- * project's data model doesn't yet have calories/activeMinutes/
- * activeZoneMinutes measurement types, so those fields are honestly
- * disclosed as unavailable rather than fabricated from steps.
+ * <p>Steps are always real when any data exists. Calories and activeMinutes
+ * are real once a Garmin Connect sync has run (see garminconnect module) —
+ * null otherwise, not fabricated from steps. activeZoneMinutes (heart-rate-
+ * zone-weighted) genuinely isn't tracked by either data source yet.
  *
  * @param confidence  overall confidence — "none" if steps itself has no data
  * @param limitations known caveats, including which fields aren't tracked yet

@@ -224,9 +224,9 @@ class ApiClient {
     return SleepSummary.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Get sleep trends.
-  Future<List<SleepTrendPoint>> getSleepTrends() async {
-    final response = await _dio.get('/api/v1/sleep/trends');
+  /// Get sleep trends. [days] defaults to 7 server-side if omitted.
+  Future<List<SleepTrendPoint>> getSleepTrends({int? days}) async {
+    final response = await _dio.get('/api/v1/sleep/trends', queryParameters: days != null ? {'days': days} : null);
     return (response.data as List)
         .map((e) => SleepTrendPoint.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -250,9 +250,9 @@ class ApiClient {
     return ActivitySummary.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Get activity trends.
-  Future<List<ActivityTrendPoint>> getActivityTrends() async {
-    final response = await _dio.get('/api/v1/activities/trends');
+  /// Get activity trends. [days] defaults to 7 server-side if omitted.
+  Future<List<ActivityTrendPoint>> getActivityTrends({int? days}) async {
+    final response = await _dio.get('/api/v1/activities/trends', queryParameters: days != null ? {'days': days} : null);
     return (response.data as List)
         .map((e) => ActivityTrendPoint.fromJson(e as Map<String, dynamic>))
         .toList();

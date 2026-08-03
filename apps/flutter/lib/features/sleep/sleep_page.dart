@@ -20,7 +20,9 @@ class _SleepPageState extends State<SleepPage> {
   List<SleepTrendPoint>? _trends;
   SleepDebtResponse? _debt;
   SleepPlanResponse? _plan;
+  int _trendWindowDays = 7;
   bool _loading = true;
+  bool _trendsLoading = false;
   String? _error;
 
   @override
@@ -36,7 +38,7 @@ class _SleepPageState extends State<SleepPage> {
     });
     try {
       final summary = await _apiClient.getSleepSummary();
-      final trends = await _apiClient.getSleepTrends();
+      final trends = await _apiClient.getSleepTrends(days: _trendWindowDays);
       // Best-effort — debt is a secondary surface, shouldn't block the
       // main sleep summary from loading.
       SleepDebtResponse? debt;
@@ -55,6 +57,24 @@ class _SleepPageState extends State<SleepPage> {
         _error = e.toString();
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _changeTrendWindow(int days) async {
+    setState(() {
+      _trendWindowDays = days;
+      _trendsLoading = true;
+    });
+    try {
+      final trends = await _apiClient.getSleepTrends(days: days);
+      if (!mounted) return;
+      setState(() {
+        _trends = trends;
+        _trendsLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _trendsLoading = false);
     }
   }
 
@@ -111,7 +131,13 @@ class _SleepPageState extends State<SleepPage> {
             _SleepDebtCard(debt: _debt!),
             const SizedBox(height: AppSpacing.lg),
           ],
-          if (_trends != null) _SleepTrendsCard(trends: _trends!),
+          if (_trends != null)
+            _SleepTrendsCard(
+              trends: _trends!,
+              windowDays: _trendWindowDays,
+              loading: _trendsLoading,
+              onWindowChanged: _changeTrendWindow,
+            ),
         ],
       ),
     );
@@ -334,22 +360,124 @@ class _SleepDebtCard extends StatelessWidget {
 
 class _SleepTrendsCard extends StatelessWidget {
   final List<SleepTrendPoint> trends;
-  const _SleepTrendsCard({required this.trends});
+  final int windowDays;
+  final bool loading;
+  final ValueChanged<int> onWindowChanged;
+
+  const _SleepTrendsCard({
+    required this.trends,
+    required this.windowDays,
+    required this.loading,
+    required this.onWindowChanged,
+  });
+
+  static const List<int> _windowOptions = [7, 30, 90];
+  // A per-night row list is only readable up to a couple weeks — beyond
+  // that, the average/trend summary above carries the real signal and the
+  // list becomes a recent-nights detail view, not the whole window.
+  static const int _maxRowsShown = 14;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final shown = trends.length > _maxRowsShown
+        ? trends.sublist(trends.length - _maxRowsShown)
+        : trends;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('7-day trend', style: theme.textTheme.titleMedium),
+            Row(
+              children: [
+                Text('Trend', style: theme.textTheme.titleMedium),
+                const Spacer(),
+                SegmentedButton<int>(
+                  segments: _windowOptions
+                      .map((d) => ButtonSegment(value: d, label: Text('${d}d')))
+                      .toList(),
+                  selected: {windowDays},
+                  showSelectedIcon: false,
+                  onSelectionChanged: loading ? null : (s) => onWindowChanged(s.first),
+                ),
+              ],
+            ),
             const SizedBox(height: AppSpacing.md),
-            ...trends.map((t) => _TrendRow(point: t)),
+            if (loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (trends.isEmpty)
+              Text('No nights in this window yet.', style: theme.textTheme.bodySmall)
+            else ...[
+              if (windowDays > 7) ...[
+                _TrendSummaryRow(trends: trends, windowDays: windowDays),
+                const SizedBox(height: AppSpacing.md),
+                if (trends.length > _maxRowsShown)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: Text(
+                      'Most recent $_maxRowsShown of ${trends.length} nights:',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+              ],
+              ...shown.map((t) => _TrendRow(point: t)),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TrendSummaryRow extends StatelessWidget {
+  final List<SleepTrendPoint> trends;
+  final int windowDays;
+  const _TrendSummaryRow({required this.trends, required this.windowDays});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final avgHours = trends.map((t) => t.totalHours).reduce((a, b) => a + b) / trends.length;
+    final avgScore = trends.map((t) => t.sleepScore).reduce((a, b) => a + b) / trends.length;
+
+    // First half vs second half of the window — a simple, honest trend
+    // direction without pretending to statistical significance testing.
+    String? trendLabel;
+    if (trends.length >= 6) {
+      final mid = trends.length ~/ 2;
+      final firstHalfAvg = trends.sublist(0, mid).map((t) => t.sleepScore).reduce((a, b) => a + b) / mid;
+      final secondHalfAvg =
+          trends.sublist(mid).map((t) => t.sleepScore).reduce((a, b) => a + b) / (trends.length - mid);
+      final delta = secondHalfAvg - firstHalfAvg;
+      if (delta.abs() >= 3) {
+        trendLabel = delta > 0 ? 'improving' : 'declining';
+      } else {
+        trendLabel = 'steady';
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '${avgHours.toStringAsFixed(1)}h avg · ${avgScore.round()} avg score over ${trends.length} nights',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+          if (trendLabel != null)
+            Text(trendLabel, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary)),
+        ],
       ),
     );
   }

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,7 +28,10 @@ import java.util.List;
 public class SleepController {
 
     private static final Long DEFAULT_ACCOUNT_ID = 1L;
-    private static final int TREND_DAYS = 7;
+    private static final int DEFAULT_TREND_DAYS = 7;
+    // A Garmin Connect historical sync can bring in a year+ of real data —
+    // this just bounds a single request's query cost, not what's storable.
+    private static final int MAX_TREND_DAYS = 366;
 
     private final SleepInsightService sleepInsightService;
 
@@ -48,9 +52,10 @@ public class SleepController {
 
     @GetMapping("/trends")
     @Operation(summary = "Get sleep trends",
-            description = "Returns sleep trend data for up to the last 7 nights with real data. Returns fewer points if less history exists.")
-    public List<SleepTrendPoint> getTrends() {
-        return sleepInsightService.computeTrends(DEFAULT_ACCOUNT_ID, TREND_DAYS);
+            description = "Returns sleep trend data for up to the last N nights with real data (default 7, max " + MAX_TREND_DAYS + "). Returns fewer points if less history exists.")
+    public List<SleepTrendPoint> getTrends(@RequestParam(required = false) Integer days) {
+        int window = Math.min(days != null && days > 0 ? days : DEFAULT_TREND_DAYS, MAX_TREND_DAYS);
+        return sleepInsightService.computeTrends(DEFAULT_ACCOUNT_ID, window);
     }
 
     @GetMapping("/debt")

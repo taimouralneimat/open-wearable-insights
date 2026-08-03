@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,10 +20,11 @@ import java.util.List;
 /**
  * REST controller for activity data and trends.
  *
- * <p>Computes real step counts from measurement data (see
- * ActivityInsightService). Calories/active minutes/active zone minutes
- * are honestly reported as unavailable rather than fabricated — the data
- * model has no measurement type for them yet.
+ * <p>Computes real step/calorie/active-minute data from measurement data
+ * (see ActivityInsightService) — calories and active minutes require a
+ * Garmin Connect sync, honestly null otherwise. Active zone minutes
+ * (heart-rate-zone-weighted) genuinely isn't tracked by either data source
+ * yet.
  */
 @RestController
 @RequestMapping("/api/v1/activities")
@@ -30,7 +32,10 @@ import java.util.List;
 public class ActivitiesController {
 
     private static final Long DEFAULT_ACCOUNT_ID = 1L;
-    private static final int TREND_DAYS = 7;
+    private static final int DEFAULT_TREND_DAYS = 7;
+    // A Garmin Connect historical sync can bring in a year+ of real data —
+    // this just bounds a single request's query cost, not what's storable.
+    private static final int MAX_TREND_DAYS = 366;
 
     private static final int SESSIONS_LIMIT = 20;
 
@@ -51,9 +56,10 @@ public class ActivitiesController {
 
     @GetMapping("/trends")
     @Operation(summary = "Get activity trends",
-            description = "Returns real step-count trends for up to the last 7 days with data.")
-    public List<ActivityTrendPoint> getTrends() {
-        return activityInsightService.computeStepTrends(DEFAULT_ACCOUNT_ID, TREND_DAYS);
+            description = "Returns real step-count trends for up to the last N days with data (default 7, max " + MAX_TREND_DAYS + ").")
+    public List<ActivityTrendPoint> getTrends(@RequestParam(required = false) Integer days) {
+        int window = Math.min(days != null && days > 0 ? days : DEFAULT_TREND_DAYS, MAX_TREND_DAYS);
+        return activityInsightService.computeStepTrends(DEFAULT_ACCOUNT_ID, window);
     }
 
     @GetMapping("/sessions")
