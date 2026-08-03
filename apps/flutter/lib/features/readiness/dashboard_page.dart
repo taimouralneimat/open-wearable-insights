@@ -306,8 +306,8 @@ class _GarminEnrichmentCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Garmin\'s own score — shown for comparison, not blended into your readiness score above'
-                '${enrichment.trainingReadinessAsOf != null ? ' · as of ${enrichment.trainingReadinessAsOf}' : ''}',
+                'Garmin\'s own recovery estimate'
+                '${enrichment.trainingReadinessAsOf != null ? ' · ${enrichment.trainingReadinessAsOf}' : ''}',
                 style: theme.textTheme.bodySmall,
               ),
             ],

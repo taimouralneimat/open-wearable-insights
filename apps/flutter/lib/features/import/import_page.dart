@@ -71,7 +71,7 @@ class _ImportPageState extends State<ImportPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(
-              copied > 0 ? 'Copied $copied real files into the import folder.' : 'Already up to date — nothing new to copy.')),
+              copied > 0 ? 'Copied $copied file${copied == 1 ? '' : 's'} into the import folder.' : 'Already up to date — nothing new to copy.')),
         );
       }
       await _scanDirectory();
@@ -442,7 +442,7 @@ class _GarminConnectBanner extends StatelessWidget {
       icon = Icons.link_outlined;
       color = theme.colorScheme.primary;
       title = 'Connect Garmin Connect';
-      subtitle = 'Log in with your real Garmin account to pull your full history';
+      subtitle = 'Log in with your Garmin account to pull your full history';
     }
 
     return Material(
@@ -501,7 +501,7 @@ class _GarminExpressCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    'Real data found: Garmin Express',
+                    'Found on Garmin Express',
                     style: theme.textTheme.titleMedium?.copyWith(color: status.onInfoContainer),
                   ),
                 ),
@@ -509,7 +509,7 @@ class _GarminExpressCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              '${device.totalFiles} real file${device.totalFiles == 1 ? '' : 's'} staged locally by Garmin '
+              '${device.totalFiles} file${device.totalFiles == 1 ? '' : 's'} staged locally by Garmin '
               'Express, not yet copied here.',
               style: theme.textTheme.bodySmall?.copyWith(color: status.onInfoContainer),
             ),

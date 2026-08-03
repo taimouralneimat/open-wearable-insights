@@ -322,7 +322,7 @@ class _SleepDebtCard extends StatelessWidget {
             Text(
               'Your personal need is ~${need.toStringAsFixed(1)}h/night (your own rolling average, '
               'not a generic target) — accumulated over ${debt.nightsConsidered} of the last '
-              '${debt.windowDays} nights with real data.',
+              '${debt.windowDays} nights.',
               style: theme.textTheme.bodySmall?.copyWith(color: onBg),
             ),
           ],

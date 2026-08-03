@@ -349,14 +349,13 @@ class _GarminConnectorPageState extends State<GarminConnectorPage> {
         Text('Pull historical data', style: theme.textTheme.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Fetches real sleep, HRV, resting heart rate, stress, and steps for the date range '
-          'below, directly from your Garmin Connect account.',
+          'Fetches sleep, HRV, heart rate, stress, Body Battery, training readiness, calories, '
+          'and more for the date range below, directly from your Garmin Connect account.',
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Deliberately throttled to avoid tripping Garmin\'s rate limits — a large range can '
-          'take several minutes. It\'s still working even if nothing seems to change for a while.',
+          'Large date ranges can take several minutes — this is normal, keep the app open.',
           style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
         ),
         const SizedBox(height: AppSpacing.md),
