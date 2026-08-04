@@ -5,6 +5,7 @@ import com.openwearableinsights.api.journal.domain.BehaviorCategory;
 import com.openwearableinsights.api.journal.domain.HabitStreak;
 import com.openwearableinsights.api.journal.domain.IdentityVotes;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
+import com.openwearableinsights.api.shared.LocalDayClock;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,7 +28,7 @@ class JournalServiceTest {
     @Test
     void taxonomy_isMeaningfullyBroaderThanOriginalSixBehaviorStub() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         List<BehaviorCategory> taxonomy = service.getTaxonomy();
 
@@ -42,7 +43,7 @@ class JournalServiceTest {
     @Test
     void taxonomy_everyCategoryHasNameAndBehaviors() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         for (BehaviorCategory category : service.getTaxonomy()) {
             assertThat(category.name()).isNotBlank();
@@ -56,7 +57,7 @@ class JournalServiceTest {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
         when(jdbc.queryForObject(anyString(), eq(Long.class), any(), any(), anyString(), any(), any()))
                 .thenReturn(42L);
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         JournalEntry entry = service.addEntry(1L, "Nutrition", "Alcohol", "2 units", "wedding");
 
@@ -78,7 +79,7 @@ class JournalServiceTest {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
         when(jdbc.queryForObject(anyString(), eq(Long.class), any(), any(), anyString(), any(), any()))
                 .thenReturn(1L);
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         service.addEntry(1L, null, "Custom behavior", null, null);
 
@@ -98,7 +99,7 @@ class JournalServiceTest {
                 "treated_as_untrusted", true, "created_at", Timestamp.from(now)
         );
         when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(List.of(row));
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         List<JournalEntry> entries = service.listEntries(1L, null);
 
@@ -118,7 +119,7 @@ class JournalServiceTest {
                 "treated_as_untrusted", true, "created_at", Timestamp.from(now)
         );
         when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(List.of(row));
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         List<JournalEntry> entries = service.listEntries(1L, null);
 
@@ -136,7 +137,7 @@ class JournalServiceTest {
                 row("Recovery::Cold exposure", today)
         );
         when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(rows);
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         List<HabitStreak> streaks = service.getStreaks(1L);
 
@@ -158,7 +159,7 @@ class JournalServiceTest {
                 row("Sleep::Consistent bedtime", today.minus(5, java.time.temporal.ChronoUnit.DAYS))
         );
         when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(rows);
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         List<HabitStreak> streaks = service.getStreaks(1L);
 
@@ -178,7 +179,7 @@ class JournalServiceTest {
                 row("Sleep::Nap taken", today.minus(1, java.time.temporal.ChronoUnit.DAYS))
         );
         when(jdbc.queryForList(anyString(), eq(1L))).thenReturn(rows);
-        JournalService service = new JournalService(jdbc);
+        JournalService service = new JournalService(jdbc, new LocalDayClock());
 
         List<HabitStreak> streaks = service.getStreaks(1L);
 
@@ -193,7 +194,7 @@ class JournalServiceTest {
 
     @Test
     void computeIdentityVotes_countsOnlyEntriesInRelevantCategories() {
-        JournalService service = new JournalService(mock(JdbcTemplate.class));
+        JournalService service = new JournalService(mock(JdbcTemplate.class), new LocalDayClock());
         Instant now = Instant.now();
         List<JournalEntry> entries = List.of(
                 entry("Recovery", "Full rest day", now),
@@ -212,7 +213,7 @@ class JournalServiceTest {
 
     @Test
     void computeIdentityVotes_noGoalSet_returnsNullGoalAndZeroVotes() {
-        JournalService service = new JournalService(mock(JdbcTemplate.class));
+        JournalService service = new JournalService(mock(JdbcTemplate.class), new LocalDayClock());
         List<JournalEntry> entries = List.of(entry("Recovery", "Full rest day", Instant.now()));
 
         IdentityVotes votes = service.computeIdentityVotes(null, entries, 30);
@@ -224,7 +225,7 @@ class JournalServiceTest {
 
     @Test
     void computeIdentityVotes_entriesOutsideWindow_excluded() {
-        JournalService service = new JournalService(mock(JdbcTemplate.class));
+        JournalService service = new JournalService(mock(JdbcTemplate.class), new LocalDayClock());
         Instant now = Instant.now();
         List<JournalEntry> entries = List.of(
                 entry("Recovery", "Full rest day", now.minus(60, java.time.temporal.ChronoUnit.DAYS))

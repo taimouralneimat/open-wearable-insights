@@ -4,6 +4,7 @@ import com.openwearableinsights.api.journal.domain.BehaviorCategory;
 import com.openwearableinsights.api.journal.domain.HabitStreak;
 import com.openwearableinsights.api.journal.domain.IdentityVotes;
 import com.openwearableinsights.api.journal.domain.JournalEntry;
+import com.openwearableinsights.api.shared.LocalDayClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -106,9 +106,11 @@ public class JournalService {
     );
 
     private final JdbcTemplate jdbcTemplate;
+    private final LocalDayClock localDayClock;
 
-    public JournalService(JdbcTemplate jdbcTemplate) {
+    public JournalService(JdbcTemplate jdbcTemplate, LocalDayClock localDayClock) {
         this.jdbcTemplate = jdbcTemplate;
+        this.localDayClock = localDayClock;
     }
 
     public List<BehaviorCategory> getTaxonomy() {
@@ -168,8 +170,12 @@ public class JournalService {
     /**
      * Consecutive-day streaks for every distinct behavior the account has
      * ever logged — the "don't break the chain" mechanic. A day counts if
-     * the behavior was logged at least once that day (its own calendar
-     * day in UTC, matching how the rest of this service stores/reads time).
+     * the behavior was logged at least once that day, using the user's real
+     * local calendar day ({@link LocalDayClock}) rather than UTC — both the
+     * per-entry bucketing below and the "today" comparison move together,
+     * since bucketing entries by one day boundary while checking streak
+     * continuity against a different one would silently break the streak
+     * logic near the account's local midnight.
      *
      * <p>currentStreak resets to 0 the moment a day is missed — it only
      * stays alive if the most recent logged day is today or yesterday
@@ -212,11 +218,11 @@ public class JournalService {
             Map<String, TreeSet<LocalDate>> daysByBehavior = new LinkedHashMap<>();
             for (Map<String, Object> row : rows) {
                 String behavior = (String) row.get("behavior");
-                LocalDate day = ((Timestamp) row.get("time")).toInstant().atZone(ZoneOffset.UTC).toLocalDate();
+                LocalDate day = localDayClock.localDateOf(((Timestamp) row.get("time")).toInstant());
                 daysByBehavior.computeIfAbsent(behavior, b -> new TreeSet<>()).add(day);
             }
 
-            LocalDate today = LocalDate.now(ZoneOffset.UTC);
+            LocalDate today = localDayClock.today();
             List<HabitStreak> streaks = new ArrayList<>();
             for (Map.Entry<String, TreeSet<LocalDate>> entry : daysByBehavior.entrySet()) {
                 String[] parts = parseBehavior(entry.getKey());

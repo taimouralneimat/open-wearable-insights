@@ -10,6 +10,7 @@ import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import com.openwearableinsights.api.readiness.domain.ReadinessInputs;
 import com.openwearableinsights.api.readiness.domain.ScoreDiff;
 import com.openwearableinsights.api.readiness.domain.ReadinessScore;
+import com.openwearableinsights.api.shared.LocalDayClock;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,7 +21,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,21 +30,11 @@ import java.util.Optional;
  * <p>Phase 1: accepts inputs directly (synthetic data). Phase 2+ will read
  * from the database via the normalization module.
  *
- * <p><strong>Known limitation, not yet fixed:</strong> {@code LocalDate.now(ZoneOffset.UTC)}
- * below decides which calendar day "today" is for score-history storage and
- * day-over-day diffing. For an account not in UTC, this can disagree with
- * the user's real local day for a window around their local midnight (e.g.
- * UTC+3 means the app still thinks it's "yesterday" for the first ~3 hours
- * after local midnight) — found 2026-08-04 alongside a similar,
- * already-fixed display-only bug in SleepInsightService (see that class).
- * Not fixed here yet because the day-bucketing this compares against
- * (measurements grouped by {@code DATE(time)} in UTC throughout the
- * codebase) would need to move in lockstep — fixing only "today" here
- * without also fixing that bucketing would create a worse, inconsistent
- * mismatch, not a smaller one. Same root cause also affects
- * {@code CoachController} (day-over-day "why" comparison) and
- * {@code JournalService} (habit-streak continuity) — a real, systemic,
- * cross-cutting question worth a dedicated pass, not a piecemeal fix.
+ * <p>"Today" for score-history storage and day-over-day diffing is the
+ * user's real local calendar day ({@link LocalDayClock}), not UTC — see
+ * that class's javadoc. Same fix applied to {@code CoachController} (day-
+ * over-day "why" comparison) and {@code JournalService} (habit-streak
+ * continuity).
  */
 @RestController
 @RequestMapping("/api/v1/readiness")
@@ -58,19 +48,22 @@ public class ReadinessController {
     private final CurrentMetricsService currentMetricsService;
     private final ScoreDiffService scoreDiffService;
     private final ReadinessScoreHistoryRepository scoreHistoryRepository;
+    private final LocalDayClock localDayClock;
 
     public ReadinessController(
             ReadinessCalculator calculator,
             BaselineService baselineService,
             CurrentMetricsService currentMetricsService,
             ScoreDiffService scoreDiffService,
-            ReadinessScoreHistoryRepository scoreHistoryRepository
+            ReadinessScoreHistoryRepository scoreHistoryRepository,
+            LocalDayClock localDayClock
     ) {
         this.calculator = calculator;
         this.baselineService = baselineService;
         this.currentMetricsService = currentMetricsService;
         this.scoreDiffService = scoreDiffService;
         this.scoreHistoryRepository = scoreHistoryRepository;
+        this.localDayClock = localDayClock;
     }
 
     @PostMapping("/calculate")
@@ -97,7 +90,7 @@ public class ReadinessController {
         PersonalBaseline baseline = baselineService.computeBaseline();
         CurrentMetrics current = currentMetricsService.fetchCurrent();
         ReadinessScore score = calculator.calculate(current, baseline);
-        scoreHistoryRepository.upsertToday(DEFAULT_ACCOUNT_ID, LocalDate.now(ZoneOffset.UTC), score);
+        scoreHistoryRepository.upsertToday(DEFAULT_ACCOUNT_ID, localDayClock.today(), score);
         return score;
     }
 
@@ -115,7 +108,7 @@ public class ReadinessController {
         PersonalBaseline baseline = baselineService.computeBaseline();
         CurrentMetrics current = currentMetricsService.fetchCurrent();
         ReadinessScore today = calculator.calculate(current, baseline);
-        LocalDate todayDate = LocalDate.now(ZoneOffset.UTC);
+        LocalDate todayDate = localDayClock.today();
         scoreHistoryRepository.upsertToday(DEFAULT_ACCOUNT_ID, todayDate, today);
 
         Optional<ReadinessScore> priorScore =

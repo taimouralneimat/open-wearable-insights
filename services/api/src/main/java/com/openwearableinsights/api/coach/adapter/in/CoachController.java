@@ -13,13 +13,13 @@ import com.openwearableinsights.api.readiness.domain.CurrentMetrics;
 import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import com.openwearableinsights.api.readiness.domain.ReadinessScore;
 import com.openwearableinsights.api.readiness.domain.ScoreDiff;
+import com.openwearableinsights.api.shared.LocalDayClock;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.Optional;
 
 /**
@@ -44,6 +44,7 @@ public class CoachController {
     private final ReadinessScoreHistoryRepository scoreHistoryRepository;
     private final DeterministicInsightEngine insightEngine;
     private final boolean llmEnabled;
+    private final LocalDayClock localDayClock;
 
     public CoachController(
             ReadinessCalculator readinessCalculator,
@@ -52,7 +53,8 @@ public class CoachController {
             ScoreDiffService scoreDiffService,
             ReadinessScoreHistoryRepository scoreHistoryRepository,
             DeterministicInsightEngine insightEngine,
-            @Value("${owi.llm.enabled:false}") boolean llmEnabled
+            @Value("${owi.llm.enabled:false}") boolean llmEnabled,
+            LocalDayClock localDayClock
     ) {
         this.readinessCalculator = readinessCalculator;
         this.baselineService = baselineService;
@@ -61,6 +63,7 @@ public class CoachController {
         this.scoreHistoryRepository = scoreHistoryRepository;
         this.insightEngine = insightEngine;
         this.llmEnabled = llmEnabled;
+        this.localDayClock = localDayClock;
     }
 
     @GetMapping("/insight")
@@ -85,7 +88,7 @@ public class CoachController {
     public WhyAnswer why() {
         ReadinessScore score = calculateCurrent();
 
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate today = localDayClock.today();
         Optional<ReadinessScore> priorScore =
                 scoreHistoryRepository.findByDate(DEFAULT_ACCOUNT_ID, today.minusDays(1));
 
@@ -113,7 +116,7 @@ public class CoachController {
         PersonalBaseline baseline = baselineService.computeBaseline();
         CurrentMetrics current = currentMetricsService.fetchCurrent();
         ReadinessScore score = readinessCalculator.calculate(current, baseline);
-        scoreHistoryRepository.upsertToday(DEFAULT_ACCOUNT_ID, LocalDate.now(ZoneOffset.UTC), score);
+        scoreHistoryRepository.upsertToday(DEFAULT_ACCOUNT_ID, localDayClock.today(), score);
         return score;
     }
 

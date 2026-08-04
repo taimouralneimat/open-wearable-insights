@@ -1,6 +1,7 @@
 package com.openwearableinsights.api.readiness.application;
 
 import com.openwearableinsights.api.readiness.domain.CurrentMetrics;
+import com.openwearableinsights.api.shared.LocalDayClock;
 import com.openwearableinsights.api.trainingload.application.TrainingLoadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,10 +36,12 @@ public class CurrentMetricsService {
 
     private final JdbcTemplate jdbcTemplate;
     private final TrainingLoadService trainingLoadService;
+    private final LocalDayClock localDayClock;
 
-    public CurrentMetricsService(JdbcTemplate jdbcTemplate, TrainingLoadService trainingLoadService) {
+    public CurrentMetricsService(JdbcTemplate jdbcTemplate, TrainingLoadService trainingLoadService, LocalDayClock localDayClock) {
         this.jdbcTemplate = jdbcTemplate;
         this.trainingLoadService = trainingLoadService;
+        this.localDayClock = localDayClock;
     }
 
     /**
@@ -51,7 +53,11 @@ public class CurrentMetricsService {
     }
 
     public CurrentMetrics fetchCurrent(Long accountId) {
-        Instant todayStart = Instant.now().truncatedTo(ChronoUnit.DAYS);
+        // Local midnight, not UTC midnight — see LocalDayClock's javadoc for
+        // why this matters: UTC-midnight truncation silently misattributes
+        // up to ~N hours of "today's" readings (N = the account's real UTC
+        // offset) to the wrong day for anyone not in UTC.
+        Instant todayStart = localDayClock.startOfToday();
 
         Optional<Double> hrv = fetchLatestMetric(accountId, "hrv", todayStart);
         Optional<Double> rhr = fetchLatestMetric(accountId, "rhr", todayStart);
