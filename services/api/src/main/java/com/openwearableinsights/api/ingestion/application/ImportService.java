@@ -1,5 +1,8 @@
 package com.openwearableinsights.api.ingestion.application;
 
+import com.openwearableinsights.api.biomarkers.application.BiomarkerCsvParser;
+import com.openwearableinsights.api.biomarkers.application.BiomarkerReadingRepository;
+import com.openwearableinsights.api.biomarkers.domain.BiomarkerCsvParseResult;
 import com.openwearableinsights.api.connections.application.ConnectorRegistry;
 import com.openwearableinsights.api.connections.domain.ParsedActivity;
 import com.openwearableinsights.api.connections.domain.ParsedMeasurement;
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +50,7 @@ public class ImportService {
     private final ConnectorRegistry connectorRegistry;
     private final MeasurementRepository measurementRepository;
     private final ActivityRepository activityRepository;
+    private final BiomarkerReadingRepository biomarkerReadingRepository;
     private final TransactionTemplate requiresNewTx;
 
     public ImportService(
@@ -54,6 +59,7 @@ public class ImportService {
             ConnectorRegistry connectorRegistry,
             MeasurementRepository measurementRepository,
             ActivityRepository activityRepository,
+            BiomarkerReadingRepository biomarkerReadingRepository,
             PlatformTransactionManager txManager
     ) {
         this.validator = validator;
@@ -61,6 +67,7 @@ public class ImportService {
         this.connectorRegistry = connectorRegistry;
         this.measurementRepository = measurementRepository;
         this.activityRepository = activityRepository;
+        this.biomarkerReadingRepository = biomarkerReadingRepository;
         this.requiresNewTx = new TransactionTemplate(txManager);
         this.requiresNewTx.setPropagationBehavior(
                 org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW
@@ -146,6 +153,25 @@ public class ImportService {
                             );
                             return measurementCount + activityCount;
                         }
+
+                        // No vendor connector recognizes this file — check whether
+                        // it's a biomarker (lab bloodwork) CSV before falling back
+                        // to the record-count-only placeholder below. This is the
+                        // first non-connector CSV/JSON shape that actually gets
+                        // persisted, not just counted (see DryRunValidator).
+                        if ("csv".equals(vr.detectedFormat())) {
+                            List<String> lines;
+                            try {
+                                lines = Files.readAllLines(filePath);
+                            } catch (IOException e) {
+                                throw new RuntimeException("Failed to parse " + vr.filename() + ": " + e.getMessage(), e);
+                            }
+                            if (BiomarkerCsvParser.looksLikeBiomarkerCsv(lines)) {
+                                BiomarkerCsvParseResult parsed = BiomarkerCsvParser.parse(lines);
+                                return biomarkerReadingRepository.persist(DEFAULT_ACCOUNT_ID, saved.getId(), parsed.rows());
+                            }
+                        }
+
                         return vr.recordCount();
                     });
 

@@ -1,5 +1,7 @@
 package com.openwearableinsights.api.ingestion.application;
 
+import com.openwearableinsights.api.biomarkers.application.BiomarkerCsvParser;
+import com.openwearableinsights.api.biomarkers.domain.BiomarkerCsvParseResult;
 import com.openwearableinsights.api.connections.application.ConnectorRegistry;
 import com.openwearableinsights.api.ingestion.domain.ValidationResult;
 import com.openwearableinsights.api.ingestion.domain.ScannedFile;
@@ -252,6 +254,18 @@ public class DryRunValidator {
     private int countCsvRecords(Path filePath, List<String> unsupportedRecords, List<String> warnings) throws IOException {
         List<String> lines = Files.readAllLines(filePath);
         if (lines.isEmpty()) return 0;
+
+        // A biomarker (lab bloodwork) CSV is detected by its header
+        // (date,biomarker_name,value,unit) and routed to the real parser
+        // for accurate per-row validation, rather than the generic
+        // comma-count heuristic below (which was never wired to real
+        // persistence for non-connector CSVs — see ImportService).
+        if (BiomarkerCsvParser.looksLikeBiomarkerCsv(lines)) {
+            BiomarkerCsvParseResult parsed = BiomarkerCsvParser.parse(lines);
+            unsupportedRecords.addAll(parsed.rowErrors());
+            warnings.addAll(parsed.warnings());
+            return parsed.rows().size();
+        }
 
         int count = 0;
         boolean headerSkipped = false;

@@ -4,6 +4,7 @@ import 'package:open_wearable_insights/app/theme.dart';
 import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
 import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/import/garmin_connector_page.dart';
+import 'package:open_wearable_insights/features/biomarkers/biomarkers_page.dart';
 import 'package:open_wearable_insights/features/sleep/sleep_page.dart';
 import 'package:open_wearable_insights/features/activities/activities_page.dart';
 import 'package:open_wearable_insights/features/activities/activity_session_detail_page.dart';
@@ -92,6 +93,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
           GoRoute(
             path: 'garmin-connect',
             builder: (context, state) => const GarminConnectorPage(),
+          ),
+          GoRoute(
+            path: 'biomarkers',
+            builder: (context, state) => const BiomarkersPage(),
           ),
         ],
       ),

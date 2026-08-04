@@ -22,6 +22,9 @@
 - `synthetic_generator.py` — synthetic data generator (Python, deterministic).
 - `synthetic-activity.fit` — synthetic FIT fixture (generated, not from a real device).
 - `synthetic-*.json` — synthetic JSON exports for testing.
+- `synthetic-biomarkers.csv` — synthetic blood biomarker (lab bloodwork) CSV
+  fixture for `biomarkers.application.BiomarkerCsvParser` tests. Fabricated
+  values only, not from any real lab result.
 
 ## Rules
 

@@ -207,6 +207,7 @@ class _ImportPageState extends State<ImportPage> {
               _loadGarminConnectStatus();
             },
           ),
+          _BiomarkersBanner(onTap: () => context.push('/import/biomarkers')),
           Expanded(child: _buildBody()),
         ],
       ),
@@ -461,6 +462,48 @@ class _GarminConnectBanner extends StatelessWidget {
                   children: [
                     Text(title, style: theme.textTheme.titleSmall),
                     Text(subtitle, style: theme.textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Entry point to the blood biomarker (lab bloodwork) import screen —
+/// docs/product/parity-matrix.md row 22. Biomarker CSVs use the exact same
+/// import folder/dry-run/import flow as everything else on this page, so
+/// this is a discovery banner, not a separate upload mechanism like Garmin
+/// Connect's (which genuinely needs its own login flow). Always visible,
+/// same placement rationale as [_GarminConnectBanner] above.
+class _BiomarkersBanner extends StatelessWidget {
+  final VoidCallback onTap;
+  const _BiomarkersBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          child: Row(
+            children: [
+              Icon(Icons.science_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Blood biomarkers', style: theme.textTheme.titleSmall),
+                    Text('Import lab bloodwork from a CSV — not medical advice',
+                        style: theme.textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),

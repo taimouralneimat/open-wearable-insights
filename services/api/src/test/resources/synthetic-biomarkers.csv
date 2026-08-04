@@ -1,0 +1,16 @@
+date,biomarker_name,value,unit,reference_low,reference_high
+2026-04-15,LDL Cholesterol,118,mg/dL,0,99
+2026-04-15,HDL Cholesterol,52,mg/dL,40,
+2026-04-15,Triglycerides,90,mg/dL,,149
+2026-04-15,Total Cholesterol,188,mg/dL,0,199
+2026-04-15,Glucose,91,mg/dL,70,99
+2026-04-15,Hemoglobin A1c (HbA1c),5.3,%,4.0,5.6
+2026-04-15,Vitamin D,38,ng/mL,30,100
+2026-04-15,hs-CRP,0.8,mg/L,0,3.0
+2026-04-15,TSH,1.9,mIU/L,0.4,4.5
+2026-04-15,WBC,5.6,10^3/uL,3.4,10.8
+2026-07-20,LDL Cholesterol,105,mg/dL,0,99
+2026-07-20,HDL Cholesterol,55,mg/dL,40,
+2026-07-20,Triglycerides,82,mg/dL,,149
+2026-07-20,Glucose,88,mg/dL,70,99
+2026-07-20,Vitamin D,44,ng/mL,30,100

@@ -391,6 +391,39 @@ class ApiClient {
     final response = await _dio.post('/api/v1/auth/regenerate-token');
     return (response.data as Map<String, dynamic>)['token'] as String;
   }
+
+  /// List imported blood biomarker (lab bloodwork) readings, most recent
+  /// first. Real CSV-imported rows only — empty list if nothing imported yet.
+  Future<List<BiomarkerReadingResponse>> getBiomarkerReadings({String? name}) async {
+    final response = await _dio.get('/api/v1/biomarkers/readings', queryParameters: name != null ? {'name': name} : null);
+    return (response.data as List)
+        .map((e) => BiomarkerReadingResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Distinct biomarker names this account has at least one real reading
+  /// for — used to populate a trend picker without guessing at names.
+  Future<List<String>> getBiomarkerNames() async {
+    final response = await _dio.get('/api/v1/biomarkers/names');
+    return (response.data as List).cast<String>();
+  }
+
+  /// Every imported reading for one biomarker name, chronological.
+  Future<List<BiomarkerReadingResponse>> getBiomarkerTrend(String biomarkerName) async {
+    final response = await _dio.get('/api/v1/biomarkers/trend/${Uri.encodeComponent(biomarkerName)}');
+    return (response.data as List)
+        .map((e) => BiomarkerReadingResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Static reference catalog (name/category/plain-language description) —
+  /// no numeric ranges, see BiomarkerReferenceCatalog on the backend.
+  Future<List<BiomarkerReferenceEntryResponse>> getBiomarkerReference() async {
+    final response = await _dio.get('/api/v1/biomarkers/reference');
+    return (response.data as List)
+        .map((e) => BiomarkerReferenceEntryResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }
 
 /// Readiness score response from the API.
@@ -1763,6 +1796,68 @@ class BodyBatteryTrendPointResponse {
       date: json['date'] as String,
       high: (json['high'] as num?)?.toDouble(),
       low: (json['low'] as num?)?.toDouble(),
+    );
+  }
+}
+
+/// One imported blood biomarker (lab bloodwork) reading. [referenceLow]/
+/// [referenceHigh]/[inRange] are only ever populated from the user's own
+/// CSV row — never a fabricated "typical" range (see the backend's
+/// biomarkers module Javadoc for why). [inRange] is null when no reference
+/// range was supplied at all — an honest "unknown", not a default true.
+class BiomarkerReadingResponse {
+  final int id;
+  final String biomarkerName;
+  final String? category;
+  final double value;
+  final String unit;
+  final double? referenceLow;
+  final double? referenceHigh;
+  final bool? inRange;
+  final String readingDate;
+
+  BiomarkerReadingResponse({
+    required this.id,
+    required this.biomarkerName,
+    this.category,
+    required this.value,
+    required this.unit,
+    this.referenceLow,
+    this.referenceHigh,
+    this.inRange,
+    required this.readingDate,
+  });
+
+  bool get hasReferenceRange => referenceLow != null || referenceHigh != null;
+
+  factory BiomarkerReadingResponse.fromJson(Map<String, dynamic> json) {
+    return BiomarkerReadingResponse(
+      id: json['id'] as int,
+      biomarkerName: json['biomarkerName'] as String,
+      category: json['category'] as String?,
+      value: (json['value'] as num).toDouble(),
+      unit: json['unit'] as String,
+      referenceLow: (json['referenceLow'] as num?)?.toDouble(),
+      referenceHigh: (json['referenceHigh'] as num?)?.toDouble(),
+      inRange: json['inRange'] as bool?,
+      readingDate: json['readingDate'] as String,
+    );
+  }
+}
+
+/// Static reference-catalog entry (display labeling only — no numeric range).
+class BiomarkerReferenceEntryResponse {
+  final String name;
+  final String category;
+  final String description;
+
+  BiomarkerReferenceEntryResponse({required this.name, required this.category, required this.description});
+
+  factory BiomarkerReferenceEntryResponse.fromJson(Map<String, dynamic> json) {
+    return BiomarkerReferenceEntryResponse(
+      name: json['name'] as String,
+      category: json['category'] as String,
+      description: json['description'] as String,
     );
   }
 }

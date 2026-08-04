@@ -1,5 +1,6 @@
 package com.openwearableinsights.api.ingestion;
 
+import com.openwearableinsights.api.biomarkers.application.BiomarkerReadingRepository;
 import com.openwearableinsights.api.connections.adapter.garmin.GarminFitConnector;
 import com.openwearableinsights.api.connections.application.ConnectorRegistry;
 import com.openwearableinsights.api.ingestion.application.ActivityRepository;
@@ -30,6 +31,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -46,11 +48,13 @@ class ImportServiceTest {
     Path tempDir;
 
     private ImportBatchRepository batchRepository;
+    private BiomarkerReadingRepository biomarkerReadingRepository;
     private ImportService importService;
 
     @BeforeEach
     void setUp() throws IOException {
         batchRepository = mock(ImportBatchRepository.class);
+        biomarkerReadingRepository = mock(BiomarkerReadingRepository.class);
 
         // Create a real DryRunValidator pointing at the temp dir
         var scanner = new com.openwearableinsights.api.ingestion.application.ImportDirectoryScanner(tempDir.toString());
@@ -69,7 +73,7 @@ class ImportServiceTest {
             public void rollback(org.springframework.transaction.TransactionStatus status) {}
         };
 
-        importService = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), mock(ActivityRepository.class), txManager);
+        importService = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), mock(ActivityRepository.class), biomarkerReadingRepository, txManager);
     }
 
     @Test
@@ -259,7 +263,7 @@ class ImportServiceTest {
             @Override public void commit(org.springframework.transaction.TransactionStatus s) {}
             @Override public void rollback(org.springframework.transaction.TransactionStatus s) {}
         };
-        var service = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), mock(ActivityRepository.class), txManager);
+        var service = new ImportService(validator, batchRepository, connectorRegistry, mock(MeasurementRepository.class), mock(ActivityRepository.class), mock(BiomarkerReadingRepository.class), txManager);
 
         ImportProgress progress = service.importAll();
 
@@ -301,5 +305,42 @@ class ImportServiceTest {
         assertThat(secondImport.imported()).isEqualTo(1);
         assertThat(secondImport.skipped()).isZero();
         assertThat(secondImport.failed()).isZero();
+    }
+
+    @Test
+    void biomarkerCsv_isRecognizedAndPersistedThroughBiomarkerReadingRepository() throws IOException {
+        // A biomarker CSV isn't handled by any WearableConnector (those are
+        // vendor-device formats) — this exercises the dedicated branch added
+        // to ImportService for it (see DryRunValidator/BiomarkerCsvParser).
+        String csv = """
+            date,biomarker_name,value,unit,reference_low,reference_high
+            2026-07-01,LDL Cholesterol,95,mg/dL,0,100
+            2026-07-01,HDL Cholesterol,55,mg/dL,40,
+            """;
+        Files.writeString(tempDir.resolve("labs.csv"), csv);
+
+        when(batchRepository.existsByContentHashAndStatus(any(), any())).thenReturn(false);
+        when(batchRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(biomarkerReadingRepository.persist(eq(1L), any(), any())).thenReturn(2);
+
+        ImportProgress progress = importService.importAll();
+
+        assertThat(progress.imported()).isEqualTo(1);
+        assertThat(progress.failed()).isZero();
+        assertThat(progress.totalRecords()).isEqualTo(2);
+
+        ArgumentCaptor<List<com.openwearableinsights.api.biomarkers.domain.ParsedBiomarkerRow>> rowsCaptor =
+                ArgumentCaptor.forClass(List.class);
+        verify(biomarkerReadingRepository).persist(eq(1L), any(), rowsCaptor.capture());
+        List<com.openwearableinsights.api.biomarkers.domain.ParsedBiomarkerRow> rows = rowsCaptor.getValue();
+        assertThat(rows).hasSize(2);
+        assertThat(rows.get(0).biomarkerName()).isEqualTo("LDL Cholesterol");
+        assertThat(rows.get(0).value()).isEqualTo(95.0);
+        assertThat(rows.get(0).referenceLow()).isEqualTo(0.0);
+        assertThat(rows.get(0).referenceHigh()).isEqualTo(100.0);
+        // Auto-filled from the reference catalog since the CSV row itself
+        // has no category column.
+        assertThat(rows.get(0).category()).isEqualTo("Lipid/Cardiovascular");
+        assertThat(rows.get(1).referenceHigh()).isNull();
     }
 }
