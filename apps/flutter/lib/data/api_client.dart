@@ -293,6 +293,20 @@ class ApiClient {
         .toList();
   }
 
+  /// Get the current VO2max estimate.
+  Future<Vo2MaxEstimateResponse> getVo2MaxEstimate() async {
+    final response = await _dio.get('/api/v1/vo2max');
+    return Vo2MaxEstimateResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get the monthly VO2max trend (up to 12 months, months with insufficient data omitted).
+  Future<List<Vo2MaxTrendPointResponse>> getVo2MaxTrend() async {
+    final response = await _dio.get('/api/v1/vo2max/trend');
+    return (response.data as List)
+        .map((e) => Vo2MaxTrendPointResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Get score diff vs prior day.
   Future<ScoreDiffResponse> getScoreDiff() async {
     final response = await _dio.get("/api/v1/readiness/diff");
@@ -1343,6 +1357,64 @@ class TrainingLoadTrendPointResponse {
     return TrainingLoadTrendPointResponse(
       date: json['date'] as String,
       load: (json['load'] as num).toDouble(),
+    );
+  }
+}
+
+/// VO2max estimate (parity-matrix row 18). vo2Max/hrMaxBpm/hrRestBpm are
+/// null when there isn't enough real data yet — never a fabricated number.
+/// See limitations for the published methodology's margin of error and
+/// exactly what's missing when the estimate is unavailable.
+class Vo2MaxEstimateResponse {
+  final double? vo2Max;
+  final int? hrMaxBpm;
+  final double? hrRestBpm;
+  final String? hrMaxSource;
+  final String? hrRestSource;
+  final String algorithmVersion;
+  final String confidence;
+  final String methodology;
+  final List<String> limitations;
+
+  Vo2MaxEstimateResponse({
+    this.vo2Max,
+    this.hrMaxBpm,
+    this.hrRestBpm,
+    this.hrMaxSource,
+    this.hrRestSource,
+    required this.algorithmVersion,
+    required this.confidence,
+    required this.methodology,
+    required this.limitations,
+  });
+
+  factory Vo2MaxEstimateResponse.fromJson(Map<String, dynamic> json) {
+    return Vo2MaxEstimateResponse(
+      vo2Max: (json['vo2Max'] as num?)?.toDouble(),
+      hrMaxBpm: json['hrMaxBpm'] as int?,
+      hrRestBpm: (json['hrRestBpm'] as num?)?.toDouble(),
+      hrMaxSource: json['hrMaxSource'] as String?,
+      hrRestSource: json['hrRestSource'] as String?,
+      algorithmVersion: json['algorithmVersion'] as String,
+      confidence: json['confidence'] as String,
+      methodology: json['methodology'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+/// One calendar month's VO2max estimate for the trend view. Months with
+/// insufficient real data are omitted entirely, not zero-filled.
+class Vo2MaxTrendPointResponse {
+  final String month;
+  final double vo2Max;
+
+  Vo2MaxTrendPointResponse({required this.month, required this.vo2Max});
+
+  factory Vo2MaxTrendPointResponse.fromJson(Map<String, dynamic> json) {
+    return Vo2MaxTrendPointResponse(
+      month: json['month'] as String,
+      vo2Max: (json['vo2Max'] as num).toDouble(),
     );
   }
 }
