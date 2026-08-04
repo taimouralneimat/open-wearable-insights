@@ -116,6 +116,8 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
           const SizedBox(height: AppSpacing.lg),
           _TrainingLoadEntryCard(),
           const SizedBox(height: AppSpacing.lg),
+          _StrengthEntryCard(),
+          const SizedBox(height: AppSpacing.lg),
           if (_trends != null)
             _ActivityTrendsCard(
               trends: _trends!,
@@ -170,6 +172,47 @@ class _TrainingLoadEntryCardState extends State<_TrainingLoadEntryCard> {
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push('/activities/training-load'),
+      ),
+    );
+  }
+}
+
+/// Lightweight entry point into the Strength Activity Time trend view
+/// (parity-matrix row 25) — same fetch-its-own-summary pattern as
+/// [_TrainingLoadEntryCard].
+class _StrengthEntryCard extends StatefulWidget {
+  @override
+  State<_StrengthEntryCard> createState() => _StrengthEntryCardState();
+}
+
+class _StrengthEntryCardState extends State<_StrengthEntryCard> {
+  final _apiClient = ApiClient();
+  StrengthActivityTrendResponse? _trend;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient.getStrengthTrends(window: 'weekly').then((t) {
+      if (mounted) setState(() => _trend = t);
+    }).catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final trend = _trend;
+    final weekMinutes = trend != null && trend.points.isNotEmpty ? trend.points.last.totalMinutes : null;
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.fitness_center_outlined, color: theme.colorScheme.primary),
+        title: const Text('Strength training'),
+        subtitle: Text(
+          weekMinutes != null
+              ? '${weekMinutes.toStringAsFixed(0)} min this week'
+              : (trend != null ? 'No strength training logged this week' : 'Loading…'),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/activities/strength'),
       ),
     );
   }
