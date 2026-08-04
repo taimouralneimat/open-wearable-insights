@@ -204,4 +204,48 @@ class DryRunValidatorTest {
         assertThat(vr.detectedFormat()).isEqualTo("fit");
         assertThat(vr.errors()).isNotEmpty();
     }
+
+    @Test
+    void biomarkerCsvFile_detectedAndCountedViaRealParser() throws IOException {
+        // Distinct header shape (date,biomarker_name,value,unit) from the
+        // generic vendor CSV (time,metric_type,value,unit) tested above —
+        // this routes to BiomarkerCsvParser instead of the generic counter.
+        setupValidator();
+        String csv = """
+            date,biomarker_name,value,unit,reference_low,reference_high
+            2026-07-01,LDL Cholesterol,95,mg/dL,0,100
+            2026-07-01,Glucose,88,mg/dL,70,99
+            """;
+        Files.writeString(tempDir.resolve("labs.csv"), csv);
+
+        DryRunSummary summary = validator.validateAll();
+
+        ValidationResult vr = summary.results().get(0);
+        assertThat(vr.supported()).isTrue();
+        assertThat(vr.detectedFormat()).isEqualTo("csv");
+        assertThat(vr.recordCount()).isEqualTo(2);
+        assertThat(vr.contentHash()).isNotBlank();
+        assertThat(vr.errors()).isEmpty();
+        assertThat(vr.unsupportedRecords()).isEmpty();
+    }
+
+    @Test
+    void biomarkerCsvWithBadRow_reportsRowErrorButKeepsValidRows() throws IOException {
+        setupValidator();
+        String csv = """
+            date,biomarker_name,value,unit
+            2026-07-01,LDL Cholesterol,95,mg/dL
+            not-a-date,Glucose,88,mg/dL
+            2026-07-02,HDL Cholesterol,not-a-number,mg/dL
+            """;
+        Files.writeString(tempDir.resolve("labs_bad.csv"), csv);
+
+        DryRunSummary summary = validator.validateAll();
+
+        ValidationResult vr = summary.results().get(0);
+        assertThat(vr.recordCount()).isEqualTo(1);
+        assertThat(vr.unsupportedRecords()).hasSize(2);
+        assertThat(vr.unsupportedRecords()).anyMatch(e -> e.contains("invalid date"));
+        assertThat(vr.unsupportedRecords()).anyMatch(e -> e.contains("invalid numeric value"));
+    }
 }
