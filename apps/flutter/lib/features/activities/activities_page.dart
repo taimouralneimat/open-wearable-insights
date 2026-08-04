@@ -116,6 +116,8 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
           const SizedBox(height: AppSpacing.lg),
           _TrainingLoadEntryCard(),
           const SizedBox(height: AppSpacing.lg),
+          _Vo2MaxEntryCard(),
+          const SizedBox(height: AppSpacing.lg),
           if (_trends != null)
             _ActivityTrendsCard(
               trends: _trends!,
@@ -170,6 +172,48 @@ class _TrainingLoadEntryCardState extends State<_TrainingLoadEntryCard> {
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push('/activities/training-load'),
+      ),
+    );
+  }
+}
+
+/// Lightweight entry point into the full VO2 Max view — fetches its own
+/// estimate so it can show a live at-a-glance value without coupling to the
+/// parent page's load sequence (same pattern as _TrainingLoadEntryCard).
+class _Vo2MaxEntryCard extends StatefulWidget {
+  @override
+  State<_Vo2MaxEntryCard> createState() => _Vo2MaxEntryCardState();
+}
+
+class _Vo2MaxEntryCardState extends State<_Vo2MaxEntryCard> {
+  final _apiClient = ApiClient();
+  Vo2MaxEstimateResponse? _estimate;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient.getVo2MaxEstimate().then((e) {
+      if (mounted) setState(() => _estimate = e);
+    }).catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final estimate = _estimate;
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.monitor_heart_outlined, color: theme.colorScheme.primary),
+        title: const Text('VO2 Max'),
+        subtitle: Text(
+          estimate != null
+              ? (estimate.vo2Max != null
+                  ? '${estimate.vo2Max!.toStringAsFixed(1)} mL/kg/min · ${estimate.confidence} confidence'
+                  : 'Not enough real data yet')
+              : 'Loading…',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/activities/vo2max'),
       ),
     );
   }
