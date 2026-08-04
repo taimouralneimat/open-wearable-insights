@@ -383,6 +383,14 @@ class ApiClient {
     );
     return (response.data as Map<String, dynamic>).map((k, v) => MapEntry(k, v as int));
   }
+
+  /// Rotates the local API token — invalidates the current one and returns
+  /// a new one. The caller must store the new token immediately; this
+  /// request's own token stops working right after this call succeeds.
+  Future<String> regenerateToken() async {
+    final response = await _dio.post('/api/v1/auth/regenerate-token');
+    return (response.data as Map<String, dynamic>)['token'] as String;
+  }
 }
 
 /// Readiness score response from the API.

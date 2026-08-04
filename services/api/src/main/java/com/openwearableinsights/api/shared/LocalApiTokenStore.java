@@ -15,6 +15,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Owns the single, persistent, per-machine local API token used to authenticate
@@ -39,19 +40,40 @@ public class LocalApiTokenStore {
     private static final int TOKEN_BYTES = 32;
 
     private final Path tokenFile;
-    private final String token;
+    private final AtomicReference<String> token;
 
     public LocalApiTokenStore(
             @Value("${owi.local-api-token-file:~/.open-wearable-insights/local-api-token}") String tokenFilePath) {
         this.tokenFile = resolvePath(tokenFilePath);
-        this.token = loadOrGenerateToken(this.tokenFile);
+        this.token = new AtomicReference<>(loadOrGenerateToken(this.tokenFile));
     }
 
     /**
      * The current local API token. Never null after construction.
      */
     public String token() {
-        return token;
+        return token.get();
+    }
+
+    /**
+     * Generates a fresh token, persists it (overwriting the old one), and
+     * returns it. Callable only by a client that already holds the current
+     * valid token — this method has no auth of its own, it relies entirely
+     * on {@link LocalApiTokenAuthFilter} already having verified the caller
+     * against the token being replaced, same as every other {@code
+     * /api/v1/**} endpoint. The caller is expected to immediately store the
+     * returned value as its new token — see {@code POST
+     * /api/v1/auth/regenerate-token} — so a single already-authenticated
+     * client rotates itself atomically, with no separate re-pairing step and
+     * no window where it's locked out of its own action.
+     */
+    public synchronized String regenerate() throws IOException {
+        String fresh = generateToken();
+        writeTokenFile(tokenFile, fresh);
+        token.set(fresh);
+        log.info("Local API token regenerated at {}. Any other client still using the previous " +
+                "token will get 401s and need to re-pair.", tokenFile);
+        return fresh;
     }
 
     /**
@@ -61,7 +83,7 @@ public class LocalApiTokenStore {
      * a remote cryptographic comparison.
      */
     public boolean matches(String candidate) {
-        return candidate != null && token.equals(candidate);
+        return candidate != null && token.get().equals(candidate);
     }
 
     private static String loadOrGenerateToken(Path tokenFile) {
@@ -96,6 +118,7 @@ public class LocalApiTokenStore {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
+    /** Creates the file with owner-only permissions if it doesn't exist yet; overwrites its content either way — used both for first-boot generation and later regeneration. */
     private static void writeTokenFile(Path tokenFile, String token) throws IOException {
         Path parent = tokenFile.getParent();
         if (parent != null) {
@@ -104,9 +127,11 @@ public class LocalApiTokenStore {
 
         boolean posix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
         if (posix) {
-            FileAttribute<?> ownerOnly = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
-            Path created = Files.createFile(tokenFile, ownerOnly);
-            Files.writeString(created, token, StandardCharsets.UTF_8);
+            if (!Files.exists(tokenFile)) {
+                FileAttribute<?> ownerOnly = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
+                Files.createFile(tokenFile, ownerOnly);
+            }
+            Files.writeString(tokenFile, token, StandardCharsets.UTF_8);
         } else {
             Files.writeString(tokenFile, token, StandardCharsets.UTF_8);
             java.io.File f = tokenFile.toFile();

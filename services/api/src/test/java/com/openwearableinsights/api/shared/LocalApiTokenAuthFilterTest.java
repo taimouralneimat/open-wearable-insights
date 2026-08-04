@@ -93,4 +93,45 @@ class LocalApiTokenAuthFilterTest {
 
         assertThat(secondBoot.token()).isEqualTo(firstBoot.token());
     }
+
+    @Test
+    void regenerate_returnsANewTokenAndTheStoreAdoptsItImmediately(@TempDir Path tmp) throws Exception {
+        LocalApiTokenStore store = new LocalApiTokenStore(tmp.resolve("token").toString());
+        String original = store.token();
+
+        String regenerated = store.regenerate();
+
+        assertThat(regenerated).isNotEqualTo(original);
+        assertThat(store.token()).isEqualTo(regenerated);
+        assertThat(store.matches(original)).isFalse();
+        assertThat(store.matches(regenerated)).isTrue();
+    }
+
+    @Test
+    void regenerate_persistsSoARestartPicksUpTheNewTokenNotTheOld(@TempDir Path tmp) throws Exception {
+        String path = tmp.resolve("token").toString();
+        LocalApiTokenStore firstBoot = new LocalApiTokenStore(path);
+        String regenerated = firstBoot.regenerate();
+
+        LocalApiTokenStore secondBoot = new LocalApiTokenStore(path);
+
+        assertThat(secondBoot.token()).isEqualTo(regenerated);
+    }
+
+    @Test
+    void afterRegenerate_requestsCarryingTheOldTokenAreRejected(@TempDir Path tmp) throws Exception {
+        LocalApiTokenStore store = new LocalApiTokenStore(tmp.resolve("token").toString());
+        String original = store.token();
+        LocalApiTokenAuthFilter filter = new LocalApiTokenAuthFilter(store);
+        store.regenerate();
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/readiness/latest");
+        request.setServletPath("/api/v1/readiness/latest");
+        request.addHeader(LocalApiTokenAuthFilter.HEADER_NAME, original);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertThat(response.getStatus()).isEqualTo(401);
+    }
 }

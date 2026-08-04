@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../../data/api_client.dart';
+import '../../data/token_store.dart';
 import '../../data/web_download.dart';
 import '../../widgets/state_views.dart';
 
@@ -23,6 +24,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
   bool _loading = true;
   bool _exporting = false;
   bool _deleting = false;
+  bool _regeneratingToken = false;
   String? _error;
 
   @override
@@ -90,6 +92,36 @@ class _PrivacyPageState extends State<PrivacyPage> {
     }
   }
 
+  Future<void> _confirmAndRegenerateToken() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const _RegenerateTokenDialog(),
+    );
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    setState(() => _regeneratingToken = true);
+    try {
+      final newToken = await _apiClient.regenerateToken();
+      // This request's own token just stopped working server-side — the
+      // response above already carried the new one, and this is the first
+      // thing done with it: swap it into this same client's storage before
+      // anything else runs, so this device is never the one locked out.
+      await TokenStore.write(newToken);
+      if (!mounted) return;
+      setState(() => _regeneratingToken = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(
+            'Token regenerated. This device is already using the new one — any other device or '
+            'browser tab that was paired will need to re-pair.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _regeneratingToken = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Regeneration failed: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,6 +183,24 @@ class _PrivacyPageState extends State<PrivacyPage> {
               ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
               : const Icon(Icons.download_outlined, size: 18),
           label: Text(_exporting ? 'Preparing export…' : 'Export all my data'),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        Text('Local access', style: theme.textTheme.titleMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'This app is protected by a single local token instead of a username/password (see the '
+          'pairing screen). If it might have been exposed — a screen share, a screenshot, another '
+          'app reading the token file — regenerate it. This device switches to the new one '
+          'immediately; any other device or browser tab that was paired will need to re-pair.',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        OutlinedButton.icon(
+          onPressed: _regeneratingToken ? null : _confirmAndRegenerateToken,
+          icon: _regeneratingToken
+              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.autorenew, size: 18),
+          label: Text(_regeneratingToken ? 'Regenerating…' : 'Regenerate access token'),
         ),
         const SizedBox(height: AppSpacing.xxl),
         Text('Delete your data', style: theme.textTheme.titleMedium?.copyWith(color: theme.status.poor)),
@@ -230,6 +280,34 @@ class _DeleteAllDataDialogState extends State<_DeleteAllDataDialog> {
           onPressed: _confirmed ? () => Navigator.of(context).pop(true) : null,
           style: FilledButton.styleFrom(backgroundColor: theme.status.poor),
           child: const Text('Delete everything'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Lighter-weight than the delete-all confirmation (no typed phrase) —
+/// regenerating a token is reversible in effect (worst case: re-pair a
+/// device), unlike deleting data, so a plain confirm/cancel is proportionate.
+class _RegenerateTokenDialog extends StatelessWidget {
+  const _RegenerateTokenDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Regenerate access token?'),
+      content: const Text(
+        'This device switches to the new token automatically. Any other device or browser tab '
+        'currently paired will stop working and need to re-pair.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Regenerate'),
         ),
       ],
     );
