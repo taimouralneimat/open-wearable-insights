@@ -95,6 +95,13 @@ public class ExportService {
                 "SELECT * FROM activities WHERE account_id = ? ORDER BY start_time", accountId);
         List<Map<String, Object>> biomarkerReadings = query(
                 "SELECT * FROM biomarker_readings WHERE account_id = ? ORDER BY reading_date", accountId);
+        List<Map<String, Object>> strengthWorkouts = query(
+                "SELECT * FROM strength_workouts WHERE account_id = ? ORDER BY started_at", accountId);
+        // strength_sets has no direct account_id column — scoped via its parent workout, same join
+        // pattern raw_payloads/provenance use above for tables one hop from account_id.
+        List<Map<String, Object>> strengthSets = query(
+                "SELECT ss.* FROM strength_sets ss JOIN strength_workouts sw ON ss.workout_id = sw.id " +
+                "WHERE sw.account_id = ? ORDER BY ss.workout_id, ss.set_order", accountId);
         List<Map<String, Object>> journalEntries = query(
                 "SELECT * FROM journal_entries WHERE account_id = ? ORDER BY time", accountId);
         List<Map<String, Object>> readinessScoreHistory = query(
@@ -130,6 +137,8 @@ public class ExportService {
         recordCounts.put("measurements", measurements.size());
         recordCounts.put("activities", activities.size());
         recordCounts.put("biomarkerReadings", biomarkerReadings.size());
+        recordCounts.put("strengthWorkouts", strengthWorkouts.size());
+        recordCounts.put("strengthSets", strengthSets.size());
         recordCounts.put("journalEntries", journalEntries.size());
         recordCounts.put("readinessScoreHistory", readinessScoreHistory.size());
         recordCounts.put("derivedMetrics", derivedMetrics.size());
@@ -149,6 +158,8 @@ public class ExportService {
         export.put("measurements", measurements);
         export.put("activities", activities);
         export.put("biomarkerReadings", biomarkerReadings);
+        export.put("strengthWorkouts", strengthWorkouts);
+        export.put("strengthSets", strengthSets);
         export.put("journalEntries", journalEntries);
         export.put("readinessScoreHistory", readinessScoreHistory);
         export.put("derivedMetrics", derivedMetrics);
@@ -194,6 +205,13 @@ public class ExportService {
                 "DELETE FROM activities WHERE account_id = ?", accountId));
         deletedCounts.put("biomarkerReadings", jdbcTemplate.update(
                 "DELETE FROM biomarker_readings WHERE account_id = ?", accountId));
+        // strength_sets (child) before strength_workouts (parent) — FK order, same convention as
+        // measurements/activities before their own referenced rows elsewhere in this method.
+        deletedCounts.put("strengthSets", jdbcTemplate.update(
+                "DELETE FROM strength_sets WHERE workout_id IN (SELECT id FROM strength_workouts WHERE account_id = ?)",
+                accountId));
+        deletedCounts.put("strengthWorkouts", jdbcTemplate.update(
+                "DELETE FROM strength_workouts WHERE account_id = ?", accountId));
         deletedCounts.put("rawPayloads", jdbcTemplate.update(
                 "DELETE FROM raw_payloads WHERE batch_id IN (SELECT id FROM import_batches WHERE account_id = ?)",
                 accountId));
