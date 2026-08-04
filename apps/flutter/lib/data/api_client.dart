@@ -438,6 +438,53 @@ class ApiClient {
         .map((e) => BiomarkerReferenceEntryResponse.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  /// Log a manually-tracked strength workout. [startedAt] defaults to now
+  /// server-side if omitted. [durationMinutes] is optional — when omitted,
+  /// the backend estimates one from set count for trend purposes rather
+  /// than measuring it (see StrengthTrainingService).
+  Future<StrengthWorkoutResponse> logStrengthWorkout({
+    DateTime? startedAt,
+    int? durationMinutes,
+    String? note,
+    required List<StrengthExerciseInput> exercises,
+  }) async {
+    final response = await _dio.post('/api/v1/strength/workouts', data: {
+      'startedAt': startedAt?.toUtc().toIso8601String(),
+      'durationMinutes': durationMinutes,
+      'note': note,
+      'exercises': exercises.map((e) => e.toJson()).toList(),
+    });
+    return StrengthWorkoutResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// List recent manually-logged strength workouts, most recent first.
+  Future<List<StrengthWorkoutResponse>> getStrengthWorkouts() async {
+    final response = await _dio.get('/api/v1/strength/workouts');
+    return (response.data as List)
+        .map((e) => StrengthWorkoutResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get the real "Strength Activity Time" trend. [window] is 'weekly'
+  /// (last 7 days, daily buckets), 'monthly' (last 30 days, weekly
+  /// buckets), or 'sixmonth' (last 180 days, monthly buckets).
+  Future<StrengthActivityTrendResponse> getStrengthTrends({String window = 'weekly'}) async {
+    final response = await _dio.get('/api/v1/strength/trends', queryParameters: {'window': window});
+    return StrengthActivityTrendResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Get the optional weekly strength-minutes goal — null if unset.
+  Future<int?> getStrengthGoalMinutes() async {
+    final response = await _dio.get('/api/v1/strength/goal');
+    return (response.data as Map<String, dynamic>)['weeklyGoalMinutes'] as int?;
+  }
+
+  /// Set (or clear, with null) the weekly strength-minutes goal.
+  Future<int?> setStrengthGoalMinutes(int? minutes) async {
+    final response = await _dio.put('/api/v1/strength/goal', data: {'weeklyGoalMinutes': minutes});
+    return (response.data as Map<String, dynamic>)['weeklyGoalMinutes'] as int?;
+  }
 }
 
 /// Readiness score response from the API.
@@ -1930,6 +1977,160 @@ class BiomarkerReferenceEntryResponse {
       name: json['name'] as String,
       category: json['category'] as String,
       description: json['description'] as String,
+    );
+  }
+}
+
+/// One set to submit when logging a workout — see [ApiClient.logStrengthWorkout].
+class StrengthSetInput {
+  final int reps;
+  final double? weightKg;
+
+  StrengthSetInput({required this.reps, this.weightKg});
+
+  Map<String, dynamic> toJson() => {'reps': reps, 'weightKg': weightKg};
+}
+
+/// One exercise (with its sets) to submit when logging a workout.
+class StrengthExerciseInput {
+  final String exerciseName;
+  final List<StrengthSetInput> sets;
+
+  StrengthExerciseInput({required this.exerciseName, required this.sets});
+
+  Map<String, dynamic> toJson() => {
+        'exerciseName': exerciseName,
+        'sets': sets.map((s) => s.toJson()).toList(),
+      };
+}
+
+/// A logged set, as returned by the API (setOrder is workout-wide, 1-based).
+class StrengthSetResponse {
+  final int setOrder;
+  final int reps;
+  final double? weightKg;
+
+  StrengthSetResponse({required this.setOrder, required this.reps, this.weightKg});
+
+  factory StrengthSetResponse.fromJson(Map<String, dynamic> json) {
+    return StrengthSetResponse(
+      setOrder: json['setOrder'] as int,
+      reps: json['reps'] as int,
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+    );
+  }
+}
+
+/// One exercise within a logged workout, with its sets in performed order.
+class StrengthExerciseResponse {
+  final String exerciseName;
+  final List<StrengthSetResponse> sets;
+
+  StrengthExerciseResponse({required this.exerciseName, required this.sets});
+
+  factory StrengthExerciseResponse.fromJson(Map<String, dynamic> json) {
+    return StrengthExerciseResponse(
+      exerciseName: json['exerciseName'] as String,
+      sets: (json['sets'] as List).map((e) => StrengthSetResponse.fromJson(e as Map<String, dynamic>)).toList(),
+    );
+  }
+}
+
+/// A manually-logged strength workout. [durationIsEstimated] is true when
+/// [durationMinutes] wasn't user-reported and was instead estimated from
+/// set count (see StrengthTrainingService) — never silently treated as a
+/// measured duration.
+class StrengthWorkoutResponse {
+  final int id;
+  final String startedAt;
+  final int? userDurationMinutes;
+  final int durationMinutes;
+  final bool durationIsEstimated;
+  final String? note;
+  final List<StrengthExerciseResponse> exercises;
+
+  StrengthWorkoutResponse({
+    required this.id,
+    required this.startedAt,
+    this.userDurationMinutes,
+    required this.durationMinutes,
+    required this.durationIsEstimated,
+    this.note,
+    required this.exercises,
+  });
+
+  int get totalSets => exercises.fold(0, (sum, e) => sum + e.sets.length);
+
+  factory StrengthWorkoutResponse.fromJson(Map<String, dynamic> json) {
+    return StrengthWorkoutResponse(
+      id: json['id'] as int,
+      startedAt: json['startedAt'] as String,
+      userDurationMinutes: json['userDurationMinutes'] as int?,
+      durationMinutes: json['durationMinutes'] as int,
+      durationIsEstimated: json['durationIsEstimated'] as bool,
+      note: json['note'] as String?,
+      exercises: (json['exercises'] as List)
+          .map((e) => StrengthExerciseResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+/// One bucket of the Strength Activity Time trend — see
+/// StrengthActivityTrendPoint on the backend for the full honesty
+/// convention behind garminMinutes vs manualMinutes never being blended
+/// into one unlabeled number.
+class StrengthActivityTrendPointResponse {
+  final String periodStart;
+  final String periodEnd;
+  final double garminMinutes;
+  final double manualMinutes;
+  final bool manualMinutesEstimated;
+  final double totalMinutes;
+
+  StrengthActivityTrendPointResponse({
+    required this.periodStart,
+    required this.periodEnd,
+    required this.garminMinutes,
+    required this.manualMinutes,
+    required this.manualMinutesEstimated,
+    required this.totalMinutes,
+  });
+
+  factory StrengthActivityTrendPointResponse.fromJson(Map<String, dynamic> json) {
+    return StrengthActivityTrendPointResponse(
+      periodStart: json['periodStart'] as String,
+      periodEnd: json['periodEnd'] as String,
+      garminMinutes: (json['garminMinutes'] as num).toDouble(),
+      manualMinutes: (json['manualMinutes'] as num).toDouble(),
+      manualMinutesEstimated: json['manualMinutesEstimated'] as bool,
+      totalMinutes: (json['totalMinutes'] as num).toDouble(),
+    );
+  }
+}
+
+/// The full Strength Activity Time trend response for one window.
+class StrengthActivityTrendResponse {
+  final String window;
+  final List<StrengthActivityTrendPointResponse> points;
+  final int? weeklyGoalMinutes;
+  final List<String> limitations;
+
+  StrengthActivityTrendResponse({
+    required this.window,
+    required this.points,
+    this.weeklyGoalMinutes,
+    required this.limitations,
+  });
+
+  factory StrengthActivityTrendResponse.fromJson(Map<String, dynamic> json) {
+    return StrengthActivityTrendResponse(
+      window: json['window'] as String,
+      points: (json['points'] as List)
+          .map((e) => StrengthActivityTrendPointResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      weeklyGoalMinutes: json['weeklyGoalMinutes'] as int?,
+      limitations: (json['limitations'] as List).cast<String>(),
     );
   }
 }

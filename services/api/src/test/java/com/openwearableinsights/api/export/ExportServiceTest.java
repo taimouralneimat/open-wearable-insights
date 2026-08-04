@@ -64,6 +64,10 @@ class ExportServiceTest {
                 .thenReturn(List.of(Map.of("id", 1L)));
         when(jdbc.queryForList(contains("FROM biomarker_readings"), eq(ACCOUNT_ID)))
                 .thenReturn(List.of(Map.of("id", 1L), Map.of("id", 2L)));
+        when(jdbc.queryForList(contains("FROM strength_workouts"), eq(ACCOUNT_ID)))
+                .thenReturn(List.of(Map.of("id", 1L)));
+        when(jdbc.queryForList(contains("FROM strength_sets"), eq(ACCOUNT_ID)))
+                .thenReturn(List.of(Map.of("id", 1L), Map.of("id", 2L), Map.of("id", 3L)));
         when(jdbc.queryForList(contains("FROM journal_entries"), eq(ACCOUNT_ID)))
                 .thenReturn(List.of());
         when(jdbc.queryForList(contains("FROM readiness_score_history"), eq(ACCOUNT_ID)))
@@ -96,6 +100,8 @@ class ExportServiceTest {
         assertThat(recordCounts.get("measurements")).isEqualTo(2);
         assertThat(recordCounts.get("activities")).isEqualTo(1);
         assertThat(recordCounts.get("biomarkerReadings")).isEqualTo(2);
+        assertThat(recordCounts.get("strengthWorkouts")).isEqualTo(1);
+        assertThat(recordCounts.get("strengthSets")).isEqualTo(3);
         assertThat(recordCounts.get("journalEntries")).isEqualTo(0);
         assertThat(recordCounts.get("readinessScoreHistory")).isEqualTo(3);
         assertThat(recordCounts.get("derivedMetrics")).isEqualTo(0);
@@ -109,8 +115,8 @@ class ExportServiceTest {
         // export shouldn't silently omit sections that happen to be empty.
         assertThat(export.keySet()).containsExactlyInAnyOrder(
                 "exportVersion", "exportedAt", "accountId", "recordCounts", "account",
-                "devices", "measurements", "activities", "biomarkerReadings", "journalEntries",
-                "readinessScoreHistory", "derivedMetrics", "llmOutputs",
+                "devices", "measurements", "activities", "biomarkerReadings", "strengthWorkouts", "strengthSets",
+                "journalEntries", "readinessScoreHistory", "derivedMetrics", "llmOutputs",
                 "importBatches", "rawPayloads", "provenance", "algorithmVersions"
         );
     }
@@ -228,7 +234,8 @@ class ExportServiceTest {
         Map<String, Integer> deleted = service.deleteAllData(ACCOUNT_ID).orElseThrow();
 
         assertThat(deleted.keySet()).containsExactlyInAnyOrder(
-                "measurements", "activities", "biomarkerReadings", "rawPayloads", "provenance", "derivedMetrics",
+                "measurements", "activities", "biomarkerReadings", "strengthSets", "strengthWorkouts",
+                "rawPayloads", "provenance", "derivedMetrics",
                 "journalEntries", "llmOutputs", "readinessScoreHistory", "garminConnectAccount",
                 "importBatches", "devices"
         );

@@ -10,6 +10,8 @@ import 'package:open_wearable_insights/features/activities/activities_page.dart'
 import 'package:open_wearable_insights/features/activities/activity_session_detail_page.dart';
 import 'package:open_wearable_insights/features/activities/training_load_page.dart';
 import 'package:open_wearable_insights/features/activities/vo2max_page.dart';
+import 'package:open_wearable_insights/features/strength/strength_trend_page.dart';
+import 'package:open_wearable_insights/features/strength/strength_log_page.dart';
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 import 'package:open_wearable_insights/features/journal/journal_page.dart';
 import 'package:open_wearable_insights/features/profile/profile_page.dart';
@@ -81,6 +83,16 @@ class OpenWearableInsightsApp extends StatelessWidget {
                   GoRoute(
                     path: 'vo2max',
                     builder: (context, state) => const Vo2MaxPage(),
+                  ),
+                  GoRoute(
+                    path: 'strength',
+                    builder: (context, state) => const StrengthTrendPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'log',
+                        builder: (context, state) => const StrengthLogPage(),
+                      ),
+                    ],
                   ),
                 ],
               ),
