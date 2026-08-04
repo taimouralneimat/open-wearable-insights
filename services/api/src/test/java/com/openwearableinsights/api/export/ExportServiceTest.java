@@ -62,6 +62,8 @@ class ExportServiceTest {
                 .thenReturn(List.of(Map.of("time", Timestamp.from(Instant.now())), Map.of("time", Timestamp.from(Instant.now()))));
         when(jdbc.queryForList(contains("FROM activities"), eq(ACCOUNT_ID)))
                 .thenReturn(List.of(Map.of("id", 1L)));
+        when(jdbc.queryForList(contains("FROM biomarker_readings"), eq(ACCOUNT_ID)))
+                .thenReturn(List.of(Map.of("id", 1L), Map.of("id", 2L)));
         when(jdbc.queryForList(contains("FROM journal_entries"), eq(ACCOUNT_ID)))
                 .thenReturn(List.of());
         when(jdbc.queryForList(contains("FROM readiness_score_history"), eq(ACCOUNT_ID)))
@@ -93,6 +95,7 @@ class ExportServiceTest {
         assertThat(recordCounts.get("devices")).isEqualTo(1);
         assertThat(recordCounts.get("measurements")).isEqualTo(2);
         assertThat(recordCounts.get("activities")).isEqualTo(1);
+        assertThat(recordCounts.get("biomarkerReadings")).isEqualTo(2);
         assertThat(recordCounts.get("journalEntries")).isEqualTo(0);
         assertThat(recordCounts.get("readinessScoreHistory")).isEqualTo(3);
         assertThat(recordCounts.get("derivedMetrics")).isEqualTo(0);
@@ -106,7 +109,7 @@ class ExportServiceTest {
         // export shouldn't silently omit sections that happen to be empty.
         assertThat(export.keySet()).containsExactlyInAnyOrder(
                 "exportVersion", "exportedAt", "accountId", "recordCounts", "account",
-                "devices", "measurements", "activities", "journalEntries",
+                "devices", "measurements", "activities", "biomarkerReadings", "journalEntries",
                 "readinessScoreHistory", "derivedMetrics", "llmOutputs",
                 "importBatches", "rawPayloads", "provenance", "algorithmVersions"
         );
@@ -225,7 +228,7 @@ class ExportServiceTest {
         Map<String, Integer> deleted = service.deleteAllData(ACCOUNT_ID).orElseThrow();
 
         assertThat(deleted.keySet()).containsExactlyInAnyOrder(
-                "measurements", "activities", "rawPayloads", "provenance", "derivedMetrics",
+                "measurements", "activities", "biomarkerReadings", "rawPayloads", "provenance", "derivedMetrics",
                 "journalEntries", "llmOutputs", "readinessScoreHistory", "garminConnectAccount",
                 "importBatches", "devices"
         );

@@ -93,6 +93,8 @@ public class ExportService {
                 "SELECT * FROM measurements WHERE account_id = ? ORDER BY time", accountId);
         List<Map<String, Object>> activities = query(
                 "SELECT * FROM activities WHERE account_id = ? ORDER BY start_time", accountId);
+        List<Map<String, Object>> biomarkerReadings = query(
+                "SELECT * FROM biomarker_readings WHERE account_id = ? ORDER BY reading_date", accountId);
         List<Map<String, Object>> journalEntries = query(
                 "SELECT * FROM journal_entries WHERE account_id = ? ORDER BY time", accountId);
         List<Map<String, Object>> readinessScoreHistory = query(
@@ -127,6 +129,7 @@ public class ExportService {
         recordCounts.put("devices", devices.size());
         recordCounts.put("measurements", measurements.size());
         recordCounts.put("activities", activities.size());
+        recordCounts.put("biomarkerReadings", biomarkerReadings.size());
         recordCounts.put("journalEntries", journalEntries.size());
         recordCounts.put("readinessScoreHistory", readinessScoreHistory.size());
         recordCounts.put("derivedMetrics", derivedMetrics.size());
@@ -145,6 +148,7 @@ public class ExportService {
         export.put("devices", devices);
         export.put("measurements", measurements);
         export.put("activities", activities);
+        export.put("biomarkerReadings", biomarkerReadings);
         export.put("journalEntries", journalEntries);
         export.put("readinessScoreHistory", readinessScoreHistory);
         export.put("derivedMetrics", derivedMetrics);
@@ -188,6 +192,8 @@ public class ExportService {
                 "DELETE FROM measurements WHERE account_id = ?", accountId));
         deletedCounts.put("activities", jdbcTemplate.update(
                 "DELETE FROM activities WHERE account_id = ?", accountId));
+        deletedCounts.put("biomarkerReadings", jdbcTemplate.update(
+                "DELETE FROM biomarker_readings WHERE account_id = ?", accountId));
         deletedCounts.put("rawPayloads", jdbcTemplate.update(
                 "DELETE FROM raw_payloads WHERE batch_id IN (SELECT id FROM import_batches WHERE account_id = ?)",
                 accountId));
