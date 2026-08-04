@@ -29,6 +29,22 @@ import java.util.Optional;
  *
  * <p>Phase 1: accepts inputs directly (synthetic data). Phase 2+ will read
  * from the database via the normalization module.
+ *
+ * <p><strong>Known limitation, not yet fixed:</strong> {@code LocalDate.now(ZoneOffset.UTC)}
+ * below decides which calendar day "today" is for score-history storage and
+ * day-over-day diffing. For an account not in UTC, this can disagree with
+ * the user's real local day for a window around their local midnight (e.g.
+ * UTC+3 means the app still thinks it's "yesterday" for the first ~3 hours
+ * after local midnight) — found 2026-08-04 alongside a similar,
+ * already-fixed display-only bug in SleepInsightService (see that class).
+ * Not fixed here yet because the day-bucketing this compares against
+ * (measurements grouped by {@code DATE(time)} in UTC throughout the
+ * codebase) would need to move in lockstep — fixing only "today" here
+ * without also fixing that bucketing would create a worse, inconsistent
+ * mismatch, not a smaller one. Same root cause also affects
+ * {@code CoachController} (day-over-day "why" comparison) and
+ * {@code JournalService} (habit-streak continuity) — a real, systemic,
+ * cross-cutting question worth a dedicated pass, not a piecemeal fix.
  */
 @RestController
 @RequestMapping("/api/v1/readiness")
