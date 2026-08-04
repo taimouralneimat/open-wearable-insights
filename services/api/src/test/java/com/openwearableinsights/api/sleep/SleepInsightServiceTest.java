@@ -49,7 +49,7 @@ class SleepInsightServiceTest {
         BaselineService baselineService = mock(BaselineService.class);
         when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepDebt debt = service.computeSleepDebt(1L);
 
         assertThat(debt.neededHoursPerNight()).isNull();
@@ -74,7 +74,7 @@ class SleepInsightServiceTest {
         mockNight(jdbc, 1L, night1, 24); // 24 * 0.25 = 6.0h
         mockNight(jdbc, 1L, night2, 32); // 32 * 0.25 = 8.0h (meets need exactly)
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepDebt debt = service.computeSleepDebt(1L);
 
         assertThat(debt.neededHoursPerNight()).isEqualTo(8.0);
@@ -94,7 +94,7 @@ class SleepInsightServiceTest {
                 .thenReturn(List.of(date));
         mockNight(jdbc, 1L, date, 28);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepSummary summary = service.computeLatestSummary(1L).orElseThrow();
 
         assertThat(summary.sleepNeedHours()).isEqualTo(7.75);
@@ -111,7 +111,7 @@ class SleepInsightServiceTest {
                 .thenReturn(List.of(date));
         mockNight(jdbc, 1L, date, 28);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepSummary summary = service.computeLatestSummary(1L).orElseThrow();
 
         assertThat(summary.sleepNeedHours()).isNull();
@@ -124,7 +124,7 @@ class SleepInsightServiceTest {
         BaselineService baselineService = mock(BaselineService.class);
         when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepPlan plan = service.computeSleepPlan(1L);
 
         assertThat(plan.recommendedBedtime()).isNull();
@@ -156,7 +156,7 @@ class SleepInsightServiceTest {
         );
         when(jdbc.queryForList(anyString(), eq(1L), eq(7))).thenReturn(wakeRows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepPlan plan = service.computeSleepPlan(1L);
 
         assertThat(plan.targetWakeTime()).isEqualTo("07:00");
@@ -216,7 +216,7 @@ class SleepInsightServiceTest {
                 consistencyRow(LocalDate.of(2026, 8, 2), "23:15", "07:10")
         ));
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         assertThat(result.consistencyScore()).isNull();
@@ -237,7 +237,7 @@ class SleepInsightServiceTest {
         }
         when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         assertThat(result.consistencyScore()).isEqualTo(100);
@@ -261,7 +261,7 @@ class SleepInsightServiceTest {
         }
         when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         // Midpoint of 23:30 and 00:30 is 00:00, not 12:00.
@@ -281,7 +281,7 @@ class SleepInsightServiceTest {
         );
         when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         assertThat(result.consistencyScore()).isLessThan(70);

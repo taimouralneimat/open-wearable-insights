@@ -9,6 +9,7 @@ import com.openwearableinsights.api.sleep.domain.SleepSummary.SleepStagePoint;
 import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,10 +76,28 @@ public class SleepInsightService {
 
     private final JdbcTemplate jdbcTemplate;
     private final BaselineService baselineService;
+    // Measurements are stored as UTC instants (correct — see V01 schema),
+    // but bed/wake clock-times shown to the user must be their own local
+    // time, not the storage timezone. This app runs entirely on the user's
+    // own machine (ADR-0008), so the JVM's default zone IS the user's real
+    // zone — no config needed. Only affects display formatting here; day
+    // bucketing (DATE(time) in the SQL below) deliberately stays UTC-based
+    // and is NOT touched by this — a real, separate, larger question (would
+    // a session crossing local midnight near a UTC-day boundary ever get
+    // split or merged across two DATE(time) buckets?) that needs its own
+    // dedicated look, not a same-night fix bundled in here.
+    private final ZoneId displayZone;
 
+    @Autowired
     public SleepInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService) {
+        this(jdbcTemplate, baselineService, ZoneId.systemDefault());
+    }
+
+    /** Explicit-zone seam — mainly so test clock-time assertions don't depend on the test runner's host timezone. */
+    public SleepInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService, ZoneId displayZone) {
         this.jdbcTemplate = jdbcTemplate;
         this.baselineService = baselineService;
+        this.displayZone = displayZone;
     }
 
     /**
@@ -263,7 +282,7 @@ public class SleepInsightService {
 
     /** Minutes since midnight, then shifted so noon (not midnight) is the wrap-around point — see computeSleepConsistency. */
     private int shiftedMinutesSinceNoon(Instant instant) {
-        LocalTime t = instant.atZone(ZoneOffset.UTC).toLocalTime();
+        LocalTime t = instant.atZone(displayZone).toLocalTime();
         int minutesSinceMidnight = t.getHour() * 60 + t.getMinute();
         return (minutesSinceMidnight + 12 * 60) % (24 * 60);
     }
@@ -304,7 +323,7 @@ public class SleepInsightService {
             int totalMinutes = 0;
             for (Map<String, Object> row : rows) {
                 Instant lastReading = ((Timestamp) row.get("last_reading")).toInstant();
-                LocalTime t = lastReading.atZone(ZoneOffset.UTC).toLocalTime();
+                LocalTime t = lastReading.atZone(displayZone).toLocalTime();
                 totalMinutes += t.getHour() * 60 + t.getMinute();
             }
             int avgMinutes = totalMinutes / rows.size();
@@ -351,7 +370,7 @@ public class SleepInsightService {
                 hoursByStage[stageIndex] += HOURS_PER_READING;
                 Timestamp t = (Timestamp) row.get("time");
                 stages.add(new SleepStagePoint(
-                        t.toInstant().atZone(ZoneOffset.UTC).toLocalTime().toString(),
+                        t.toInstant().atZone(displayZone).toLocalTime().toString(),
                         STAGE_NAMES.get(stageIndex)
                 ));
             }
