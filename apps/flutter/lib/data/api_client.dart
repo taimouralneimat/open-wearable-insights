@@ -307,6 +307,12 @@ class ApiClient {
         .toList();
   }
 
+  /// Get the composite healthspan/wellness score (30-day and 6-month windows).
+  Future<HealthspanSummaryResponse> getHealthspanSummary() async {
+    final response = await _dio.get('/api/v1/healthspan');
+    return HealthspanSummaryResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get score diff vs prior day.
   Future<ScoreDiffResponse> getScoreDiff() async {
     final response = await _dio.get("/api/v1/readiness/diff");
@@ -1462,6 +1468,108 @@ class Vo2MaxTrendPointResponse {
     return Vo2MaxTrendPointResponse(
       month: json['month'] as String,
       vo2Max: (json['vo2Max'] as num).toDouble(),
+    );
+  }
+}
+
+/// The composite healthspan/wellness score (parity-matrix row 24) — this
+/// app's own original composite, not a reproduction of any vendor's
+/// proprietary biological-age formula. Both windows use the exact same
+/// methodology; only the "recent vs. prior" comparison span differs.
+class HealthspanSummaryResponse {
+  final HealthspanScoreResponse thirtyDay;
+  final HealthspanScoreResponse sixMonth;
+
+  HealthspanSummaryResponse({required this.thirtyDay, required this.sixMonth});
+
+  factory HealthspanSummaryResponse.fromJson(Map<String, dynamic> json) {
+    return HealthspanSummaryResponse(
+      thirtyDay: HealthspanScoreResponse.fromJson(json['thirtyDay'] as Map<String, dynamic>),
+      sixMonth: HealthspanScoreResponse.fromJson(json['sixMonth'] as Map<String, dynamic>),
+    );
+  }
+}
+
+/// A single window's healthspan score. score/factors are null/empty when
+/// there isn't enough real history yet across enough contributing metrics —
+/// never a fabricated or partial number. confidence never exceeds "medium".
+class HealthspanScoreResponse {
+  final int? score;
+  final String window;
+  final String algorithmVersion;
+  final String confidence;
+  final List<HealthspanFactorResponse> factors;
+  final String missingDataTreatment;
+  final String methodology;
+  final String disclaimer;
+  final List<String> limitations;
+
+  HealthspanScoreResponse({
+    this.score,
+    required this.window,
+    required this.algorithmVersion,
+    required this.confidence,
+    required this.factors,
+    required this.missingDataTreatment,
+    required this.methodology,
+    required this.disclaimer,
+    required this.limitations,
+  });
+
+  factory HealthspanScoreResponse.fromJson(Map<String, dynamic> json) {
+    return HealthspanScoreResponse(
+      score: json['score'] as int?,
+      window: json['window'] as String,
+      algorithmVersion: json['algorithmVersion'] as String,
+      confidence: json['confidence'] as String,
+      factors: (json['factors'] as List)
+          .map((e) => HealthspanFactorResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      missingDataTreatment: json['missingDataTreatment'] as String,
+      methodology: json['methodology'] as String,
+      disclaimer: json['disclaimer'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+/// One contributing metric's real value, comparison, weight, and
+/// contribution to a [HealthspanScoreResponse] — the same
+/// cite-your-own-inputs transparency every score in this app follows.
+class HealthspanFactorResponse {
+  final String name;
+  final double? value;
+  final String unit;
+  final String comparison;
+  final String direction;
+  final double weight;
+  final double contribution;
+  final String confidence;
+  final String source;
+
+  HealthspanFactorResponse({
+    required this.name,
+    this.value,
+    required this.unit,
+    required this.comparison,
+    required this.direction,
+    required this.weight,
+    required this.contribution,
+    required this.confidence,
+    required this.source,
+  });
+
+  factory HealthspanFactorResponse.fromJson(Map<String, dynamic> json) {
+    return HealthspanFactorResponse(
+      name: json['name'] as String,
+      value: (json['value'] as num?)?.toDouble(),
+      unit: json['unit'] as String,
+      comparison: json['comparison'] as String,
+      direction: json['direction'] as String,
+      weight: (json['weight'] as num).toDouble(),
+      contribution: (json['contribution'] as num).toDouble(),
+      confidence: json['confidence'] as String,
+      source: json['source'] as String,
     );
   }
 }
