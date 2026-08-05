@@ -402,15 +402,29 @@ class _ActivityTrendsCard extends StatelessWidget {
               if (windowDays > 7) ...[
                 _ActivityTrendSummaryRow(trends: trends),
                 const SizedBox(height: AppSpacing.md),
-                if (trends.length > _maxRowsShown)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: Text(
-                      'Most recent $_maxRowsShown of ${trends.length} days:',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
               ],
+              // Beyond 31/120 days the backend rolls raw daily points up into
+              // weekly/monthly averages (parity-matrix row 9) — disclosed
+              // here rather than silently showing an averaged number as if
+              // it were a single real day's count.
+              if (trends.first.granularity != 'day')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Text(
+                    trends.first.granularity == 'week'
+                        ? 'Weekly averages (avg steps/day per week)'
+                        : 'Monthly averages (avg steps/day per month)',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                )
+              else if (trends.length > _maxRowsShown)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Text(
+                    'Most recent $_maxRowsShown of ${trends.length} days:',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
               ...shown.map((t) => _TrendBar(point: t, maxSteps: maxSteps)),
             ],
           ],

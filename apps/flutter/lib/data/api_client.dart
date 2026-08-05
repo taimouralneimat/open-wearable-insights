@@ -1466,21 +1466,30 @@ class Vo2MaxTrendPointResponse {
   }
 }
 
-/// A day's step count within a trend view. Calories/active minutes aren't
+/// A point within a step-count trend view. Calories/active minutes aren't
 /// tracked in the current data model — see ActivitySummary.
+///
+/// [granularity] is 'day', 'week', or 'month' — beyond a 31-day window the
+/// backend returns weekly averages instead of daily counts (and monthly
+/// beyond 120), so a large window renders as a readable trend instead of
+/// hundreds of raw daily bars. [steps] is that day's real count for 'day',
+/// or the average steps/day across real days in the bucket for 'week'/'month'.
 class ActivityTrendPoint {
   final String date;
   final int steps;
+  final String granularity;
 
   ActivityTrendPoint({
     required this.date,
     required this.steps,
+    required this.granularity,
   });
 
   factory ActivityTrendPoint.fromJson(Map<String, dynamic> json) {
     return ActivityTrendPoint(
       date: json['date'] as String,
       steps: json['steps'] as int,
+      granularity: json['granularity'] as String? ?? 'day',
     );
   }
 }

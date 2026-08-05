@@ -56,7 +56,10 @@ public class ActivitiesController {
 
     @GetMapping("/trends")
     @Operation(summary = "Get activity trends",
-            description = "Returns real step-count trends for up to the last N days with data (default 7, max " + MAX_TREND_DAYS + ").")
+            description = "Returns real step-count trends for up to the last N days with data (default 7, max " + MAX_TREND_DAYS + "). "
+                    + "Beyond 31 days, points are weekly averages instead of daily counts; beyond 120, monthly — each "
+                    + "point's granularity field says which, so a large window renders as a readable trend rather than "
+                    + "hundreds of raw daily bars.")
     public List<ActivityTrendPoint> getTrends(@RequestParam(required = false) Integer days) {
         int window = Math.min(days != null && days > 0 ? days : DEFAULT_TREND_DAYS, MAX_TREND_DAYS);
         return activityInsightService.computeStepTrends(DEFAULT_ACCOUNT_ID, window);

@@ -7,11 +7,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -69,27 +74,77 @@ public class ActivityInsightService {
         );
     }
 
+    // Rollup thresholds (parity-matrix.md row 9): beyond a few weeks, one
+    // point per real day stops being readable (366 raw points for a
+    // year+ view) — bucket into weekly, then monthly points instead. Chosen
+    // to line up with the Flutter trend card's existing 7/30/90-day window
+    // selector: 7 and 30 both stay daily, 90 buckets to weekly.
+    private static final int WEEKLY_ROLLUP_THRESHOLD_DAYS = 31;
+    private static final int MONTHLY_ROLLUP_THRESHOLD_DAYS = 120;
+
     /**
      * Real step trends for up to {@code days} most recent dates with data.
      * Returns fewer points if less history exists.
+     *
+     * <p>For {@code days > 31} this returns weekly points instead of daily
+     * ones, and for {@code days > 120} monthly points — each the average
+     * steps/day across the real days with data in that bucket (never
+     * zero-filled for days with no data), with {@link ActivityTrendPoint#granularity()}
+     * disclosing which. A raw list of up to 366 individual daily points
+     * doesn't render usefully as a year+ trend; averaging within the bucket
+     * (rather than summing) keeps the number comparable across granularities.
      */
     public List<ActivityTrendPoint> computeStepTrends(Long accountId, int days) {
         try {
-            List<LocalDate> dates = jdbcTemplate.queryForList(
-                    "SELECT DISTINCT DATE(time) FROM measurements " +
+            // One grouped query (day, sum-for-that-day) instead of the
+            // previous DISTINCT-dates-then-N-per-date-queries approach —
+            // matters once `days` can be up to 366.
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT DATE(time) AS day, SUM(value)::int AS total FROM measurements " +
                     "WHERE account_id = ? AND metric_type = 'steps' " +
-                    "ORDER BY DATE(time) DESC LIMIT ?",
-                    LocalDate.class, accountId, days
+                    "GROUP BY DATE(time) ORDER BY DATE(time) DESC LIMIT ?",
+                    accountId, days
             );
-            List<ActivityTrendPoint> trends = new ArrayList<>();
-            for (LocalDate date : dates.reversed()) {
-                trends.add(new ActivityTrendPoint(date.toString(), sumStepsForDate(accountId, date)));
+            List<DailyPoint> daily = new ArrayList<>();
+            for (Map<String, Object> row : rows) {
+                daily.add(new DailyPoint(((java.sql.Date) row.get("day")).toLocalDate(), ((Number) row.get("total")).intValue()));
             }
-            return trends;
+            daily.sort((a, b) -> a.date.compareTo(b.date));
+
+            if (days <= WEEKLY_ROLLUP_THRESHOLD_DAYS) {
+                List<ActivityTrendPoint> trends = new ArrayList<>();
+                for (DailyPoint p : daily) {
+                    trends.add(new ActivityTrendPoint(p.date.toString(), p.steps, "day"));
+                }
+                return trends;
+            }
+
+            String granularity = days <= MONTHLY_ROLLUP_THRESHOLD_DAYS ? "week" : "month";
+            return bucketAverage(daily, granularity);
         } catch (Exception e) {
             log.warn("Failed to compute step trends for account {}: {}", accountId, e.getMessage(), e);
             return List.of();
         }
+    }
+
+    private record DailyPoint(LocalDate date, int steps) {}
+
+    /** Buckets real daily points into weekly/monthly averages — see {@link #computeStepTrends}. */
+    private List<ActivityTrendPoint> bucketAverage(List<DailyPoint> daily, String granularity) {
+        Map<LocalDate, List<Integer>> byBucket = new LinkedHashMap<>();
+        for (DailyPoint p : daily) {
+            LocalDate bucketStart = "week".equals(granularity)
+                    ? p.date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    : p.date.withDayOfMonth(1);
+            byBucket.computeIfAbsent(bucketStart, k -> new ArrayList<>()).add(p.steps);
+        }
+        List<ActivityTrendPoint> trends = new ArrayList<>();
+        for (Map.Entry<LocalDate, List<Integer>> entry : byBucket.entrySet()) {
+            int avg = (int) Math.round(entry.getValue().stream().mapToInt(Integer::intValue).average().orElse(0));
+            trends.add(new ActivityTrendPoint(entry.getKey().toString(), avg, granularity));
+        }
+        trends.sort((a, b) -> a.date().compareTo(b.date()));
+        return trends;
     }
 
     private Optional<LocalDate> findMostRecentStepsDate(Long accountId) {
