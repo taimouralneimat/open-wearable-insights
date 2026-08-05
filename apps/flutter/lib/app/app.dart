@@ -4,6 +4,7 @@ import 'package:open_wearable_insights/app/theme.dart';
 import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
 import 'package:open_wearable_insights/features/readiness/healthspan_page.dart';
 import 'package:open_wearable_insights/features/readiness/monthly_report_page.dart';
+import 'package:open_wearable_insights/features/workoutgen/workout_generator_page.dart';
 import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/import/garmin_connector_page.dart';
 import 'package:open_wearable_insights/features/biomarkers/biomarkers_page.dart';
@@ -73,6 +74,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
                   GoRoute(
                     path: 'monthly-report',
                     builder: (context, state) => const MonthlyReportPage(),
+                  ),
+                  GoRoute(
+                    path: 'workout-generator',
+                    builder: (context, state) => const WorkoutGeneratorPage(),
                   ),
                 ],
               ),
