@@ -286,4 +286,72 @@ class SleepInsightServiceTest {
 
         assertThat(result.consistencyScore()).isLessThan(70);
     }
+
+    @Test
+    void computeTrends_smallWindow_returnsDailyPoints() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
+
+        LocalDate night1 = LocalDate.of(2026, 8, 1);
+        LocalDate night2 = LocalDate.of(2026, 8, 2);
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), eq(7)))
+                .thenReturn(List.of(night2, night1)); // desc, as findRecentSleepDates queries
+        mockNight(jdbc, 1L, night1, 24);
+        mockNight(jdbc, 1L, night2, 32);
+
+        List<com.openwearableinsights.api.sleep.domain.SleepTrendPoint> trends =
+                new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC).computeTrends(1L, 7);
+
+        assertThat(trends).hasSize(2);
+        assertThat(trends).allMatch(t -> "day".equals(t.granularity()));
+        assertThat(trends.get(0).date()).isEqualTo("2026-08-01");
+        assertThat(trends.get(0).totalHours()).isEqualTo(6.0, org.assertj.core.data.Offset.offset(0.01));
+        assertThat(trends.get(1).totalHours()).isEqualTo(8.0, org.assertj.core.data.Offset.offset(0.01));
+    }
+
+    @Test
+    void computeTrends_beyond31Days_rollsUpToWeeklyAverages() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
+
+        // 2026-08-03 is a Monday — both nights fall in the same Mon-Sun week.
+        LocalDate night1 = LocalDate.of(2026, 8, 3);
+        LocalDate night2 = LocalDate.of(2026, 8, 4);
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), eq(90)))
+                .thenReturn(List.of(night2, night1));
+        mockNight(jdbc, 1L, night1, 24); // 6.0h
+        mockNight(jdbc, 1L, night2, 32); // 8.0h
+
+        List<com.openwearableinsights.api.sleep.domain.SleepTrendPoint> trends =
+                new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC).computeTrends(1L, 90);
+
+        assertThat(trends).hasSize(1);
+        assertThat(trends.get(0).granularity()).isEqualTo("week");
+        assertThat(trends.get(0).date()).isEqualTo("2026-08-03"); // the Monday
+        assertThat(trends.get(0).totalHours()).isEqualTo(7.0, org.assertj.core.data.Offset.offset(0.01)); // avg, not sum
+    }
+
+    @Test
+    void computeTrends_beyond120Days_rollsUpToMonthlyAverages() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
+
+        LocalDate night1 = LocalDate.of(2026, 6, 15);
+        LocalDate night2 = LocalDate.of(2026, 7, 20);
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), eq(200)))
+                .thenReturn(List.of(night2, night1));
+        mockNight(jdbc, 1L, night1, 24);
+        mockNight(jdbc, 1L, night2, 32);
+
+        List<com.openwearableinsights.api.sleep.domain.SleepTrendPoint> trends =
+                new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC).computeTrends(1L, 200);
+
+        assertThat(trends).hasSize(2);
+        assertThat(trends).allMatch(t -> "month".equals(t.granularity()));
+        assertThat(trends.get(0).date()).isEqualTo("2026-06-01");
+        assertThat(trends.get(1).date()).isEqualTo("2026-07-01");
+    }
 }

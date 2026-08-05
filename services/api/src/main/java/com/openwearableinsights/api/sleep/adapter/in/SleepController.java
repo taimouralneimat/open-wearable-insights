@@ -53,7 +53,9 @@ public class SleepController {
 
     @GetMapping("/trends")
     @Operation(summary = "Get sleep trends",
-            description = "Returns sleep trend data for up to the last N nights with real data (default 7, max " + MAX_TREND_DAYS + "). Returns fewer points if less history exists.")
+            description = "Returns sleep trend data for up to the last N nights with real data (default 7, max " + MAX_TREND_DAYS + "). Returns fewer points if less history exists. "
+                    + "Beyond 31 days, points are weekly averages instead of nightly values; beyond 120, monthly — "
+                    + "each point's granularity field says which.")
     public List<SleepTrendPoint> getTrends(@RequestParam(required = false) Integer days) {
         int window = Math.min(days != null && days > 0 ? days : DEFAULT_TREND_DAYS, MAX_TREND_DAYS);
         return sleepInsightService.computeTrends(DEFAULT_ACCOUNT_ID, window);

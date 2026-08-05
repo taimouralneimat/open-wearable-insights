@@ -1243,6 +1243,9 @@ class SleepStagePoint {
   }
 }
 
+/// [granularity] is 'day', 'week', or 'month' — beyond a 31-day window the
+/// backend returns weekly averages instead of nightly values (and monthly
+/// beyond 120), same rollup as ActivityTrendPoint.
 class SleepTrendPoint {
   final String date;
   final double totalHours;
@@ -1251,6 +1254,7 @@ class SleepTrendPoint {
   final double lightHours;
   final double awakeHours;
   final int sleepScore;
+  final String granularity;
 
   SleepTrendPoint({
     required this.date,
@@ -1260,6 +1264,7 @@ class SleepTrendPoint {
     required this.lightHours,
     required this.awakeHours,
     required this.sleepScore,
+    required this.granularity,
   });
 
   factory SleepTrendPoint.fromJson(Map<String, dynamic> json) {
@@ -1271,6 +1276,7 @@ class SleepTrendPoint {
       lightHours: (json['lightHours'] as num).toDouble(),
       awakeHours: (json['awakeHours'] as num).toDouble(),
       sleepScore: json['sleepScore'] as int,
+      granularity: json['granularity'] as String? ?? 'day',
     );
   }
 }

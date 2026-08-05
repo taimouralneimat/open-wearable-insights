@@ -14,11 +14,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -110,22 +113,70 @@ public class SleepInsightService {
         return latestDate.map(date -> computeSummaryForDate(accountId, date, personalNeed));
     }
 
+    // Rollup thresholds — same values and reasoning as
+    // ActivityInsightService's WEEKLY_ROLLUP_THRESHOLD_DAYS/
+    // MONTHLY_ROLLUP_THRESHOLD_DAYS (parity-matrix.md row 9): beyond a few
+    // weeks, one bar per real night stops being readable.
+    private static final int WEEKLY_ROLLUP_THRESHOLD_DAYS = 31;
+    private static final int MONTHLY_ROLLUP_THRESHOLD_DAYS = 120;
+
     /**
      * Compute summaries for up to {@code days} most recent nights with data.
      * Returns fewer than {@code days} points if less history exists —
      * never fabricates missing nights.
+     *
+     * <p>For {@code days > 31} this returns weekly points instead of nightly
+     * ones, and for {@code days > 120} monthly points — each of the six
+     * numeric fields averaged across the real nights with data in that
+     * bucket (never zero-filled, never summed), with {@link
+     * SleepTrendPoint#granularity()} disclosing which. Same reasoning as
+     * {@code ActivityInsightService#computeStepTrends}'s identical rollup.
      */
     public List<SleepTrendPoint> computeTrends(Long accountId, int days) {
         List<LocalDate> dates = findRecentSleepDates(accountId, days);
         Double personalNeed = personalSleepNeedHours(accountId);
-        List<SleepTrendPoint> trends = new ArrayList<>();
+        List<SleepTrendPoint> nightly = new ArrayList<>();
         for (LocalDate date : dates) {
             SleepSummary s = computeSummaryForDate(accountId, date, personalNeed);
-            trends.add(new SleepTrendPoint(
+            nightly.add(new SleepTrendPoint(
                     date.toString(), s.totalHours(), s.deepHours(), s.remHours(),
-                    s.lightHours(), s.awakeHours(), s.sleepScore()
+                    s.lightHours(), s.awakeHours(), s.sleepScore(), "day"
             ));
         }
+
+        if (days <= WEEKLY_ROLLUP_THRESHOLD_DAYS) {
+            return nightly;
+        }
+        String granularity = days <= MONTHLY_ROLLUP_THRESHOLD_DAYS ? "week" : "month";
+        return bucketAverage(nightly, granularity);
+    }
+
+    /** Buckets real nightly points into weekly/monthly averages — see {@link #computeTrends}. */
+    private List<SleepTrendPoint> bucketAverage(List<SleepTrendPoint> nightly, String granularity) {
+        Map<LocalDate, List<SleepTrendPoint>> byBucket = new LinkedHashMap<>();
+        for (SleepTrendPoint p : nightly) {
+            LocalDate date = LocalDate.parse(p.date());
+            LocalDate bucketStart = "week".equals(granularity)
+                    ? date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    : date.withDayOfMonth(1);
+            byBucket.computeIfAbsent(bucketStart, k -> new ArrayList<>()).add(p);
+        }
+        List<SleepTrendPoint> trends = new ArrayList<>();
+        for (Map.Entry<LocalDate, List<SleepTrendPoint>> entry : byBucket.entrySet()) {
+            List<SleepTrendPoint> points = entry.getValue();
+            int n = points.size();
+            trends.add(new SleepTrendPoint(
+                    entry.getKey().toString(),
+                    points.stream().mapToDouble(SleepTrendPoint::totalHours).sum() / n,
+                    points.stream().mapToDouble(SleepTrendPoint::deepHours).sum() / n,
+                    points.stream().mapToDouble(SleepTrendPoint::remHours).sum() / n,
+                    points.stream().mapToDouble(SleepTrendPoint::lightHours).sum() / n,
+                    points.stream().mapToDouble(SleepTrendPoint::awakeHours).sum() / n,
+                    (int) Math.round(points.stream().mapToInt(SleepTrendPoint::sleepScore).average().orElse(0)),
+                    granularity
+            ));
+        }
+        trends.sort((a, b) -> a.date().compareTo(b.date()));
         return trends;
     }
 
