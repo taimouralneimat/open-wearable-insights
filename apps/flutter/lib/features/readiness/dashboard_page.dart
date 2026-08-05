@@ -138,6 +138,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ],
           _FactorsCard(readiness: r),
           const SizedBox(height: AppSpacing.lg),
+          _HealthspanEntryCard(),
+          const SizedBox(height: AppSpacing.lg),
           _DataQualityCard(readiness: r),
         ],
       ),
@@ -240,6 +242,54 @@ class _ScoreDiffCard extends StatelessWidget {
             ...diff.factorDiffs.where((f) => f.direction != 'unchanged').map((f) => _FactorDiffRow(diff: f)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Lightweight entry point into the full Healthspan view (parity-matrix
+/// row 24) — fetches its own summary so it can show a live at-a-glance
+/// value without coupling to the parent page's load sequence (same pattern
+/// as activities_page.dart's entry cards for VO2max/Strength/Training load).
+/// Lives on the dashboard rather than the Activities page because this is a
+/// composite score spanning fitness, strength, sleep, and training data —
+/// the same multi-domain scope as the readiness score above it, not a
+/// single-domain activity metric.
+class _HealthspanEntryCard extends StatefulWidget {
+  @override
+  State<_HealthspanEntryCard> createState() => _HealthspanEntryCardState();
+}
+
+class _HealthspanEntryCardState extends State<_HealthspanEntryCard> {
+  final _apiClient = ApiClient();
+  HealthspanSummaryResponse? _summary;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient.getHealthspanSummary().then((s) {
+      if (mounted) setState(() => _summary = s);
+    }).catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final summary = _summary;
+    final score = summary?.thirtyDay.score;
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.favorite_border, color: theme.colorScheme.primary),
+        title: const Text('Healthspan'),
+        subtitle: Text(
+          summary != null
+              ? (score != null
+                  ? '$score/100 · ${summary.thirtyDay.confidence} confidence'
+                  : 'Not enough real history yet')
+              : 'Loading…',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/healthspan'),
       ),
     );
   }

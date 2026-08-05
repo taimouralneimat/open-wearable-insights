@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:open_wearable_insights/app/theme.dart';
 import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
+import 'package:open_wearable_insights/features/readiness/healthspan_page.dart';
 import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/import/garmin_connector_page.dart';
 import 'package:open_wearable_insights/features/biomarkers/biomarkers_page.dart';
@@ -59,7 +60,18 @@ class OpenWearableInsightsApp extends StatelessWidget {
         builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: '/', builder: (context, state) => const DashboardPage())],
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const DashboardPage(),
+                routes: [
+                  GoRoute(
+                    path: 'healthspan',
+                    builder: (context, state) => const HealthspanPage(),
+                  ),
+                ],
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [GoRoute(path: '/sleep', builder: (context, state) => const SleepPage())],
