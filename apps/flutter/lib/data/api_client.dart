@@ -502,6 +502,26 @@ class ApiClient {
     final response = await _dio.put('/api/v1/strength/goal', data: {'weeklyGoalMinutes': minutes});
     return (response.data as Map<String, dynamic>)['weeklyGoalMinutes'] as int?;
   }
+
+  /// Generate a deterministic, template-based custom workout (parity-matrix
+  /// row 26). No LLM is called — see the response's disclaimer/source
+  /// fields. [equipment] and [limitations] are the enum names the backend
+  /// expects (e.g. 'DUMBBELLS', 'KNEE') — bodyweight is always implicitly
+  /// available and never needs to be included in [equipment].
+  Future<GeneratedWorkoutResponse> generateWorkout({
+    required String goal,
+    required List<String> equipment,
+    required List<String> limitations,
+    required int durationMinutes,
+  }) async {
+    final response = await _dio.post('/api/v1/workout-gen/generate', data: {
+      'goal': goal,
+      'equipment': equipment,
+      'limitations': limitations,
+      'durationMinutes': durationMinutes,
+    });
+    return GeneratedWorkoutResponse.fromJson(response.data as Map<String, dynamic>);
+  }
 }
 
 /// Readiness score response from the API.
@@ -2371,6 +2391,91 @@ class StrengthActivityTrendResponse {
           .toList(),
       weeklyGoalMinutes: json['weeklyGoalMinutes'] as int?,
       limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+/// A deterministically-generated workout (parity-matrix row 26) — see
+/// WorkoutGeneratorService on the backend. [source] is always
+/// 'DETERMINISTIC_TEMPLATE' today; no LLM path is wired in this app yet.
+class GeneratedWorkoutResponse {
+  final String algorithmVersion;
+  final String source;
+  final String goal;
+  final List<String> equipmentConsidered;
+  final List<String> injuryLimitationsConsidered;
+  final int durationMinutesRequested;
+  final int durationMinutesEstimated;
+  final List<WorkoutExerciseResponse> warmup;
+  final List<WorkoutExerciseResponse> main;
+  final List<WorkoutExerciseResponse> cooldown;
+  final String? intensityAdjustment;
+  final String disclaimer;
+  final List<String> limitations;
+  final String generatedAt;
+
+  GeneratedWorkoutResponse({
+    required this.algorithmVersion,
+    required this.source,
+    required this.goal,
+    required this.equipmentConsidered,
+    required this.injuryLimitationsConsidered,
+    required this.durationMinutesRequested,
+    required this.durationMinutesEstimated,
+    required this.warmup,
+    required this.main,
+    required this.cooldown,
+    this.intensityAdjustment,
+    required this.disclaimer,
+    required this.limitations,
+    required this.generatedAt,
+  });
+
+  factory GeneratedWorkoutResponse.fromJson(Map<String, dynamic> json) {
+    List<WorkoutExerciseResponse> parseExercises(String key) => (json[key] as List)
+        .map((e) => WorkoutExerciseResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return GeneratedWorkoutResponse(
+      algorithmVersion: json['algorithmVersion'] as String,
+      source: json['source'] as String,
+      goal: json['goal'] as String,
+      equipmentConsidered: (json['equipmentConsidered'] as List).cast<String>(),
+      injuryLimitationsConsidered: (json['injuryLimitationsConsidered'] as List).cast<String>(),
+      durationMinutesRequested: json['durationMinutesRequested'] as int,
+      durationMinutesEstimated: json['durationMinutesEstimated'] as int,
+      warmup: parseExercises('warmup'),
+      main: parseExercises('main'),
+      cooldown: parseExercises('cooldown'),
+      intensityAdjustment: json['intensityAdjustment'] as String?,
+      disclaimer: json['disclaimer'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+      generatedAt: json['generatedAt'] as String,
+    );
+  }
+}
+
+class WorkoutExerciseResponse {
+  final String name;
+  final int sets;
+  final String repsOrDuration;
+  final int restSeconds;
+  final String equipment;
+
+  WorkoutExerciseResponse({
+    required this.name,
+    required this.sets,
+    required this.repsOrDuration,
+    required this.restSeconds,
+    required this.equipment,
+  });
+
+  factory WorkoutExerciseResponse.fromJson(Map<String, dynamic> json) {
+    return WorkoutExerciseResponse(
+      name: json['name'] as String,
+      sets: json['sets'] as int,
+      repsOrDuration: json['repsOrDuration'] as String,
+      restSeconds: json['restSeconds'] as int,
+      equipment: json['equipment'] as String,
     );
   }
 }

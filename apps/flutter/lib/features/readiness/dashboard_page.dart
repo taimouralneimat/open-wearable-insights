@@ -132,6 +132,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             _CoachCard(insight: i),
             const SizedBox(height: AppSpacing.lg),
           ],
+          _WorkoutGeneratorEntryCard(),
+          const SizedBox(height: AppSpacing.lg),
           if (_habitCue != null && _habitCue!.present) ...[
             _HabitCueCard(cue: _habitCue!),
             const SizedBox(height: AppSpacing.lg),
@@ -244,6 +246,31 @@ class _ScoreDiffCard extends StatelessWidget {
             ...diff.factorDiffs.where((f) => f.direction != 'unchanged').map((f) => _FactorDiffRow(diff: f)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Entry point into the deterministic workout generator (parity-matrix row
+/// 26) — a real form (goal/equipment/limitations/duration), not a fetched
+/// summary, so unlike _HealthspanEntryCard/_MonthlyReportEntryCard below it
+/// has nothing to load up front and is just a static navigation card. Sits
+/// directly under the coach card since the parity-matrix entry itself calls
+/// this "a natural fit for the existing local-LLM coach module" — this is
+/// the deterministic-template half of that capability (see
+/// WorkoutGeneratorService's class Javadoc for why the LLM half is
+/// deliberately deferred).
+class _WorkoutGeneratorEntryCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.fitness_center, color: theme.colorScheme.primary),
+        title: const Text('Workout generator'),
+        subtitle: const Text('Generate a workout from your goal, equipment, and limitations'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/workout-generator'),
       ),
     );
   }
