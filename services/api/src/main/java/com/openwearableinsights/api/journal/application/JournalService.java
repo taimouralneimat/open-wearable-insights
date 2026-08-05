@@ -36,13 +36,17 @@ public class JournalService {
     private static final Logger log = LoggerFactory.getLogger(JournalService.class);
 
     /**
-     * Curated taxonomy. Widened 2026-07-30 in direct response to user
-     * feedback that the original 6-category/34-behavior list read as thin
-     * next to competitor journal breadth (parity-matrix row #27). Every
-     * entry here is a real, specific, loggable behavior — not padding to
-     * hit a count. Deliberately does NOT add a menstrual-cycle/hormonal
-     * category yet: parity row #21 flags that as needing its own
-     * consent/privacy design pass, not a same-list bolt-on.
+     * Curated taxonomy. Widened 2026-07-30 (34→88 behaviors, +Environment
+     * category) in direct response to user feedback that the original
+     * 6-category/34-behavior list read as thin next to competitor journal
+     * breadth (parity-matrix row #27), then widened again 2026-08-05
+     * (88→131 behaviors — see the row #27 parity-matrix entry for the
+     * honest remaining gap against that row's 140+ target) purely to add
+     * more real width to existing categories — no new category this pass. Every entry
+     * here is a real, specific, loggable behavior — not padding to hit a
+     * count. Deliberately does NOT add a menstrual-cycle/hormonal category:
+     * parity row #21 flags that as needing its own consent/privacy design
+     * pass, not a same-list bolt-on.
      */
     private static final List<BehaviorCategory> TAXONOMY = List.of(
             new BehaviorCategory("Sleep", List.of(
@@ -50,43 +54,58 @@ public class JournalService {
                     "Nap taken", "Room temperature comfortable", "Caffeine after 2pm",
                     "Went to bed later than usual", "Woke during the night", "Used blue-light filter/glasses",
                     "Blackout curtains / dark room", "White noise or earplugs used", "Read before bed (no screen)",
-                    "Shorter sleep than usual (<6h)", "Longer sleep than usual (>9h)"
+                    "Shorter sleep than usual (<6h)", "Longer sleep than usual (>9h)",
+                    "Consistent wake time", "Woke up naturally (no alarm)", "Daytime drowsiness",
+                    "Slept in an unfamiliar bed/location", "Snoring reported", "Shift work / irregular schedule"
             )),
             new BehaviorCategory("Nutrition", List.of(
                     "Alcohol", "Late meal (within 2h of bed)", "High-carb meal",
                     "Skipped a meal", "Hydration goal met", "Fasted >12h",
                     "Large meal", "High-sugar intake", "Mostly processed food today", "Mostly whole foods today",
                     "Under-ate today", "Overate / binge", "New or unfamiliar food", "Dined out",
-                    "High-sodium meal", "High-protein day", "Low-fiber day"
+                    "High-sodium meal", "High-protein day", "Low-fiber day",
+                    "Meal prepped in advance", "Ate mindfully / without distraction", "Sugary drink consumed",
+                    "Intermittent-fasting window kept", "Grazed / many small meals", "Home-cooked meal",
+                    "Caffeinated beverage count above usual"
             )),
             new BehaviorCategory("Recovery", List.of(
                     "Stretching/mobility work", "Cold exposure", "Sauna/heat exposure",
                     "Massage", "Active recovery session", "Full rest day",
                     "Foam rolling", "Compression garments used", "Contrast therapy (hot/cold)",
-                    "Breathwork session", "Yoga / light movement", "Deload week"
+                    "Breathwork session", "Yoga / light movement", "Deload week",
+                    "Ice bath", "Percussion massage device used", "Epsom salt bath",
+                    "Physical therapy session", "Chiropractic session", "Acupuncture session"
             )),
             new BehaviorCategory("Mental wellbeing", List.of(
                     "High stress day", "Meditation/mindfulness", "Social connection",
                     "Work overload", "Travel/timezone change", "Illness/feeling unwell",
                     "Anxious mood", "Low mood / down day", "Felt calm and content", "Journaling done",
                     "Time in nature", "Heavy screen-time day", "Conflict or argument", "Major life event",
-                    "Deep-focus / flow-state work"
+                    "Deep-focus / flow-state work",
+                    "Gratitude practice", "Therapy/counseling session", "Screen-free evening",
+                    "Public speaking / high-pressure event", "Financial stress", "Caregiving responsibilities",
+                    "Positive social event"
             )),
             new BehaviorCategory("Training", List.of(
                     "RPE (rate of perceived exertion)", "Muscle soreness",
                     "New/unfamiliar exercise", "Injury/pain flag",
                     "Missed planned workout", "Exceeded planned intensity", "Felt strong during training",
                     "Felt flat / low energy during training", "Two-a-day session", "Taper / reduced-volume day",
-                    "Trained in the heat", "Trained fasted"
+                    "Trained in the heat", "Trained fasted",
+                    "Personal record set", "Group/team training session", "Solo training session",
+                    "Cross-training day", "Technical/skill-focused session", "Trained at altitude"
             )),
             new BehaviorCategory("Supplements", List.of(
                     "Magnesium", "Melatonin", "Creatine", "Caffeine/pre-workout", "Other supplement",
                     "Vitamin D", "Omega-3 / fish oil", "Ashwagandha", "Electrolytes", "Protein supplement",
-                    "Zinc", "Probiotic"
+                    "Zinc", "Probiotic",
+                    "Multivitamin", "Iron", "Collagen", "B-complex vitamins", "Turmeric/curcumin", "Glutamine"
             )),
             new BehaviorCategory("Environment", List.of(
                     "Poor air quality day", "Altitude change", "Extreme heat exposure", "Extreme cold exposure",
-                    "Noisy sleep environment", "Illness in household"
+                    "Noisy sleep environment", "Illness in household",
+                    "Seasonal allergy flare-up", "Daylight saving / clock change", "Air travel / jet lag",
+                    "Unusually long commute", "Worked from an unfamiliar location"
             ))
     );
 
