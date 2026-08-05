@@ -7,6 +7,8 @@ import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
 import com.openwearableinsights.api.sleep.domain.SleepSummary.SleepStagePoint;
 import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
+import com.openwearableinsights.api.trainingload.application.TrainingLoadService;
+import com.openwearableinsights.api.trainingload.domain.TrainingLoadSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +70,20 @@ public class SleepInsightService {
     private static final double DEBT_REPAYMENT_FRACTION = 1.0 / 7.0;
     private static final double MAX_DEBT_REPAYMENT_HOURS = 1.0;
 
+    // Strain adjustment (parity row #20's other named gap: "adjusting for
+    // ... strain"): a modest extra allowance when recent training load is
+    // elevated/high, on top of (not instead of) debt repayment — recovery
+    // from real training stress and repaying accumulated sleep debt are
+    // different things this app already computes separately elsewhere
+    // (TrainingLoadService's ACWR-based loadStatus vs. this class's own
+    // debt), so they're additive here too, each disclosed separately in the
+    // reasoning text rather than folded into one unexplained number. Modest
+    // and fixed (not a percentage of load) since ACWR/loadStatus is itself
+    // a coarse "low/optimal/elevated/high" bucket, not a continuous input —
+    // a fixed bump per bucket is the honest granularity to work with.
+    private static final double STRAIN_ADJUSTMENT_ELEVATED_HOURS = 0.25;
+    private static final double STRAIN_ADJUSTMENT_HIGH_HOURS = 0.5;
+
     // Sleep consistency (parity row #3): wider window than wake-time
     // inference above since it's now well-powered by real Garmin Connect
     // history, not just recent FIT imports.
@@ -79,6 +95,7 @@ public class SleepInsightService {
 
     private final JdbcTemplate jdbcTemplate;
     private final BaselineService baselineService;
+    private final TrainingLoadService trainingLoadService;
     // Measurements are stored as UTC instants (correct — see V01 schema),
     // but bed/wake clock-times shown to the user must be their own local
     // time, not the storage timezone. This app runs entirely on the user's
@@ -92,14 +109,15 @@ public class SleepInsightService {
     private final ZoneId displayZone;
 
     @Autowired
-    public SleepInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService) {
-        this(jdbcTemplate, baselineService, ZoneId.systemDefault());
+    public SleepInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService, TrainingLoadService trainingLoadService) {
+        this(jdbcTemplate, baselineService, trainingLoadService, ZoneId.systemDefault());
     }
 
     /** Explicit-zone seam — mainly so test clock-time assertions don't depend on the test runner's host timezone. */
-    public SleepInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService, ZoneId displayZone) {
+    public SleepInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService, TrainingLoadService trainingLoadService, ZoneId displayZone) {
         this.jdbcTemplate = jdbcTemplate;
         this.baselineService = baselineService;
+        this.trainingLoadService = trainingLoadService;
         this.displayZone = displayZone;
     }
 
@@ -240,7 +258,7 @@ public class SleepInsightService {
                     ? "Not enough sleep history yet for a personal need estimate."
                     : "Not enough recent nights (need at least " + MIN_NIGHTS_FOR_WAKE_TIME +
                             ") to infer your usual wake time.");
-            return new SleepPlan(null, null, null, 0.0,
+            return new SleepPlan(null, null, null, 0.0, 0.0,
                     "Not enough sleep history yet to recommend a bedtime — keep the app importing sleep data.",
                     "none", limitations);
         }
@@ -248,25 +266,69 @@ public class SleepInsightService {
         SleepDebt debt = computeSleepDebt(accountId);
         double debtHours = debt.accumulatedHours() != null ? debt.accumulatedHours() : 0.0;
         double debtRepayment = clamp(Math.max(0, debtHours) * DEBT_REPAYMENT_FRACTION, 0, MAX_DEBT_REPAYMENT_HOURS);
-        double targetSleepHours = personalNeed + debtRepayment;
+
+        double strainAdjustment = computeStrainAdjustment(accountId, limitations);
+        double targetSleepHours = personalNeed + debtRepayment + strainAdjustment;
 
         LocalTime recommendedBedtime = targetWakeTime.minusMinutes(Math.round(targetSleepHours * 60));
 
-        String reasoning = debtRepayment > 0.05
+        List<String> extras = new ArrayList<>();
+        if (debtRepayment > 0.05) {
+            extras.add(String.format("%.1fh extra to gradually catch up on accumulated sleep debt", debtRepayment));
+        }
+        if (strainAdjustment > 0.05) {
+            extras.add(String.format("%.1fh extra since your recent training load has been elevated", strainAdjustment));
+        }
+        String reasoning = extras.isEmpty()
                 ? String.format(
-                        "Based on your usual wake time of ~%s and your personal need of ~%.1fh, plus %.1fh " +
-                        "extra tonight to gradually catch up on accumulated sleep debt, aim to be asleep by %s.",
-                        targetWakeTime, personalNeed, debtRepayment, recommendedBedtime)
-                : String.format(
                         "Based on your usual wake time of ~%s and your personal need of ~%.1fh, aim to be asleep by %s.",
-                        targetWakeTime, personalNeed, recommendedBedtime);
+                        targetWakeTime, personalNeed, recommendedBedtime)
+                : String.format(
+                        "Based on your usual wake time of ~%s and your personal need of ~%.1fh, plus %s, aim to be asleep by %s.",
+                        targetWakeTime, personalNeed, String.join(" and ", extras), recommendedBedtime);
 
         String confidence = "high".equals(debt.confidence()) || "medium".equals(debt.confidence()) ? "medium" : "low";
 
         return new SleepPlan(
                 recommendedBedtime.toString(), targetWakeTime.toString(),
-                targetSleepHours, debtRepayment, reasoning, confidence, limitations
+                targetSleepHours, debtRepayment, strainAdjustment, reasoning, confidence, limitations
         );
+    }
+
+    /**
+     * Modest extra sleep allowance when recent training load is elevated/high
+     * — see class field-level javadoc on {@code STRAIN_ADJUSTMENT_*_HOURS}
+     * for why this is additive to (not a replacement for) debt repayment,
+     * and why it's a fixed bump per {@code loadStatus} bucket rather than a
+     * continuous function of ACWR. Never throws or blocks the rest of the
+     * plan if training-load data is unavailable — 0.0 (no adjustment) in
+     * that case, same "degrade gracefully" convention as every other
+     * cross-module read in this service.
+     */
+    private double computeStrainAdjustment(Long accountId, List<String> limitations) {
+        try {
+            TrainingLoadSummary summary = trainingLoadService.computeSummary(accountId);
+            if (summary == null || summary.loadStatus() == null) {
+                return 0.0;
+            }
+            return switch (summary.loadStatus()) {
+                case "elevated" -> {
+                    limitations.add("Includes a small extra allowance for elevated recent training load — " +
+                            "see the Training Load view for the underlying ACWR.");
+                    yield STRAIN_ADJUSTMENT_ELEVATED_HOURS;
+                }
+                case "high" -> {
+                    limitations.add("Includes a small extra allowance for high recent training load — " +
+                            "see the Training Load view for the underlying ACWR.");
+                    yield STRAIN_ADJUSTMENT_HIGH_HOURS;
+                }
+                default -> 0.0;
+            };
+        } catch (Exception e) {
+            log.warn("Failed to fetch training load for sleep plan strain adjustment, account {}: {}",
+                    accountId, e.getMessage(), e);
+            return 0.0;
+        }
     }
 
     /**

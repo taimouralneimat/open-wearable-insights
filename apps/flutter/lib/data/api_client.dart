@@ -1213,6 +1213,7 @@ class SleepPlanResponse {
   final String? targetWakeTime;
   final double? targetSleepHours;
   final double debtRepaymentHours;
+  final double strainAdjustmentHours;
   final String reasoning;
   final String confidence;
   final List<String> limitations;
@@ -1222,6 +1223,7 @@ class SleepPlanResponse {
     this.targetWakeTime,
     this.targetSleepHours,
     required this.debtRepaymentHours,
+    required this.strainAdjustmentHours,
     required this.reasoning,
     required this.confidence,
     required this.limitations,
@@ -1233,6 +1235,7 @@ class SleepPlanResponse {
       targetWakeTime: json['targetWakeTime'] as String?,
       targetSleepHours: (json['targetSleepHours'] as num?)?.toDouble(),
       debtRepaymentHours: (json['debtRepaymentHours'] as num).toDouble(),
+      strainAdjustmentHours: (json['strainAdjustmentHours'] as num?)?.toDouble() ?? 0.0,
       reasoning: json['reasoning'] as String,
       confidence: json['confidence'] as String,
       limitations: (json['limitations'] as List?)?.cast<String>() ?? const [],

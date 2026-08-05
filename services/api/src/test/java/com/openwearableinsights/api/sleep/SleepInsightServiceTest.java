@@ -7,6 +7,7 @@ import com.openwearableinsights.api.sleep.domain.SleepConsistency;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
+import com.openwearableinsights.api.trainingload.application.TrainingLoadService;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -49,7 +50,7 @@ class SleepInsightServiceTest {
         BaselineService baselineService = mock(BaselineService.class);
         when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepDebt debt = service.computeSleepDebt(1L);
 
         assertThat(debt.neededHoursPerNight()).isNull();
@@ -74,7 +75,7 @@ class SleepInsightServiceTest {
         mockNight(jdbc, 1L, night1, 24); // 24 * 0.25 = 6.0h
         mockNight(jdbc, 1L, night2, 32); // 32 * 0.25 = 8.0h (meets need exactly)
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepDebt debt = service.computeSleepDebt(1L);
 
         assertThat(debt.neededHoursPerNight()).isEqualTo(8.0);
@@ -94,7 +95,7 @@ class SleepInsightServiceTest {
                 .thenReturn(List.of(date));
         mockNight(jdbc, 1L, date, 28);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepSummary summary = service.computeLatestSummary(1L).orElseThrow();
 
         assertThat(summary.sleepNeedHours()).isEqualTo(7.75);
@@ -111,7 +112,7 @@ class SleepInsightServiceTest {
                 .thenReturn(List.of(date));
         mockNight(jdbc, 1L, date, 28);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepSummary summary = service.computeLatestSummary(1L).orElseThrow();
 
         assertThat(summary.sleepNeedHours()).isNull();
@@ -124,7 +125,7 @@ class SleepInsightServiceTest {
         BaselineService baselineService = mock(BaselineService.class);
         when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepPlan plan = service.computeSleepPlan(1L);
 
         assertThat(plan.recommendedBedtime()).isNull();
@@ -156,7 +157,7 @@ class SleepInsightServiceTest {
         );
         when(jdbc.queryForList(anyString(), eq(1L), eq(7))).thenReturn(wakeRows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepPlan plan = service.computeSleepPlan(1L);
 
         assertThat(plan.targetWakeTime()).isEqualTo("07:00");
@@ -166,6 +167,74 @@ class SleepInsightServiceTest {
         // 07:00 - ~8h43m = ~22:17 the night before
         assertThat(plan.recommendedBedtime()).isEqualTo("22:17");
         assertThat(plan.reasoning()).contains("catch up");
+    }
+
+    @Test
+    void computeSleepPlan_elevatedTrainingLoad_addsModestStrainAdjustment() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(baselineWithSleepNeed(8.0));
+        TrainingLoadService trainingLoadService = mock(TrainingLoadService.class);
+        when(trainingLoadService.computeSummary(1L)).thenReturn(new com.openwearableinsights.api.trainingload.domain.TrainingLoadSummary(
+                10.0, 8.0, 1.25, "elevated", "trainingload-v1", "medium", List.of()));
+
+        LocalDate night1 = LocalDate.of(2026, 7, 20);
+        LocalDate night2 = LocalDate.of(2026, 7, 21);
+        LocalDate night3 = LocalDate.of(2026, 7, 22);
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), anyInt()))
+                .thenReturn(List.of(night1, night2, night3));
+        mockNight(jdbc, 1L, night1, 32); // 8.0h -> 0 deficit
+        mockNight(jdbc, 1L, night2, 32); // 8.0h -> 0 deficit
+        mockNight(jdbc, 1L, night3, 32); // 8.0h -> 0 deficit (accumulated = 0)
+
+        Instant wakeBase = Instant.parse("2026-07-22T07:00:00Z");
+        List<Map<String, Object>> wakeRows = List.of(
+                Map.of("d", night1, "last_reading", Timestamp.from(wakeBase)),
+                Map.of("d", night2, "last_reading", Timestamp.from(wakeBase)),
+                Map.of("d", night3, "last_reading", Timestamp.from(wakeBase))
+        );
+        when(jdbc.queryForList(anyString(), eq(1L), eq(7))).thenReturn(wakeRows);
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, trainingLoadService, ZoneOffset.UTC);
+        SleepPlan plan = service.computeSleepPlan(1L);
+
+        assertThat(plan.strainAdjustmentHours()).isEqualTo(0.25);
+        assertThat(plan.debtRepaymentHours()).isEqualTo(0.0);
+        assertThat(plan.targetSleepHours()).isEqualTo(8.25, org.assertj.core.data.Offset.offset(0.01));
+        assertThat(plan.reasoning()).contains("training load has been elevated");
+        assertThat(plan.limitations()).anyMatch(l -> l.contains("elevated recent training load"));
+    }
+
+    @Test
+    void computeSleepPlan_trainingLoadUnavailable_noStrainAdjustmentNoException() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(baselineWithSleepNeed(8.0));
+        TrainingLoadService trainingLoadService = mock(TrainingLoadService.class);
+        when(trainingLoadService.computeSummary(1L)).thenThrow(new RuntimeException("db down"));
+
+        LocalDate night1 = LocalDate.of(2026, 7, 20);
+        LocalDate night2 = LocalDate.of(2026, 7, 21);
+        LocalDate night3 = LocalDate.of(2026, 7, 22);
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), anyInt()))
+                .thenReturn(List.of(night1, night2, night3));
+        mockNight(jdbc, 1L, night1, 32);
+        mockNight(jdbc, 1L, night2, 32);
+        mockNight(jdbc, 1L, night3, 32);
+
+        Instant wakeBase = Instant.parse("2026-07-22T07:00:00Z");
+        List<Map<String, Object>> wakeRows = List.of(
+                Map.of("d", night1, "last_reading", Timestamp.from(wakeBase)),
+                Map.of("d", night2, "last_reading", Timestamp.from(wakeBase)),
+                Map.of("d", night3, "last_reading", Timestamp.from(wakeBase))
+        );
+        when(jdbc.queryForList(anyString(), eq(1L), eq(7))).thenReturn(wakeRows);
+
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, trainingLoadService, ZoneOffset.UTC);
+        SleepPlan plan = service.computeSleepPlan(1L);
+
+        assertThat(plan.strainAdjustmentHours()).isEqualTo(0.0);
+        assertThat(plan.targetSleepHours()).isEqualTo(8.0, org.assertj.core.data.Offset.offset(0.01));
     }
 
     /** Stubs the two per-night queries computeSummaryForDate issues for a given date. */
@@ -216,7 +285,7 @@ class SleepInsightServiceTest {
                 consistencyRow(LocalDate.of(2026, 8, 2), "23:15", "07:10")
         ));
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         assertThat(result.consistencyScore()).isNull();
@@ -237,7 +306,7 @@ class SleepInsightServiceTest {
         }
         when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         assertThat(result.consistencyScore()).isEqualTo(100);
@@ -261,7 +330,7 @@ class SleepInsightServiceTest {
         }
         when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         // Midpoint of 23:30 and 00:30 is 00:00, not 12:00.
@@ -281,7 +350,7 @@ class SleepInsightServiceTest {
         );
         when(jdbc.queryForList(anyString(), eq(1L), any(Timestamp.class))).thenReturn(rows);
 
-        SleepInsightService service = new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC);
+        SleepInsightService service = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC);
         SleepConsistency result = service.computeSleepConsistency(1L);
 
         assertThat(result.consistencyScore()).isLessThan(70);
@@ -301,7 +370,7 @@ class SleepInsightServiceTest {
         mockNight(jdbc, 1L, night2, 32);
 
         List<com.openwearableinsights.api.sleep.domain.SleepTrendPoint> trends =
-                new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC).computeTrends(1L, 7);
+                new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC).computeTrends(1L, 7);
 
         assertThat(trends).hasSize(2);
         assertThat(trends).allMatch(t -> "day".equals(t.granularity()));
@@ -325,7 +394,7 @@ class SleepInsightServiceTest {
         mockNight(jdbc, 1L, night2, 32); // 8.0h
 
         List<com.openwearableinsights.api.sleep.domain.SleepTrendPoint> trends =
-                new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC).computeTrends(1L, 90);
+                new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC).computeTrends(1L, 90);
 
         assertThat(trends).hasSize(1);
         assertThat(trends.get(0).granularity()).isEqualTo("week");
@@ -347,7 +416,7 @@ class SleepInsightServiceTest {
         mockNight(jdbc, 1L, night2, 32);
 
         List<com.openwearableinsights.api.sleep.domain.SleepTrendPoint> trends =
-                new SleepInsightService(jdbc, baselineService, ZoneOffset.UTC).computeTrends(1L, 200);
+                new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC).computeTrends(1L, 200);
 
         assertThat(trends).hasSize(2);
         assertThat(trends).allMatch(t -> "month".equals(t.granularity()));
