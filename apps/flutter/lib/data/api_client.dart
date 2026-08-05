@@ -313,6 +313,17 @@ class ApiClient {
     return HealthspanSummaryResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Get the monthly performance report (strain/sleep/recovery breakdown).
+  /// [month] is ISO yyyy-MM (e.g. "2026-06"); omit for the most recently
+  /// complete calendar month.
+  Future<MonthlyReportResponse> getMonthlyReport({String? month}) async {
+    final response = await _dio.get(
+      '/api/v1/monthly-report',
+      queryParameters: month != null ? {'month': month} : null,
+    );
+    return MonthlyReportResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Get score diff vs prior day.
   Future<ScoreDiffResponse> getScoreDiff() async {
     final response = await _dio.get("/api/v1/readiness/diff");
@@ -1576,6 +1587,109 @@ class HealthspanFactorResponse {
       contribution: (json['contribution'] as num).toDouble(),
       confidence: json['confidence'] as String,
       source: json['source'] as String,
+    );
+  }
+}
+
+/// The monthly performance report (parity-matrix row 30) — this app's own
+/// original strain/sleep/recovery breakdown for one calendar month, built
+/// from real readiness-score history, training load, and sleep-score trend
+/// data already computed elsewhere in this app. Not a reproduction of any
+/// vendor's proprietary monthly-report design or scoring.
+///
+/// [strain]/[sleep]/[recovery] are all null when [sufficientHistory] is
+/// false — an honest "not enough history yet" state, never a partial report.
+class MonthlyReportResponse {
+  final String month;
+  final String algorithmVersion;
+  final bool sufficientHistory;
+  final int recoveryScoreCount;
+  final int requiredRecoveryScoreCount;
+  final MonthlyMetricSectionResponse? strain;
+  final MonthlyMetricSectionResponse? sleep;
+  final MonthlyMetricSectionResponse? recovery;
+  final String overallConfidence;
+  final String methodology;
+  final List<String> limitations;
+  final String? insufficientHistoryMessage;
+
+  MonthlyReportResponse({
+    required this.month,
+    required this.algorithmVersion,
+    required this.sufficientHistory,
+    required this.recoveryScoreCount,
+    required this.requiredRecoveryScoreCount,
+    this.strain,
+    this.sleep,
+    this.recovery,
+    required this.overallConfidence,
+    required this.methodology,
+    required this.limitations,
+    this.insufficientHistoryMessage,
+  });
+
+  factory MonthlyReportResponse.fromJson(Map<String, dynamic> json) {
+    return MonthlyReportResponse(
+      month: json['month'] as String,
+      algorithmVersion: json['algorithmVersion'] as String,
+      sufficientHistory: json['sufficientHistory'] as bool,
+      recoveryScoreCount: json['recoveryScoreCount'] as int,
+      requiredRecoveryScoreCount: json['requiredRecoveryScoreCount'] as int,
+      strain: json['strain'] != null
+          ? MonthlyMetricSectionResponse.fromJson(json['strain'] as Map<String, dynamic>)
+          : null,
+      sleep: json['sleep'] != null
+          ? MonthlyMetricSectionResponse.fromJson(json['sleep'] as Map<String, dynamic>)
+          : null,
+      recovery: json['recovery'] != null
+          ? MonthlyMetricSectionResponse.fromJson(json['recovery'] as Map<String, dynamic>)
+          : null,
+      overallConfidence: json['overallConfidence'] as String,
+      methodology: json['methodology'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+      insufficientHistoryMessage: json['insufficientHistoryMessage'] as String?,
+    );
+  }
+}
+
+/// One dimension's real breakdown (strain, sleep, or recovery) within a
+/// [MonthlyReportResponse]. [trendDirection] is "IMPROVING", "DECLINING",
+/// "STEADY", or "UNKNOWN" — UNKNOWN when there isn't enough real data this
+/// month to read a trend, never a fabricated direction.
+class MonthlyMetricSectionResponse {
+  final String name;
+  final double? averageValue;
+  final String unit;
+  final int daysWithData;
+  final int daysInMonth;
+  final String trendDirection;
+  final String trendDetail;
+  final String confidence;
+  final List<String> limitations;
+
+  MonthlyMetricSectionResponse({
+    required this.name,
+    this.averageValue,
+    required this.unit,
+    required this.daysWithData,
+    required this.daysInMonth,
+    required this.trendDirection,
+    required this.trendDetail,
+    required this.confidence,
+    required this.limitations,
+  });
+
+  factory MonthlyMetricSectionResponse.fromJson(Map<String, dynamic> json) {
+    return MonthlyMetricSectionResponse(
+      name: json['name'] as String,
+      averageValue: (json['averageValue'] as num?)?.toDouble(),
+      unit: json['unit'] as String,
+      daysWithData: json['daysWithData'] as int,
+      daysInMonth: json['daysInMonth'] as int,
+      trendDirection: json['trendDirection'] as String,
+      trendDetail: json['trendDetail'] as String,
+      confidence: json['confidence'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
     );
   }
 }
