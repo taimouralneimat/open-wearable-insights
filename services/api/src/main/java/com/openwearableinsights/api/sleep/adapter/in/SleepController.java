@@ -5,7 +5,7 @@ import com.openwearableinsights.api.sleep.domain.SleepConsistency;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
-import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
+import com.openwearableinsights.api.sleep.domain.SleepTrend;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,12 +53,16 @@ public class SleepController {
 
     @GetMapping("/trends")
     @Operation(summary = "Get sleep trends",
-            description = "Returns sleep trend data for up to the last N nights with real data (default 7, max " + MAX_TREND_DAYS + "). Returns fewer points if less history exists. "
-                    + "Beyond 31 days, points are weekly averages instead of nightly values; beyond 120, monthly — "
-                    + "each point's granularity field says which.")
-    public List<SleepTrendPoint> getTrends(@RequestParam(required = false) Integer days) {
+            description = "Returns sleep trend data for up to the last N nights with real data (default 7, max " + MAX_TREND_DAYS + "), "
+                    + "plus the account's current personal sleep-duration baseline for a reference line/band on the "
+                    + "chart (parity-matrix.md row 8). Returns fewer points if less history exists. Beyond 31 days, "
+                    + "points are weekly averages instead of nightly values; beyond 120, monthly — each point's "
+                    + "granularity field says which. The baseline is the CURRENT rolling average applied as one flat "
+                    + "line across the whole window, not a historical per-point baseline — see the response's "
+                    + "limitations field.")
+    public SleepTrend getTrends(@RequestParam(required = false) Integer days) {
         int window = Math.min(days != null && days > 0 ? days : DEFAULT_TREND_DAYS, MAX_TREND_DAYS);
-        return sleepInsightService.computeTrends(DEFAULT_ACCOUNT_ID, window);
+        return sleepInsightService.computeTrendsWithBaseline(DEFAULT_ACCOUNT_ID, window);
     }
 
     @GetMapping("/debt")

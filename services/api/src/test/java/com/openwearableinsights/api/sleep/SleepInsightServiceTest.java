@@ -7,6 +7,7 @@ import com.openwearableinsights.api.sleep.domain.SleepConsistency;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
+import com.openwearableinsights.api.sleep.domain.SleepTrend;
 import com.openwearableinsights.api.trainingload.application.TrainingLoadService;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -422,5 +423,60 @@ class SleepInsightServiceTest {
         assertThat(trends).allMatch(t -> "month".equals(t.granularity()));
         assertThat(trends.get(0).date()).isEqualTo("2026-06-01");
         assertThat(trends.get(1).date()).isEqualTo("2026-07-01");
+    }
+
+    @Test
+    void computeTrendsWithBaseline_realBaseline_includesBaselineFields() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(baselineWithSleepNeed(7.5));
+
+        LocalDate night = LocalDate.of(2026, 8, 1);
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), eq(7)))
+                .thenReturn(List.of(night));
+        mockNight(jdbc, 1L, night, 32);
+
+        SleepTrend trend = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC)
+                .computeTrendsWithBaseline(1L, 7);
+
+        assertThat(trend.points()).hasSize(1);
+        assertThat(trend.baselineHours()).isEqualTo(7.5);
+        assertThat(trend.baselineWindowDescription()).isEqualTo("28-day rolling");
+        assertThat(trend.baselineConfidence()).isEqualTo("high");
+        assertThat(trend.baselineSampleSize()).isEqualTo(20);
+        assertThat(trend.limitations()).anyMatch(l -> l.contains("CURRENT rolling average"));
+    }
+
+    @Test
+    void computeTrendsWithBaseline_noBaselineYet_honestNullNotFabricated() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(emptyBaseline());
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), eq(7)))
+                .thenReturn(List.of());
+
+        SleepTrend trend = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC)
+                .computeTrendsWithBaseline(1L, 7);
+
+        assertThat(trend.baselineHours()).isNull();
+        assertThat(trend.baselineWindowDescription()).isNull();
+        assertThat(trend.limitations()).anyMatch(l -> l.contains("No personal sleep-duration baseline yet"));
+    }
+
+    @Test
+    void computeTrendsWithBaseline_provisionalBaseline_disclosesProvisional() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(1L)).thenReturn(new PersonalBaseline(
+                Map.of("sleep_duration", 6.5), Map.of("sleep_duration", 4), 4, "low", "4-day provisional"
+        ));
+        when(jdbc.queryForList(anyString(), eq(LocalDate.class), eq(1L), eq(7)))
+                .thenReturn(List.of());
+
+        SleepTrend trend = new SleepInsightService(jdbc, baselineService, mock(TrainingLoadService.class), ZoneOffset.UTC)
+                .computeTrendsWithBaseline(1L, 7);
+
+        assertThat(trend.baselineHours()).isEqualTo(6.5);
+        assertThat(trend.limitations()).anyMatch(l -> l.contains("still provisional"));
     }
 }

@@ -4,7 +4,7 @@ import com.openwearableinsights.api.activities.application.ActivityInsightServic
 import com.openwearableinsights.api.activities.application.ActivitySessionRepository;
 import com.openwearableinsights.api.activities.domain.ActivitySession;
 import com.openwearableinsights.api.activities.domain.ActivitySummary;
-import com.openwearableinsights.api.activities.domain.ActivityTrendPoint;
+import com.openwearableinsights.api.activities.domain.ActivityTrend;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -56,13 +56,16 @@ public class ActivitiesController {
 
     @GetMapping("/trends")
     @Operation(summary = "Get activity trends",
-            description = "Returns real step-count trends for up to the last N days with data (default 7, max " + MAX_TREND_DAYS + "). "
-                    + "Beyond 31 days, points are weekly averages instead of daily counts; beyond 120, monthly — each "
-                    + "point's granularity field says which, so a large window renders as a readable trend rather than "
-                    + "hundreds of raw daily bars.")
-    public List<ActivityTrendPoint> getTrends(@RequestParam(required = false) Integer days) {
+            description = "Returns real step-count trends for up to the last N days with data (default 7, max " + MAX_TREND_DAYS + "), "
+                    + "plus the account's current personal steps baseline for a reference line/band on the chart "
+                    + "(parity-matrix.md row 8). Beyond 31 days, points are weekly averages instead of daily counts; "
+                    + "beyond 120, monthly — each point's granularity field says which, so a large window renders as a "
+                    + "readable trend rather than hundreds of raw daily bars. The baseline is the CURRENT rolling "
+                    + "average applied as one flat line across the whole window, not a historical per-point baseline "
+                    + "— see the response's limitations field.")
+    public ActivityTrend getTrends(@RequestParam(required = false) Integer days) {
         int window = Math.min(days != null && days > 0 ? days : DEFAULT_TREND_DAYS, MAX_TREND_DAYS);
-        return activityInsightService.computeStepTrends(DEFAULT_ACCOUNT_ID, window);
+        return activityInsightService.computeStepTrendsWithBaseline(DEFAULT_ACCOUNT_ID, window);
     }
 
     @GetMapping("/sessions")
