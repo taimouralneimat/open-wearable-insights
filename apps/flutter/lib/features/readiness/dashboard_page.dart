@@ -140,6 +140,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           const SizedBox(height: AppSpacing.lg),
           _HealthspanEntryCard(),
           const SizedBox(height: AppSpacing.lg),
+          _MonthlyReportEntryCard(),
+          const SizedBox(height: AppSpacing.lg),
           _DataQualityCard(readiness: r),
         ],
       ),
@@ -290,6 +292,51 @@ class _HealthspanEntryCardState extends State<_HealthspanEntryCard> {
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push('/healthspan'),
+      ),
+    );
+  }
+}
+
+/// Lightweight entry point into the full monthly performance report
+/// (parity-matrix row 30) — fetches its own report so it can show a live
+/// at-a-glance status without coupling to the parent page's load sequence
+/// (same pattern as _HealthspanEntryCard above). Lives on the dashboard
+/// rather than a single-domain page because, like Healthspan, this report
+/// spans strain/sleep/recovery — multiple domains, not one.
+class _MonthlyReportEntryCard extends StatefulWidget {
+  @override
+  State<_MonthlyReportEntryCard> createState() => _MonthlyReportEntryCardState();
+}
+
+class _MonthlyReportEntryCardState extends State<_MonthlyReportEntryCard> {
+  final _apiClient = ApiClient();
+  MonthlyReportResponse? _report;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient.getMonthlyReport().then((r) {
+      if (mounted) setState(() => _report = r);
+    }).catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final report = _report;
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.calendar_month_outlined, color: theme.colorScheme.primary),
+        title: const Text('Monthly report'),
+        subtitle: Text(
+          report != null
+              ? (report.sufficientHistory
+                  ? '${report.month} · ${report.overallConfidence} confidence'
+                  : '${report.recoveryScoreCount}/${report.requiredRecoveryScoreCount} recovery scores so far')
+              : 'Loading…',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/monthly-report'),
       ),
     );
   }

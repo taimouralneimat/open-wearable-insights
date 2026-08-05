@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:open_wearable_insights/app/theme.dart';
 import 'package:open_wearable_insights/features/readiness/dashboard_page.dart';
 import 'package:open_wearable_insights/features/readiness/healthspan_page.dart';
+import 'package:open_wearable_insights/features/readiness/monthly_report_page.dart';
 import 'package:open_wearable_insights/features/import/import_page.dart';
 import 'package:open_wearable_insights/features/import/garmin_connector_page.dart';
 import 'package:open_wearable_insights/features/biomarkers/biomarkers_page.dart';
@@ -68,6 +69,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
                   GoRoute(
                     path: 'healthspan',
                     builder: (context, state) => const HealthspanPage(),
+                  ),
+                  GoRoute(
+                    path: 'monthly-report',
+                    builder: (context, state) => const MonthlyReportPage(),
                   ),
                 ],
               ),
