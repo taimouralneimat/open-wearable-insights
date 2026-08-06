@@ -1,7 +1,10 @@
 package com.openwearableinsights.api.activities.application;
 
 import com.openwearableinsights.api.activities.domain.ActivitySummary;
+import com.openwearableinsights.api.activities.domain.ActivityTrend;
 import com.openwearableinsights.api.activities.domain.ActivityTrendPoint;
+import com.openwearableinsights.api.readiness.application.BaselineService;
+import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,10 +46,24 @@ public class ActivityInsightService {
             "Active zone minutes (heart-rate-zone-weighted) isn't tracked yet — " +
             "active minutes above is moderate + vigorous intensity minutes, not zone-weighted.";
 
-    private final JdbcTemplate jdbcTemplate;
+    // parity-matrix.md row 8: the baseline line drawn across the trend chart
+    // is BaselineService's CURRENT rolling baseline, not a per-point
+    // historical one — BaselineService only exposes "now," so this is
+    // disclosed rather than letting a flat reference line silently imply
+    // point-in-time accuracy across the whole window. Same "state the
+    // simplification honestly" discipline as Vo2MaxService's window-choice
+    // disclosure and MonthlyPerformanceReportService's date-range caveat.
+    private static final String BASELINE_CURRENT_NOT_HISTORICAL_LIMITATION =
+            "The baseline line is your CURRENT rolling average steps/day, shown as one " +
+            "fixed reference across the whole chart — it is not recomputed for each past " +
+            "point, so it does not reflect what your baseline looked like earlier in this window.";
 
-    public ActivityInsightService(JdbcTemplate jdbcTemplate) {
+    private final JdbcTemplate jdbcTemplate;
+    private final BaselineService baselineService;
+
+    public ActivityInsightService(JdbcTemplate jdbcTemplate, BaselineService baselineService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.baselineService = baselineService;
     }
 
     public ActivitySummary computeLatestSummary(Long accountId) {
@@ -125,6 +142,44 @@ public class ActivityInsightService {
             log.warn("Failed to compute step trends for account {}: {}", accountId, e.getMessage(), e);
             return List.of();
         }
+    }
+
+    /**
+     * Same trend points as {@link #computeStepTrends}, plus the account's
+     * personal steps baseline (parity-matrix.md row 8) — reuses {@link
+     * BaselineService#computeBaseline} directly rather than recomputing a
+     * second, potentially divergent baseline, same discipline as {@link
+     * com.openwearableinsights.api.sleep.application.SleepInsightService#personalSleepNeedHours}.
+     * Honest absence: {@code baselineSteps} is {@code null} when the
+     * account has no real "steps" baseline yet (see {@link
+     * ActivityTrend} Javadoc for the current-vs-historical caveat this
+     * always discloses).
+     */
+    public ActivityTrend computeStepTrendsWithBaseline(Long accountId, int days) {
+        List<ActivityTrendPoint> points = computeStepTrends(accountId, days);
+        PersonalBaseline baseline = baselineService.computeBaseline(accountId);
+        Optional<Double> baselineSteps = baseline.baselineFor("steps");
+
+        List<String> limitations = new ArrayList<>();
+        if (baselineSteps.isEmpty()) {
+            limitations.add("No personal steps baseline yet — need more measurement " +
+                    "history before a baseline reference line can be shown.");
+            return new ActivityTrend(points, null, null, null, null, limitations);
+        }
+
+        limitations.add(BASELINE_CURRENT_NOT_HISTORICAL_LIMITATION);
+        if (baseline.isProvisional()) {
+            limitations.add("Steps baseline is still provisional (" + baseline.windowDescription() +
+                    ") — treat the reference line as a rough guide, not a solid target.");
+        }
+        return new ActivityTrend(
+                points,
+                baselineSteps.get(),
+                baseline.windowDescription(),
+                baseline.confidence(),
+                baseline.sampleSizeFor("steps"),
+                limitations
+        );
     }
 
     private record DailyPoint(LocalDate date, int steps) {}

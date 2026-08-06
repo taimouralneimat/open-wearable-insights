@@ -1,11 +1,13 @@
 package com.openwearableinsights.api.sleep.application;
 
 import com.openwearableinsights.api.readiness.application.BaselineService;
+import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import com.openwearableinsights.api.sleep.domain.SleepConsistency;
 import com.openwearableinsights.api.sleep.domain.SleepDebt;
 import com.openwearableinsights.api.sleep.domain.SleepPlan;
 import com.openwearableinsights.api.sleep.domain.SleepSummary;
 import com.openwearableinsights.api.sleep.domain.SleepSummary.SleepStagePoint;
+import com.openwearableinsights.api.sleep.domain.SleepTrend;
 import com.openwearableinsights.api.sleep.domain.SleepTrendPoint;
 import com.openwearableinsights.api.trainingload.application.TrainingLoadService;
 import com.openwearableinsights.api.trainingload.domain.TrainingLoadSummary;
@@ -46,6 +48,19 @@ import java.util.Optional;
 public class SleepInsightService {
 
     private static final Logger log = LoggerFactory.getLogger(SleepInsightService.class);
+
+    // parity-matrix.md row 8: the baseline line drawn across the sleep
+    // trend chart is BaselineService's CURRENT rolling "sleep_duration"
+    // baseline, not a per-point historical one — BaselineService only
+    // exposes "now," so this is disclosed rather than letting a flat
+    // reference line silently imply point-in-time accuracy across the
+    // whole window. Same "state the simplification honestly" discipline as
+    // Vo2MaxService's window-choice disclosure and
+    // MonthlyPerformanceReportService's date-range caveat.
+    private static final String BASELINE_CURRENT_NOT_HISTORICAL_LIMITATION =
+            "The baseline line is your CURRENT rolling average sleep duration, shown as one " +
+            "fixed reference across the whole chart — it is not recomputed for each past " +
+            "point, so it does not reflect what your baseline looked like earlier in this window.";
 
     private static final List<String> STAGE_NAMES = List.of("deep", "rem", "light", "awake");
     private static final double HOURS_PER_READING = 0.25;
@@ -167,6 +182,44 @@ public class SleepInsightService {
         }
         String granularity = days <= MONTHLY_ROLLUP_THRESHOLD_DAYS ? "week" : "month";
         return bucketAverage(nightly, granularity);
+    }
+
+    /**
+     * Same trend points as {@link #computeTrends}, plus the account's
+     * personal sleep-duration baseline (parity-matrix.md row 8) — reuses
+     * {@link #personalSleepNeedHours} (itself a thin wrapper over {@link
+     * BaselineService#computeBaseline}) rather than a second, potentially
+     * divergent computation, so this always agrees with the figure the
+     * Sleep Planner/debt views already show. Honest absence: {@code
+     * baselineHours} is {@code null} when the account has no real
+     * "sleep_duration" baseline yet (see {@link SleepTrend} Javadoc for the
+     * current-vs-historical caveat this always discloses).
+     */
+    public SleepTrend computeTrendsWithBaseline(Long accountId, int days) {
+        List<SleepTrendPoint> points = computeTrends(accountId, days);
+        PersonalBaseline baseline = baselineService.computeBaseline(accountId);
+        Optional<Double> baselineHours = baseline.baselineFor("sleep_duration");
+
+        List<String> limitations = new ArrayList<>();
+        if (baselineHours.isEmpty()) {
+            limitations.add("No personal sleep-duration baseline yet — need more sleep " +
+                    "history before a baseline reference line can be shown.");
+            return new SleepTrend(points, null, null, null, null, limitations);
+        }
+
+        limitations.add(BASELINE_CURRENT_NOT_HISTORICAL_LIMITATION);
+        if (baseline.isProvisional()) {
+            limitations.add("Sleep-duration baseline is still provisional (" + baseline.windowDescription() +
+                    ") — treat the reference line as a rough guide, not a solid target.");
+        }
+        return new SleepTrend(
+                points,
+                baselineHours.get(),
+                baseline.windowDescription(),
+                baseline.confidence(),
+                baseline.sampleSizeFor("sleep_duration"),
+                limitations
+        );
     }
 
     /** Buckets real nightly points into weekly/monthly averages — see {@link #computeTrends}. */

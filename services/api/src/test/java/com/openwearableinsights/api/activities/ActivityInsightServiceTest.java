@@ -2,7 +2,10 @@ package com.openwearableinsights.api.activities;
 
 import com.openwearableinsights.api.activities.application.ActivityInsightService;
 import com.openwearableinsights.api.activities.domain.ActivitySummary;
+import com.openwearableinsights.api.activities.domain.ActivityTrend;
 import com.openwearableinsights.api.activities.domain.ActivityTrendPoint;
+import com.openwearableinsights.api.readiness.application.BaselineService;
+import com.openwearableinsights.api.readiness.domain.PersonalBaseline;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -33,7 +36,7 @@ class ActivityInsightServiceTest {
         when(jdbc.queryForList(org.mockito.ArgumentMatchers.contains("LIMIT 1"),
                 eq(LocalDate.class), eq(ACCOUNT_ID))).thenReturn(List.of());
 
-        ActivityInsightService service = new ActivityInsightService(jdbc);
+        ActivityInsightService service = new ActivityInsightService(jdbc, mock(BaselineService.class));
         ActivitySummary summary = service.computeLatestSummary(ACCOUNT_ID);
 
         assertThat(summary.steps()).isZero();
@@ -53,7 +56,7 @@ class ActivityInsightServiceTest {
                 eq(Integer.class), eq(ACCOUNT_ID), org.mockito.ArgumentMatchers.anyString(), eq(DATE)))
                 .thenReturn(0);
 
-        ActivityInsightService service = new ActivityInsightService(jdbc);
+        ActivityInsightService service = new ActivityInsightService(jdbc, mock(BaselineService.class));
         ActivitySummary summary = service.computeLatestSummary(ACCOUNT_ID);
 
         assertThat(summary.steps()).isEqualTo(8342);
@@ -85,7 +88,7 @@ class ActivityInsightServiceTest {
         when(jdbc.queryForObject(org.mockito.ArgumentMatchers.contains("SUM(value)"),
                 eq(Double.class), eq(ACCOUNT_ID), eq("intensity_minutes_vigorous"), eq(DATE))).thenReturn(15.0);
 
-        ActivityInsightService service = new ActivityInsightService(jdbc);
+        ActivityInsightService service = new ActivityInsightService(jdbc, mock(BaselineService.class));
         ActivitySummary summary = service.computeLatestSummary(ACCOUNT_ID);
 
         assertThat(summary.steps()).isEqualTo(8342);
@@ -103,7 +106,7 @@ class ActivityInsightServiceTest {
                 Map.of("day", Date.valueOf(LocalDate.of(2026, 8, 1)), "total", 7000)
         ));
 
-        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc).computeStepTrends(ACCOUNT_ID, 7);
+        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc, mock(BaselineService.class)).computeStepTrends(ACCOUNT_ID, 7);
 
         assertThat(trends).hasSize(3);
         assertThat(trends).allMatch(t -> "day".equals(t.granularity()));
@@ -121,7 +124,7 @@ class ActivityInsightServiceTest {
                 Map.of("day", Date.valueOf(LocalDate.of(2026, 8, 3)), "total", 8000)
         ));
 
-        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc).computeStepTrends(ACCOUNT_ID, 90);
+        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc, mock(BaselineService.class)).computeStepTrends(ACCOUNT_ID, 90);
 
         assertThat(trends).hasSize(1);
         assertThat(trends.get(0).granularity()).isEqualTo("week");
@@ -137,7 +140,7 @@ class ActivityInsightServiceTest {
                 Map.of("day", Date.valueOf(LocalDate.of(2026, 7, 20)), "total", 12000)
         ));
 
-        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc).computeStepTrends(ACCOUNT_ID, 200);
+        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc, mock(BaselineService.class)).computeStepTrends(ACCOUNT_ID, 200);
 
         assertThat(trends).hasSize(2);
         assertThat(trends).allMatch(t -> "month".equals(t.granularity()));
@@ -153,8 +156,62 @@ class ActivityInsightServiceTest {
         when(jdbc.queryForList(contains("GROUP BY DATE(time)"), eq(ACCOUNT_ID), eq(7)))
                 .thenThrow(new RuntimeException("connection lost"));
 
-        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc).computeStepTrends(ACCOUNT_ID, 7);
+        List<ActivityTrendPoint> trends = new ActivityInsightService(jdbc, mock(BaselineService.class)).computeStepTrends(ACCOUNT_ID, 7);
 
         assertThat(trends).isEmpty();
+    }
+
+    @Test
+    void computeStepTrendsWithBaseline_realBaseline_includesBaselineFields() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("GROUP BY DATE(time)"), eq(ACCOUNT_ID), eq(7))).thenReturn(List.of(
+                Map.of("day", Date.valueOf(LocalDate.of(2026, 8, 1)), "total", 7000)
+        ));
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(ACCOUNT_ID)).thenReturn(new PersonalBaseline(
+                Map.of("steps", 8500.0), Map.of("steps", 25), 28, "high", "28-day rolling"
+        ));
+
+        ActivityTrend trend = new ActivityInsightService(jdbc, baselineService)
+                .computeStepTrendsWithBaseline(ACCOUNT_ID, 7);
+
+        assertThat(trend.points()).hasSize(1);
+        assertThat(trend.baselineSteps()).isEqualTo(8500.0);
+        assertThat(trend.baselineWindowDescription()).isEqualTo("28-day rolling");
+        assertThat(trend.baselineConfidence()).isEqualTo("high");
+        assertThat(trend.baselineSampleSize()).isEqualTo(25);
+        assertThat(trend.limitations()).anyMatch(l -> l.contains("CURRENT rolling average"));
+    }
+
+    @Test
+    void computeStepTrendsWithBaseline_noBaselineYet_honestNullNotFabricated() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("GROUP BY DATE(time)"), eq(ACCOUNT_ID), eq(7))).thenReturn(List.of());
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(ACCOUNT_ID)).thenReturn(
+                new PersonalBaseline(Map.of(), Map.of(), 0, "low", "no baseline data"));
+
+        ActivityTrend trend = new ActivityInsightService(jdbc, baselineService)
+                .computeStepTrendsWithBaseline(ACCOUNT_ID, 7);
+
+        assertThat(trend.baselineSteps()).isNull();
+        assertThat(trend.baselineWindowDescription()).isNull();
+        assertThat(trend.limitations()).anyMatch(l -> l.contains("No personal steps baseline yet"));
+    }
+
+    @Test
+    void computeStepTrendsWithBaseline_provisionalBaseline_disclosesProvisional() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("GROUP BY DATE(time)"), eq(ACCOUNT_ID), eq(7))).thenReturn(List.of());
+        BaselineService baselineService = mock(BaselineService.class);
+        when(baselineService.computeBaseline(ACCOUNT_ID)).thenReturn(new PersonalBaseline(
+                Map.of("steps", 6000.0), Map.of("steps", 3), 3, "low", "3-day provisional"
+        ));
+
+        ActivityTrend trend = new ActivityInsightService(jdbc, baselineService)
+                .computeStepTrendsWithBaseline(ACCOUNT_ID, 7);
+
+        assertThat(trend.baselineSteps()).isEqualTo(6000.0);
+        assertThat(trend.limitations()).anyMatch(l -> l.contains("still provisional"));
     }
 }

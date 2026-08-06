@@ -17,7 +17,7 @@ class ActivitiesPage extends StatefulWidget {
 class _ActivitiesPageState extends State<ActivitiesPage> {
   final _apiClient = ApiClient();
   ActivitySummary? _summary;
-  List<ActivityTrendPoint>? _trends;
+  ActivityTrendResponse? _trends;
   List<ActivitySessionResponse> _sessions = [];
   int _trendWindowDays = 7;
   bool _loading = true;
@@ -345,7 +345,7 @@ class _StatTile extends StatelessWidget {
 }
 
 class _ActivityTrendsCard extends StatelessWidget {
-  final List<ActivityTrendPoint> trends;
+  final ActivityTrendResponse trends;
   final int windowDays;
   final bool loading;
   final ValueChanged<int> onWindowChanged;
@@ -365,10 +365,19 @@ class _ActivityTrendsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final shown = trends.length > _maxRowsShown
-        ? trends.sublist(trends.length - _maxRowsShown)
-        : trends;
-    final maxSteps = shown.isEmpty ? 0 : shown.map((t) => t.steps).reduce((a, b) => a > b ? a : b);
+    final points = trends.points;
+    final shown = points.length > _maxRowsShown
+        ? points.sublist(points.length - _maxRowsShown)
+        : points;
+    final baselineSteps = trends.baselineSteps;
+    // Baseline included in the max so a baseline above every real point
+    // (e.g. an ambitious personal average vs. a recent lull) is never
+    // clipped off the right edge of the chart.
+    final maxSteps = [
+      if (shown.isNotEmpty) shown.map((t) => t.steps).reduce((a, b) => a > b ? a : b),
+      if (baselineSteps != null) baselineSteps.round(),
+      0,
+    ].reduce((a, b) => a > b ? a : b);
 
     return Card(
       child: Padding(
@@ -396,40 +405,83 @@ class _ActivityTrendsCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (trends.isEmpty)
+            else if (points.isEmpty)
               Text('No days in this window yet.', style: theme.textTheme.bodySmall)
             else ...[
               if (windowDays > 7) ...[
-                _ActivityTrendSummaryRow(trends: trends),
+                _ActivityTrendSummaryRow(trends: points),
+                const SizedBox(height: AppSpacing.md),
+              ],
+              // Real baseline overlay (parity-matrix row 8) — honest absence
+              // (no legend/marker at all) when the account has no baseline
+              // yet, rather than a fabricated reference line.
+              if (baselineSteps != null) ...[
+                _BaselineLegend(
+                  label: '${baselineSteps.round()} steps/day personal baseline'
+                      '${trends.baselineWindowDescription != null ? ' (${trends.baselineWindowDescription})' : ''}',
+                  confidence: trends.baselineConfidence,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Shown as a fixed line across the whole window — reflects your current '
+                  'baseline, not what it looked like at each past point.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                ),
                 const SizedBox(height: AppSpacing.md),
               ],
               // Beyond 31/120 days the backend rolls raw daily points up into
               // weekly/monthly averages (parity-matrix row 9) — disclosed
               // here rather than silently showing an averaged number as if
               // it were a single real day's count.
-              if (trends.first.granularity != 'day')
+              if (points.first.granularity != 'day')
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Text(
-                    trends.first.granularity == 'week'
+                    points.first.granularity == 'week'
                         ? 'Weekly averages (avg steps/day per week)'
                         : 'Monthly averages (avg steps/day per month)',
                     style: theme.textTheme.bodySmall,
                   ),
                 )
-              else if (trends.length > _maxRowsShown)
+              else if (points.length > _maxRowsShown)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Text(
-                    'Most recent $_maxRowsShown of ${trends.length} days:',
+                    'Most recent $_maxRowsShown of ${points.length} days:',
                     style: theme.textTheme.bodySmall,
                   ),
                 ),
-              ...shown.map((t) => _TrendBar(point: t, maxSteps: maxSteps)),
+              ...shown.map((t) => _TrendBar(point: t, maxSteps: maxSteps, baselineSteps: baselineSteps)),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Small swatch + label identifying the vertical reference line drawn on
+/// each [_TrendBar] — shared visual language for "this is a real personal
+/// baseline, not decoration" across the activity and sleep trend cards.
+class _BaselineLegend extends StatelessWidget {
+  final String label;
+  final String? confidence;
+  const _BaselineLegend({required this.label, this.confidence});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(width: 2, height: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+        if (confidence != null)
+          Text(
+            '$confidence confidence',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+          ),
+      ],
     );
   }
 }
@@ -527,13 +579,24 @@ class _SessionTile extends StatelessWidget {
 class _TrendBar extends StatelessWidget {
   final ActivityTrendPoint point;
   final int maxSteps;
-  const _TrendBar({required this.point, required this.maxSteps});
+  /// The account's real personal steps baseline (parity-matrix row 8), or
+  /// null when it doesn't have one yet — no marker is drawn in that case,
+  /// never a fabricated reference line.
+  final double? baselineSteps;
+  const _TrendBar({required this.point, required this.maxSteps, this.baselineSteps});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final fraction = maxSteps > 0 ? (point.steps / maxSteps).clamp(0.0, 1.0) : 0.0;
+    // maxSteps is shared across every bar in the card (see
+    // _ActivityTrendsCard), so this fraction lands at the same x-position on
+    // every row — stacked in the Column, the markers read as one continuous
+    // vertical reference line down the whole chart, not an isolated tick.
+    final baselineFraction = (baselineSteps != null && maxSteps > 0)
+        ? (baselineSteps! / maxSteps).clamp(0.0, 1.0)
+        : null;
     final color = point.steps >= 10000
         ? theme.status.good
         : point.steps >= 7000
@@ -546,9 +609,31 @@ class _TrendBar extends StatelessWidget {
           SizedBox(width: 44, child: Text(point.date.substring(5), style: theme.textTheme.bodySmall)),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              child: LinearProgressIndicator(value: fraction, color: color, minHeight: 10),
+            child: SizedBox(
+              height: 14,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          child: LinearProgressIndicator(value: fraction, color: color, minHeight: 10),
+                        ),
+                      ),
+                      if (baselineFraction != null)
+                        Positioned(
+                          left: (constraints.maxWidth * baselineFraction).clamp(0.0, constraints.maxWidth - 2),
+                          top: 0,
+                          bottom: 0,
+                          child: Container(width: 2, color: scheme.onSurface.withValues(alpha: 0.7)),
+                        ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

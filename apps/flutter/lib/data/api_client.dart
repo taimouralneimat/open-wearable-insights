@@ -224,12 +224,12 @@ class ApiClient {
     return SleepSummary.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Get sleep trends. [days] defaults to 7 server-side if omitted.
-  Future<List<SleepTrendPoint>> getSleepTrends({int? days}) async {
+  /// Get sleep trends, plus the account's real personal sleep-duration
+  /// baseline for a reference line on the chart (parity-matrix row 8).
+  /// [days] defaults to 7 server-side if omitted.
+  Future<SleepTrendResponse> getSleepTrends({int? days}) async {
     final response = await _dio.get('/api/v1/sleep/trends', queryParameters: days != null ? {'days': days} : null);
-    return (response.data as List)
-        .map((e) => SleepTrendPoint.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return SleepTrendResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Get accumulated sleep debt/surplus and personal sleep need.
@@ -256,12 +256,12 @@ class ApiClient {
     return ActivitySummary.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Get activity trends. [days] defaults to 7 server-side if omitted.
-  Future<List<ActivityTrendPoint>> getActivityTrends({int? days}) async {
+  /// Get activity trends, plus the account's real personal steps baseline
+  /// for a reference line on the chart (parity-matrix row 8). [days]
+  /// defaults to 7 server-side if omitted.
+  Future<ActivityTrendResponse> getActivityTrends({int? days}) async {
     final response = await _dio.get('/api/v1/activities/trends', queryParameters: days != null ? {'days': days} : null);
-    return (response.data as List)
-        .map((e) => ActivityTrendPoint.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return ActivityTrendResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// List recent discrete workout sessions (runs, rides, ...) — distinct
@@ -1315,6 +1315,47 @@ class SleepTrendPoint {
   }
 }
 
+/// The full sleep-trend response for one window (parity-matrix row 8): the
+/// real nightly/weekly/monthly [points] above, plus the account's current
+/// personal sleep-duration baseline for a reference line on the chart.
+///
+/// [baselineHours] is the account's CURRENT rolling baseline (see
+/// BaselineService on the backend) — null when the account doesn't have one
+/// yet, never a fabricated reference line. It is shown as a single flat
+/// line across the whole window, not recomputed per historical point — see
+/// [limitations] for that caveat, which the UI must surface visibly (not
+/// just in a tooltip), per SleepTrend's Javadoc on the backend.
+class SleepTrendResponse {
+  final List<SleepTrendPoint> points;
+  final double? baselineHours;
+  final String? baselineWindowDescription;
+  final String? baselineConfidence;
+  final int? baselineSampleSize;
+  final List<String> limitations;
+
+  SleepTrendResponse({
+    required this.points,
+    this.baselineHours,
+    this.baselineWindowDescription,
+    this.baselineConfidence,
+    this.baselineSampleSize,
+    required this.limitations,
+  });
+
+  factory SleepTrendResponse.fromJson(Map<String, dynamic> json) {
+    return SleepTrendResponse(
+      points: (json['points'] as List)
+          .map((e) => SleepTrendPoint.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      baselineHours: (json['baselineHours'] as num?)?.toDouble(),
+      baselineWindowDescription: json['baselineWindowDescription'] as String?,
+      baselineConfidence: json['baselineConfidence'] as String?,
+      baselineSampleSize: json['baselineSampleSize'] as int?,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
 /// Activity summary response. Only [steps] is computed from real data —
 /// calories/activeMinutes/activeZoneMinutes are null when not tracked
 /// (see ActivityInsightService on the backend for why).
@@ -1745,6 +1786,46 @@ class ActivityTrendPoint {
   }
 }
 
+/// The full step-trend response for one window (parity-matrix row 8): the
+/// real daily/weekly/monthly [points] above, plus the account's current
+/// personal steps baseline for a reference line on the chart.
+///
+/// [baselineSteps] is the account's CURRENT rolling baseline (see
+/// BaselineService on the backend) — null when the account doesn't have one
+/// yet, never a fabricated reference line. It is shown as a single flat
+/// line across the whole window, not recomputed per historical point — see
+/// [limitations] for that caveat, which the UI must surface visibly (not
+/// just in a tooltip), per ActivityTrend's Javadoc on the backend.
+class ActivityTrendResponse {
+  final List<ActivityTrendPoint> points;
+  final double? baselineSteps;
+  final String? baselineWindowDescription;
+  final String? baselineConfidence;
+  final int? baselineSampleSize;
+  final List<String> limitations;
+
+  ActivityTrendResponse({
+    required this.points,
+    this.baselineSteps,
+    this.baselineWindowDescription,
+    this.baselineConfidence,
+    this.baselineSampleSize,
+    required this.limitations,
+  });
+
+  factory ActivityTrendResponse.fromJson(Map<String, dynamic> json) {
+    return ActivityTrendResponse(
+      points: (json['points'] as List)
+          .map((e) => ActivityTrendPoint.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      baselineSteps: (json['baselineSteps'] as num?)?.toDouble(),
+      baselineWindowDescription: json['baselineWindowDescription'] as String?,
+      baselineConfidence: json['baselineConfidence'] as String?,
+      baselineSampleSize: json['baselineSampleSize'] as int?,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
 
 /// Data-quality summary response.
 class DataQualitySummary {
