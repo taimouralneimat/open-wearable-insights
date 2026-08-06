@@ -17,7 +17,7 @@ class SleepPage extends StatefulWidget {
 class _SleepPageState extends State<SleepPage> {
   final _apiClient = ApiClient();
   SleepSummary? _summary;
-  List<SleepTrendPoint>? _trends;
+  SleepTrendResponse? _trends;
   SleepDebtResponse? _debt;
   SleepPlanResponse? _plan;
   SleepConsistencyResponse? _consistency;
@@ -422,7 +422,7 @@ class _SleepConsistencyCard extends StatelessWidget {
 }
 
 class _SleepTrendsCard extends StatelessWidget {
-  final List<SleepTrendPoint> trends;
+  final SleepTrendResponse trends;
   final int windowDays;
   final bool loading;
   final ValueChanged<int> onWindowChanged;
@@ -443,9 +443,19 @@ class _SleepTrendsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final shown = trends.length > _maxRowsShown
-        ? trends.sublist(trends.length - _maxRowsShown)
-        : trends;
+    final points = trends.points;
+    final shown = points.length > _maxRowsShown
+        ? points.sublist(points.length - _maxRowsShown)
+        : points;
+    final baselineHours = trends.baselineHours;
+    // Baseline included in the max so a baseline above every real point
+    // (e.g. a strong personal average vs. a recent rough patch) is never
+    // clipped off the right edge of the chart.
+    final maxHours = [
+      if (shown.isNotEmpty) shown.map((t) => t.totalHours).reduce((a, b) => a > b ? a : b),
+      if (baselineHours != null) baselineHours,
+      0.0,
+    ].reduce((a, b) => a > b ? a : b);
 
     return Card(
       child: Padding(
@@ -473,40 +483,84 @@ class _SleepTrendsCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (trends.isEmpty)
+            else if (points.isEmpty)
               Text('No nights in this window yet.', style: theme.textTheme.bodySmall)
             else ...[
               if (windowDays > 7) ...[
-                _TrendSummaryRow(trends: trends, windowDays: windowDays),
+                _TrendSummaryRow(trends: points, windowDays: windowDays),
+                const SizedBox(height: AppSpacing.md),
+              ],
+              // Real baseline overlay (parity-matrix row 8) — honest absence
+              // (no legend/marker at all) when the account has no baseline
+              // yet, rather than a fabricated reference line.
+              if (baselineHours != null) ...[
+                _SleepBaselineLegend(
+                  label: '${baselineHours.toStringAsFixed(1)}h personal baseline'
+                      '${trends.baselineWindowDescription != null ? ' (${trends.baselineWindowDescription})' : ''}',
+                  confidence: trends.baselineConfidence,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Shown as a fixed line across the whole window — reflects your current '
+                  'baseline, not what it looked like at each past point.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                ),
                 const SizedBox(height: AppSpacing.md),
               ],
               // Beyond 31/120 days the backend rolls raw nightly points up
               // into weekly/monthly averages (parity-matrix row 9) —
               // disclosed here rather than silently showing an averaged
               // number as if it were a single real night's value.
-              if (trends.first.granularity != 'day')
+              if (points.first.granularity != 'day')
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Text(
-                    trends.first.granularity == 'week'
+                    points.first.granularity == 'week'
                         ? 'Weekly averages'
                         : 'Monthly averages',
                     style: theme.textTheme.bodySmall,
                   ),
                 )
-              else if (trends.length > _maxRowsShown)
+              else if (points.length > _maxRowsShown)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Text(
-                    'Most recent $_maxRowsShown of ${trends.length} nights:',
+                    'Most recent $_maxRowsShown of ${points.length} nights:',
                     style: theme.textTheme.bodySmall,
                   ),
                 ),
-              ...shown.map((t) => _TrendRow(point: t)),
+              ...shown.map((t) => _TrendRow(point: t, maxHours: maxHours, baselineHours: baselineHours)),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Small swatch + label identifying the vertical reference line drawn on
+/// each [_TrendRow] — same visual language as the Activities page's
+/// baseline legend, so "this is a real personal baseline, not decoration"
+/// reads consistently across both trend charts.
+class _SleepBaselineLegend extends StatelessWidget {
+  final String label;
+  final String? confidence;
+  const _SleepBaselineLegend({required this.label, this.confidence});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(width: 2, height: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+        if (confidence != null)
+          Text(
+            '$confidence confidence',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+          ),
+      ],
     );
   }
 }
@@ -562,25 +616,70 @@ class _TrendSummaryRow extends StatelessWidget {
 
 class _TrendRow extends StatelessWidget {
   final SleepTrendPoint point;
-  const _TrendRow({required this.point});
+  final double maxHours;
+  /// The account's real personal sleep-duration baseline (parity-matrix row
+  /// 8), or null when it doesn't have one yet — no marker is drawn in that
+  /// case, never a fabricated reference line.
+  final double? baselineHours;
+  const _TrendRow({required this.point, required this.maxHours, this.baselineHours});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final color = theme.status.forScore(point.sleepScore, goodAt: 80, fairAt: 60);
+    final fraction = maxHours > 0 ? (point.totalHours / maxHours).clamp(0.0, 1.0) : 0.0;
+    // maxHours is shared across every row in the card (see
+    // _SleepTrendsCard), so this fraction lands at the same x-position on
+    // every row — stacked in the Column, the markers read as one continuous
+    // vertical reference line down the whole chart, not an isolated tick.
+    final baselineFraction = (baselineHours != null && maxHours > 0)
+        ? (baselineHours! / maxHours).clamp(0.0, 1.0)
+        : null;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           SizedBox(
-            width: 72,
+            width: 44,
             child: Text(point.date.substring(5), style: theme.textTheme.bodySmall),
           ),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
+            child: SizedBox(
+              height: 14,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          child: LinearProgressIndicator(value: fraction, color: color, minHeight: 10),
+                        ),
+                      ),
+                      if (baselineFraction != null)
+                        Positioned(
+                          left: (constraints.maxWidth * baselineFraction).clamp(0.0, constraints.maxWidth - 2),
+                          top: 0,
+                          bottom: 0,
+                          child: Container(width: 2, color: scheme.onSurface.withValues(alpha: 0.7)),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          SizedBox(
+            width: 40,
             child: Text('${point.totalHours.toStringAsFixed(1)}h', style: theme.textTheme.bodyMedium),
           ),
           SizedBox(
-            width: 40,
+            width: 32,
             child: Text('${point.sleepScore}',
                 style: theme.textTheme.labelLarge?.copyWith(color: color), textAlign: TextAlign.right),
           ),
