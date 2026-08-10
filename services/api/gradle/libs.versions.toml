@@ -9,7 +9,7 @@ junit = "5.11.0"
 assertj = "3.26.0"
 mockito = "5.12.0"
 postgresql = "42.7.4"
-cyclonedx = "1.8.2"
+cyclonedx = "3.4.0"
 java = "21"
 
 [libraries]
