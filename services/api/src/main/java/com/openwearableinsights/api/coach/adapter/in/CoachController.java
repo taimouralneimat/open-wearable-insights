@@ -4,6 +4,7 @@ import com.openwearableinsights.api.insights.application.DeterministicInsightEng
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.HabitCue;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.Insight;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.WhyAnswer;
+import com.openwearableinsights.api.insights.application.LlmInsightService;
 import com.openwearableinsights.api.readiness.application.BaselineService;
 import com.openwearableinsights.api.readiness.application.CurrentMetricsService;
 import com.openwearableinsights.api.readiness.application.ReadinessCalculator;
@@ -25,10 +26,14 @@ import java.util.Optional;
 /**
  * REST controller for the daily coach.
  *
- * <p>Produces a deterministic insight grounded in the computed readiness score.
- * If Ollama is enabled and available, an optional LLM explanation may be
- * produced. If the LLM is unavailable or malformed, the deterministic
- * fallback is used. The app remains fully usable without the LLM.
+ * <p>Produces a deterministic insight grounded in the computed readiness
+ * score ({@code DeterministicInsightEngine}). When {@code owi.llm.enabled}
+ * is true, {@link LlmInsightService} optionally rephrases the summary
+ * sentence via a local Ollama model — see that class's javadoc for exactly
+ * what it's allowed to change (only the summary text, never a fact) and its
+ * current unverified-in-this-environment status. Any LLM failure falls back
+ * to the deterministic output automatically; the app remains fully usable
+ * without the LLM.
  */
 @RestController
 @RequestMapping("/api/v1/coach")
@@ -43,6 +48,7 @@ public class CoachController {
     private final ScoreDiffService scoreDiffService;
     private final ReadinessScoreHistoryRepository scoreHistoryRepository;
     private final DeterministicInsightEngine insightEngine;
+    private final LlmInsightService llmInsightService;
     private final boolean llmEnabled;
     private final LocalDayClock localDayClock;
 
@@ -53,6 +59,7 @@ public class CoachController {
             ScoreDiffService scoreDiffService,
             ReadinessScoreHistoryRepository scoreHistoryRepository,
             DeterministicInsightEngine insightEngine,
+            LlmInsightService llmInsightService,
             @Value("${owi.llm.enabled:false}") boolean llmEnabled,
             LocalDayClock localDayClock
     ) {
@@ -62,24 +69,51 @@ public class CoachController {
         this.scoreDiffService = scoreDiffService;
         this.scoreHistoryRepository = scoreHistoryRepository;
         this.insightEngine = insightEngine;
+        this.llmInsightService = llmInsightService;
         this.llmEnabled = llmEnabled;
         this.localDayClock = localDayClock;
     }
 
     @GetMapping("/insight")
-    @Operation(summary = "Get daily insight", description = "Deterministic fallback always available. LLM optional.")
+    @Operation(summary = "Get daily insight",
+            description = "Deterministic fallback always available. When owi.llm.enabled=true and a local Ollama "
+                    + "model is reachable, the summary sentence is optionally rephrased in a warmer coaching voice "
+                    + "by the LLM — every other field (score, factors, confidence, cautions, limitations) always "
+                    + "comes from the deterministic engine, never the LLM. fallbackUsed=true means an LLM attempt "
+                    + "was made and failed (timeout, unreachable, malformed response), not that the LLM is disabled.")
     public Insight getInsight() {
         ReadinessScore score = calculateCurrent();
 
-        // Always produce the deterministic insight (fallback)
+        // Always compute the deterministic insight first — this is the
+        // ground truth for every field, and the fallback if the LLM step
+        // below is disabled, unavailable, or fails in any way.
         Insight insight = insightEngine.generate(score);
 
-        // Phase 1: LLM integration is optional and not yet wired.
-        // When OWI_LLM_ENABLED=true and Ollama is available, the coach
-        // will request a structured, schema-validated explanation via
-        // Spring AI. If it fails, the deterministic fallback is used.
-        // For now, we return the deterministic insight directly.
+        if (llmEnabled) {
+            Optional<String> rephrased = llmInsightService.tryRephraseSummary(score, insight);
+            if (rephrased.isPresent()) {
+                return withSummary(insight, rephrased.get());
+            }
+            return withFallbackUsed(insight);
+        }
+
         return insight;
+    }
+
+    /** Same insight, LLM-rephrased summary substituted in — every other field stays deterministic. */
+    private Insight withSummary(Insight insight, String summary) {
+        return new Insight(
+                insight.headline(), summary, insight.supportingFactors(), insight.recommendedActions(),
+                insight.confidence(), insight.cautions(), insight.dataLimitations(), false
+        );
+    }
+
+    /** Same deterministic insight, but marked as having been reached via a failed LLM attempt, not by config. */
+    private Insight withFallbackUsed(Insight insight) {
+        return new Insight(
+                insight.headline(), insight.summary(), insight.supportingFactors(), insight.recommendedActions(),
+                insight.confidence(), insight.cautions(), insight.dataLimitations(), true
+        );
     }
 
     @GetMapping("/why")
@@ -107,9 +141,14 @@ public class CoachController {
     }
 
     @GetMapping("/status")
-    @Operation(summary = "Get LLM status", description = "Indicates whether the LLM is enabled/available or the fallback is in use.")
+    @Operation(summary = "Get LLM status",
+            description = "enabled reflects owi.llm.enabled AND that Spring AI actually configured a ChatClient "
+                    + "bean — not just that the flag is set. Does not live-probe whether the Ollama server is "
+                    + "actually reachable right now; a per-request failure there still falls back automatically "
+                    + "(see /insight's fallbackUsed field).")
     public LlmStatus getStatus() {
-        return new LlmStatus(llmEnabled, llmEnabled ? "available" : "fallback");
+        boolean available = llmEnabled && llmInsightService.isAvailable();
+        return new LlmStatus(available, available ? "available" : "fallback");
     }
 
     private ReadinessScore calculateCurrent() {

@@ -32,8 +32,10 @@ dependencies {
     // Spring Modulith
     implementation(libs.spring.modulith.starter.core)
 
-    // Spring AI (Ollama, loopback only)
-    implementation(libs.spring.ai.ollama.spring.boot.starter)
+    // Note: no Spring AI dependency. LlmInsightService talks to Ollama's
+    // REST API directly via plain Spring Web RestClient — see that class's
+    // Javadoc for why (Spring AI 1.0.1's OllamaOptions can't express the
+    // "think": false request field this app's default model needs).
 
     // OpenAPI 3
     implementation(libs.springdoc.openapi.starter.webmvc.ui)

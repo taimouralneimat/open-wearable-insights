@@ -24,7 +24,13 @@ services:
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:0.5.1
+    # 0.5.1 (previously pinned here) predates model families like qwen3 —
+    # pulling OWI_LLM_MODEL's default (qwen3:8b) against it fails with
+    # "requires a newer version of Ollama." Bumped while live-verifying the
+    # LLM coach wiring this session; re-pin to a specific newer version
+    # (not :latest) whenever bumping again, same reproducibility reasoning
+    # as the postgres image's exact tag above.
+    image: ollama/ollama:0.32.15
     container_name: open-wearable-insights-ollama
     ports:
       - "127.0.0.1:11434:11434"

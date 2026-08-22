@@ -22,13 +22,6 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-  ai:
-    ollama:
-      base-url: http://127.0.0.1:11434
-      chat:
-        model: ${OWI_LLM_MODEL:qwen3:8b}
-        # The app works fully without Ollama. LLM is optional.
-        enabled: ${OWI_LLM_ENABLED:false}
 
 # Local app-data directory for raw imported files (OUTSIDE the repo).
 owi:
@@ -42,8 +35,12 @@ owi:
   # header on all /api/v1/** requests.
   local-api-token-file: ${OWI_LOCAL_API_TOKEN_FILE:~/.open-wearable-insights/local-api-token}
   llm:
+    # The app works fully without Ollama — LLM is optional. See
+    # LlmInsightService's Javadoc for why this talks to Ollama's REST API
+    # directly (plain RestClient) rather than via Spring AI.
     enabled: ${OWI_LLM_ENABLED:false}
     model: ${OWI_LLM_MODEL:qwen3:8b}
+    base-url: ${OWI_LLM_BASE_URL:http://127.0.0.1:11434}
 
 # Actuator — local only
 management:
