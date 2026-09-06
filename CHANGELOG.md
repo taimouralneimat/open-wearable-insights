@@ -316,6 +316,43 @@ own commits, not just Cline's.
   The real, official artifact is `com.garmin:fit` on Maven Central. Fixed
   and verified via `./gradlew dependencies`.
 
+### Added — Personal Records / Milestones (original delight feature, not parity)
+- New `milestones` module: a small, honest, celebratory surface that tells
+  the user when they've genuinely hit a new personal best on something this
+  app already tracks — not a competitor-parity row, an original addition.
+  Every milestone is a real comparison between the account's own current
+  computed value and its own real historical values; an honest empty list
+  is returned when nothing genuinely new happened, never fabricated filler.
+  No LLM involvement — plain deterministic templating, same convention as
+  `DeterministicInsightEngine`.
+- Four milestone types, chosen for a clean "this is genuinely a new best"
+  comparison from data already computed elsewhere in this app: a habit
+  streak reaching its own longest-ever length (`JournalService#getStreaks`,
+  minimum 5 days so a 1-day tie isn't treated as meaningful), the most
+  recent tracked week's average steps beating every other tracked week
+  (`ActivityInsightService#computeStepTrends`), a calendar month's VO2max
+  estimate beating every other tracked month (`Vo2MaxService#computeTrend`),
+  and a training period with more total strength-training minutes than any
+  other tracked period (`StrengthTrainingService#computeTrend`, 6-month
+  monthly buckets).
+- Deliberately excludes sleep consistency: `SleepInsightService`'s
+  consistency score is a single fixed rolling window of recent nights, not a
+  series of independent past periods — it doesn't have a clean, honest "new
+  personal best" framing the way a cumulative streak/week/month/period does.
+- Stateless, computed fresh on every request (like `HealthspanService`/
+  `TrainingLoadService`) — no new table to remember past milestones. Every
+  comparison is answerable from the other modules' own existing query
+  methods; a "shown once" table is a reasonable future enhancement, not a
+  first-version requirement.
+- New `GET /api/v1/milestones` endpoint and a Flutter dashboard card
+  (renders nothing when the list is empty, same convention as
+  `ConfidenceBanner`/`LlmBadge`).
+- Required exposing `journal.application`/`journal.domain` and
+  `activities.application`/`activities.domain` as Spring Modulith
+  `@NamedInterface`s (mirroring the pattern already used by `vo2max`/
+  `strength`/`sleep`) so the new module could compose their real,
+  already-computed outputs instead of re-querying the same tables.
+
 ### Notes
 - No real health data is used in development or testing. All fixtures are
   synthetic or explicitly anonymized.

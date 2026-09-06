@@ -522,6 +522,16 @@ class ApiClient {
     });
     return GeneratedWorkoutResponse.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// Get current genuine personal records/milestones — an original delight
+  /// feature, not a competitor-parity row. Every entry is a real comparison
+  /// against the account's own historical data already computed elsewhere
+  /// in this app; an empty list is the honest result when nothing genuinely
+  /// new was found, never fabricated filler.
+  Future<MilestonesResponse> getMilestones() async {
+    final response = await _dio.get('/api/v1/milestones');
+    return MilestonesResponse.fromJson(response.data as Map<String, dynamic>);
+  }
 }
 
 /// Readiness score response from the API.
@@ -2572,6 +2582,73 @@ class WorkoutExerciseResponse {
       repsOrDuration: json['repsOrDuration'] as String,
       restSeconds: json['restSeconds'] as int,
       equipment: json['equipment'] as String,
+    );
+  }
+}
+
+/// "Personal Records / Milestones" — an original delight feature, not a
+/// competitor-parity row. [milestones] is an honest empty list, never
+/// fabricated filler, when nothing genuinely new was found this check. See
+/// MilestoneService on the backend for exactly which real comparisons back
+/// each entry.
+class MilestonesResponse {
+  final List<MilestoneResponse> milestones;
+  final String algorithmVersion;
+  final List<String> limitations;
+
+  MilestonesResponse({
+    required this.milestones,
+    required this.algorithmVersion,
+    required this.limitations,
+  });
+
+  factory MilestonesResponse.fromJson(Map<String, dynamic> json) {
+    return MilestonesResponse(
+      milestones: (json['milestones'] as List)
+          .map((e) => MilestoneResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      algorithmVersion: json['algorithmVersion'] as String,
+      limitations: (json['limitations'] as List).cast<String>(),
+    );
+  }
+}
+
+/// One genuine personal record — a real comparison between the account's
+/// own current computed value ([value]) and its own real historical value
+/// ([previousBest]). [previousBest] is null for milestone types (e.g.
+/// habit streaks) that don't have a distinct separate prior number to show
+/// — see Milestone's Javadoc on the backend.
+class MilestoneResponse {
+  final String type;
+  final String title;
+  final String description;
+  final double value;
+  final double? previousBest;
+  final String unit;
+  final String period;
+  final String detectedAt;
+
+  MilestoneResponse({
+    required this.type,
+    required this.title,
+    required this.description,
+    required this.value,
+    this.previousBest,
+    required this.unit,
+    required this.period,
+    required this.detectedAt,
+  });
+
+  factory MilestoneResponse.fromJson(Map<String, dynamic> json) {
+    return MilestoneResponse(
+      type: json['type'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      value: (json['value'] as num).toDouble(),
+      previousBest: (json['previousBest'] as num?)?.toDouble(),
+      unit: json['unit'] as String,
+      period: json['period'] as String,
+      detectedAt: json['detectedAt'] as String,
     );
   }
 }
