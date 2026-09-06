@@ -5,6 +5,7 @@ import '../../app/app.dart';
 import '../../app/theme.dart';
 import '../../data/api_client.dart';
 import '../../widgets/llm_badge.dart';
+import '../../widgets/milestones_card.dart';
 import '../../widgets/state_views.dart';
 
 /// Dashboard page — shows readiness score, factor contributions, and daily coach.
@@ -119,6 +120,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           _ReadinessCard(readiness: r),
+          const MilestonesCard(),
           if (_scoreDiff != null) ...[
             const SizedBox(height: AppSpacing.lg),
             _ScoreDiffCard(diff: _scoreDiff!),
