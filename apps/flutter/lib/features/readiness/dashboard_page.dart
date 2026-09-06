@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/app.dart';
 import '../../app/theme.dart';
 import '../../data/api_client.dart';
+import '../../widgets/llm_badge.dart';
 import '../../widgets/state_views.dart';
 
 /// Dashboard page — shows readiness score, factor contributions, and daily coach.
@@ -183,6 +184,10 @@ class _HabitCueCard extends StatelessWidget {
                     cue.reasoning,
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onTertiaryContainer),
                   ),
+                  if (cue.llmUsed) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    LlmBadge(llmUsed: cue.llmUsed),
+                  ],
                   const SizedBox(height: AppSpacing.sm),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -575,6 +580,10 @@ class _CoachCardState extends State<_CoachCard> {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(insight.summary, style: theme.textTheme.bodyMedium),
+            if (insight.llmUsed) ...[
+              const SizedBox(height: AppSpacing.xs),
+              LlmBadge(llmUsed: insight.llmUsed),
+            ],
             const SizedBox(height: AppSpacing.md),
             Text('RECOMMENDED ACTIONS', style: theme.textTheme.labelSmall),
             const SizedBox(height: AppSpacing.xs),
@@ -642,6 +651,10 @@ class _WhyAnswerSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(why.answer, style: theme.textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
+        if (why.llmUsed) ...[
+          const SizedBox(height: AppSpacing.xs),
+          LlmBadge(llmUsed: why.llmUsed),
+        ],
         const SizedBox(height: AppSpacing.md),
         Text('CITED METRICS', style: theme.textTheme.labelSmall),
         const SizedBox(height: AppSpacing.xs),

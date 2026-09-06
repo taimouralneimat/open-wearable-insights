@@ -26,14 +26,15 @@ import java.util.Optional;
 /**
  * REST controller for the daily coach.
  *
- * <p>Produces a deterministic insight grounded in the computed readiness
- * score ({@code DeterministicInsightEngine}). When {@code owi.llm.enabled}
- * is true, {@link LlmInsightService} optionally rephrases the summary
- * sentence via a local Ollama model — see that class's javadoc for exactly
- * what it's allowed to change (only the summary text, never a fact) and its
- * current unverified-in-this-environment status. Any LLM failure falls back
- * to the deterministic output automatically; the app remains fully usable
- * without the LLM.
+ * <p>Every endpoint's facts (score, factors, cited metrics, confidence) are
+ * always grounded in the computed readiness score ({@code
+ * DeterministicInsightEngine}). When {@code owi.llm.enabled} is true, {@link
+ * LlmInsightService} optionally rephrases the one piece of free text each
+ * endpoint returns (the insight's summary, the why-answer's answer, the
+ * habit-cue's reasoning) via a local Ollama model — see that class's javadoc
+ * for exactly what it's allowed to change (never a fact) and this session's
+ * live-verification results. Any LLM failure falls back to the deterministic
+ * text automatically; the app remains fully usable without the LLM.
  */
 @RestController
 @RequestMapping("/api/v1/coach")
@@ -79,8 +80,10 @@ public class CoachController {
             description = "Deterministic fallback always available. When owi.llm.enabled=true and a local Ollama "
                     + "model is reachable, the summary sentence is optionally rephrased in a warmer coaching voice "
                     + "by the LLM — every other field (score, factors, confidence, cautions, limitations) always "
-                    + "comes from the deterministic engine, never the LLM. fallbackUsed=true means an LLM attempt "
-                    + "was made and failed (timeout, unreachable, malformed response), not that the LLM is disabled.")
+                    + "comes from the deterministic engine, never the LLM. llmUsed=true means summary was genuinely "
+                    + "LLM-rephrased; fallbackUsed=true means an LLM attempt was made and failed (timeout, "
+                    + "unreachable, malformed response) — the two are mutually exclusive, and both false means the "
+                    + "LLM was never attempted (disabled).")
     public Insight getInsight() {
         ReadinessScore score = calculateCurrent();
 
@@ -104,7 +107,7 @@ public class CoachController {
     private Insight withSummary(Insight insight, String summary) {
         return new Insight(
                 insight.headline(), summary, insight.supportingFactors(), insight.recommendedActions(),
-                insight.confidence(), insight.cautions(), insight.dataLimitations(), false
+                insight.confidence(), insight.cautions(), insight.dataLimitations(), false, true
         );
     }
 
@@ -112,13 +115,19 @@ public class CoachController {
     private Insight withFallbackUsed(Insight insight) {
         return new Insight(
                 insight.headline(), insight.summary(), insight.supportingFactors(), insight.recommendedActions(),
-                insight.confidence(), insight.cautions(), insight.dataLimitations(), true
+                insight.confidence(), insight.cautions(), insight.dataLimitations(), true, false
         );
     }
 
     @GetMapping("/why")
     @Operation(summary = "Ask why the readiness score is what it is",
-            description = "Answers 'why is my readiness what it is' and, when a prior day's score exists, 'why did it change' — always citing the actual computed factors, never generic advice. Works fully without the LLM.")
+            description = "Answers 'why is my readiness what it is' and, when a prior day's score exists, 'why did "
+                    + "it change' — always citing the actual computed factors, never generic advice. Works fully "
+                    + "without the LLM. When owi.llm.enabled=true, the answer text is optionally rephrased in a "
+                    + "warmer coaching voice — citedMetrics/confidence/limitations always come from the "
+                    + "deterministic engine, never the LLM. llmUsed=true means answer was genuinely LLM-rephrased; "
+                    + "fallbackUsed=true means an LLM attempt was made and failed — mutually exclusive, and both "
+                    + "false means the LLM was never attempted (disabled).")
     public WhyAnswer why() {
         ReadinessScore score = calculateCurrent();
 
@@ -129,23 +138,51 @@ public class CoachController {
         Optional<ScoreDiff> diff = priorScore.map(prior ->
                 scoreDiffService.computeDiff(score, prior, "yesterday"));
 
-        return insightEngine.explainReadiness(score, diff);
+        WhyAnswer answer = insightEngine.explainReadiness(score, diff);
+
+        if (llmEnabled) {
+            Optional<String> rephrased = llmInsightService.tryRephraseWhyAnswer(score, answer);
+            if (rephrased.isPresent()) {
+                return new WhyAnswer(rephrased.get(), answer.citedMetrics(), answer.confidence(), answer.limitations(), false, true);
+            }
+            return new WhyAnswer(answer.answer(), answer.citedMetrics(), answer.confidence(), answer.limitations(), true, false);
+        }
+
+        return answer;
     }
 
     @GetMapping("/habit-cue")
     @Operation(summary = "Get today's habit cue",
-            description = "One specific journal behavior suggested from today's worst real readiness factor — the cue in a cue/response/reward loop, triggered by an actual wearable signal rather than a fixed time or generic tip list. present=false when there's honestly nothing to suggest.")
+            description = "One specific journal behavior suggested from today's worst real readiness factor — the "
+                    + "cue in a cue/response/reward loop, triggered by an actual wearable signal rather than a "
+                    + "fixed time or generic tip list. present=false when there's honestly nothing to suggest. When "
+                    + "owi.llm.enabled=true, the reasoning text is optionally rephrased in a warmer coaching voice "
+                    + "— every other field always comes from the deterministic engine, never the LLM. llmUsed=true "
+                    + "means reasoning was genuinely LLM-rephrased; fallbackUsed=true means an LLM attempt was made "
+                    + "and failed — mutually exclusive, and both false means the LLM was never attempted "
+                    + "(disabled, or no cue is present so no attempt was made at all).")
     public HabitCue getHabitCue() {
         ReadinessScore score = calculateCurrent();
-        return insightEngine.suggestHabitCue(score);
+        HabitCue cue = insightEngine.suggestHabitCue(score);
+
+        if (llmEnabled && cue.present()) {
+            Optional<String> rephrased = llmInsightService.tryRephraseHabitCue(cue);
+            if (rephrased.isPresent()) {
+                return new HabitCue(cue.present(), cue.triggerFactor(), cue.triggerContribution(),
+                        cue.suggestedCategory(), cue.suggestedBehavior(), rephrased.get(), cue.confidence(), false, true);
+            }
+            return new HabitCue(cue.present(), cue.triggerFactor(), cue.triggerContribution(),
+                    cue.suggestedCategory(), cue.suggestedBehavior(), cue.reasoning(), cue.confidence(), true, false);
+        }
+
+        return cue;
     }
 
     @GetMapping("/status")
     @Operation(summary = "Get LLM status",
-            description = "enabled reflects owi.llm.enabled AND that Spring AI actually configured a ChatClient "
-                    + "bean — not just that the flag is set. Does not live-probe whether the Ollama server is "
+            description = "enabled reflects owi.llm.enabled. Does not live-probe whether the Ollama server is "
                     + "actually reachable right now; a per-request failure there still falls back automatically "
-                    + "(see /insight's fallbackUsed field).")
+                    + "on every LLM-optional endpoint (see each one's own fallbackUsed field).")
     public LlmStatus getStatus() {
         boolean available = llmEnabled && llmInsightService.isAvailable();
         return new LlmStatus(available, available ? "available" : "fallback");

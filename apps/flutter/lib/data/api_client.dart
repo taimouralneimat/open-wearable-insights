@@ -606,6 +606,7 @@ class InsightResponse {
   final List<String> cautions;
   final List<String> dataLimitations;
   final bool fallbackUsed;
+  final bool llmUsed;
 
   InsightResponse({
     required this.headline,
@@ -616,6 +617,7 @@ class InsightResponse {
     required this.cautions,
     required this.dataLimitations,
     required this.fallbackUsed,
+    required this.llmUsed,
   });
 
   factory InsightResponse.fromJson(Map<String, dynamic> json) {
@@ -630,6 +632,7 @@ class InsightResponse {
       cautions: (json['cautions'] as List).cast<String>(),
       dataLimitations: (json['dataLimitations'] as List).cast<String>(),
       fallbackUsed: json['fallbackUsed'] as bool,
+      llmUsed: json['llmUsed'] as bool? ?? false,
     );
   }
 }
@@ -641,12 +644,16 @@ class WhyAnswerResponse {
   final List<CitedMetricResponse> citedMetrics;
   final String confidence;
   final List<String> limitations;
+  final bool fallbackUsed;
+  final bool llmUsed;
 
   WhyAnswerResponse({
     required this.answer,
     required this.citedMetrics,
     required this.confidence,
     required this.limitations,
+    required this.fallbackUsed,
+    required this.llmUsed,
   });
 
   factory WhyAnswerResponse.fromJson(Map<String, dynamic> json) {
@@ -657,6 +664,8 @@ class WhyAnswerResponse {
           .toList(),
       confidence: json['confidence'] as String,
       limitations: (json['limitations'] as List).cast<String>(),
+      fallbackUsed: json['fallbackUsed'] as bool? ?? false,
+      llmUsed: json['llmUsed'] as bool? ?? false,
     );
   }
 }
@@ -729,6 +738,8 @@ class HabitCueResponse {
   final String? suggestedBehavior;
   final String reasoning;
   final String confidence;
+  final bool fallbackUsed;
+  final bool llmUsed;
 
   HabitCueResponse({
     required this.present,
@@ -738,6 +749,8 @@ class HabitCueResponse {
     this.suggestedBehavior,
     required this.reasoning,
     required this.confidence,
+    required this.fallbackUsed,
+    required this.llmUsed,
   });
 
   factory HabitCueResponse.fromJson(Map<String, dynamic> json) {
@@ -749,6 +762,8 @@ class HabitCueResponse {
       suggestedBehavior: json['suggestedBehavior'] as String?,
       reasoning: json['reasoning'] as String,
       confidence: json['confidence'] as String,
+      fallbackUsed: json['fallbackUsed'] as bool? ?? false,
+      llmUsed: json['llmUsed'] as bool? ?? false,
     );
   }
 }

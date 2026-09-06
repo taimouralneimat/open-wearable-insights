@@ -3,8 +3,11 @@ package com.openwearableinsights.api.insights.application;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.CitedMetric;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.FactorSummary;
+import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.HabitCue;
 import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.Insight;
+import com.openwearableinsights.api.insights.application.DeterministicInsightEngine.WhyAnswer;
 import com.openwearableinsights.api.readiness.domain.FactorContribution;
 import com.openwearableinsights.api.readiness.domain.FactorContribution.Direction;
 import com.openwearableinsights.api.readiness.domain.ReadinessScore;
@@ -26,9 +29,10 @@ import static org.mockito.Mockito.when;
 /**
  * Unit tests for {@link LlmInsightService} — focused on the property that
  * matters most (see the class's own javadoc): every failure mode (disabled,
- * malformed response, exception, oversized summary) falls back cleanly to
+ * malformed response, exception, oversized text) falls back cleanly to
  * {@code Optional.empty()} rather than throwing, and a well-formed response
- * is parsed correctly.
+ * is parsed correctly, across all three coach touchpoints (daily insight,
+ * why-answer, habit-cue).
  *
  * <p>Uses {@code spy()} to stub {@link LlmInsightService#postToOllama}
  * directly rather than mocking {@link RestClient}'s fluent interface —
@@ -66,7 +70,26 @@ class LlmInsightServiceTest {
                 "medium",
                 List.of("This is a wellness metric, not a medical assessment."),
                 List.of("v0.2 weights are initial estimates, not empirically tuned."),
+                false,
                 false
+        );
+    }
+
+    private static WhyAnswer deterministicWhyAnswer() {
+        return new WhyAnswer(
+                "Deterministic why-answer text.",
+                List.of(new CitedMetric("HRV deviation", "3.2 ms", "12.0", "positive")),
+                "medium",
+                List.of("v0.2 weights are initial estimates, not empirically tuned."),
+                false,
+                false
+        );
+    }
+
+    private static HabitCue deterministicHabitCue() {
+        return new HabitCue(
+                true, "HRV deviation", 12.0, "Mental wellbeing", "Meditation/mindfulness",
+                "Deterministic reasoning text.", "medium", false, false
         );
     }
 
@@ -84,17 +107,19 @@ class LlmInsightServiceTest {
     }
 
     @Test
-    void disabled_isUnavailable_andNeverAttemptsACall() {
+    void disabled_isUnavailable_andNeverAttemptsACallOnAnyTouchpoint() {
         LlmInsightService service = spyService(false);
 
         assertThat(service.isAvailable()).isFalse();
         assertThat(service.tryRephraseSummary(score(), deterministicInsight())).isEmpty();
+        assertThat(service.tryRephraseWhyAnswer(score(), deterministicWhyAnswer())).isEmpty();
+        assertThat(service.tryRephraseHabitCue(deterministicHabitCue())).isEmpty();
     }
 
     @Test
     void wellFormedJsonResponse_returnsTheParsedSummary() throws Exception {
         LlmInsightService service = spyService(true);
-        doReturn(ollamaResponse("{\"summary\": \"You're recovering well today.\"}"))
+        doReturn(ollamaResponse("{\"text\": \"You're recovering well today.\"}"))
                 .when(service).postToOllama(any(ObjectNode.class));
 
         assertThat(service.isAvailable()).isTrue();
@@ -104,9 +129,31 @@ class LlmInsightServiceTest {
     }
 
     @Test
+    void wellFormedJsonResponse_returnsTheParsedWhyAnswer() throws Exception {
+        LlmInsightService service = spyService(true);
+        doReturn(ollamaResponse("{\"text\": \"Your HRV is helping most today.\"}"))
+                .when(service).postToOllama(any(ObjectNode.class));
+
+        Optional<String> result = service.tryRephraseWhyAnswer(score(), deterministicWhyAnswer());
+
+        assertThat(result).contains("Your HRV is helping most today.");
+    }
+
+    @Test
+    void wellFormedJsonResponse_returnsTheParsedHabitCue() throws Exception {
+        LlmInsightService service = spyService(true);
+        doReturn(ollamaResponse("{\"text\": \"A few minutes of mindfulness could help today.\"}"))
+                .when(service).postToOllama(any(ObjectNode.class));
+
+        Optional<String> result = service.tryRephraseHabitCue(deterministicHabitCue());
+
+        assertThat(result).contains("A few minutes of mindfulness could help today.");
+    }
+
+    @Test
     void jsonWrappedInProseOrMarkdownFences_stillExtractsTheObject() throws Exception {
         LlmInsightService service = spyService(true);
-        doReturn(ollamaResponse("Sure, here you go:\n```json\n{\"summary\": \"Great HRV trend today.\"}\n```"))
+        doReturn(ollamaResponse("Sure, here you go:\n```json\n{\"text\": \"Great HRV trend today.\"}\n```"))
                 .when(service).postToOllama(any(ObjectNode.class));
 
         Optional<String> result = service.tryRephraseSummary(score(), deterministicInsight());
@@ -124,18 +171,18 @@ class LlmInsightServiceTest {
     }
 
     @Test
-    void blankSummaryField_fallsBackToEmpty() throws Exception {
+    void blankTextField_fallsBackToEmpty() throws Exception {
         LlmInsightService service = spyService(true);
-        doReturn(ollamaResponse("{\"summary\": \"\"}")).when(service).postToOllama(any(ObjectNode.class));
+        doReturn(ollamaResponse("{\"text\": \"\"}")).when(service).postToOllama(any(ObjectNode.class));
 
         assertThat(service.tryRephraseSummary(score(), deterministicInsight())).isEmpty();
     }
 
     @Test
-    void oversizedSummary_fallsBackToEmpty() throws Exception {
+    void oversizedText_fallsBackToEmpty() throws Exception {
         String tooLong = "x".repeat(1000);
         LlmInsightService service = spyService(true);
-        doReturn(ollamaResponse("{\"summary\": \"" + tooLong + "\"}")).when(service).postToOllama(any(ObjectNode.class));
+        doReturn(ollamaResponse("{\"text\": \"" + tooLong + "\"}")).when(service).postToOllama(any(ObjectNode.class));
 
         assertThat(service.tryRephraseSummary(score(), deterministicInsight())).isEmpty();
     }

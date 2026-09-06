@@ -42,7 +42,8 @@ public class DeterministicInsightEngine {
                 confidence,
                 cautions,
                 dataLimitations,
-                false  // fallbackUsed = false (this IS the fallback)
+                false,  // fallbackUsed = false (this IS the fallback)
+                false   // llmUsed = false (this engine never calls the LLM)
         );
     }
 
@@ -200,7 +201,9 @@ public class DeterministicInsightEngine {
                 answer.toString().trim(),
                 citedMetrics,
                 score.confidence(),
-                buildLimitations(score)
+                buildLimitations(score),
+                false,
+                false
         );
     }
 
@@ -230,7 +233,7 @@ public class DeterministicInsightEngine {
         if (worst.isEmpty()) {
             return new HabitCue(false, null, 0, null, null,
                     "No specific cue right now — nothing stands out as the clear factor to act on today.",
-                    score.confidence());
+                    score.confidence(), false, false);
         }
 
         FactorContribution f = worst.get();
@@ -243,7 +246,7 @@ public class DeterministicInsightEngine {
         );
 
         return new HabitCue(true, f.name(), f.contribution(),
-                suggestion.category(), suggestion.behavior(), reasoning, score.confidence());
+                suggestion.category(), suggestion.behavior(), reasoning, score.confidence(), false, false);
     }
 
     /**
@@ -268,6 +271,7 @@ public class DeterministicInsightEngine {
      * readiness factor — not a static tip list. {@code present = false}
      * means there's honestly nothing to suggest right now.
      */
+    /** See {@link Insight}'s field-level javadoc for what {@code fallbackUsed}/{@code llmUsed} distinguish. */
     public record HabitCue(
             boolean present,
             String triggerFactor,
@@ -275,7 +279,9 @@ public class DeterministicInsightEngine {
             String suggestedCategory,
             String suggestedBehavior,
             String reasoning,
-            String confidence
+            String confidence,
+            boolean fallbackUsed,
+            boolean llmUsed
     ) {}
 
     /**
@@ -286,7 +292,9 @@ public class DeterministicInsightEngine {
             String answer,
             List<CitedMetric> citedMetrics,
             String confidence,
-            List<String> limitations
+            List<String> limitations,
+            boolean fallbackUsed,
+            boolean llmUsed
     ) {}
 
     public record CitedMetric(
@@ -296,6 +304,16 @@ public class DeterministicInsightEngine {
             String direction
     ) {}
 
+    /**
+     * @param fallbackUsed an LLM rephrase was attempted (owi.llm.enabled=true)
+     *                     and failed, so this is the deterministic text —
+     *                     distinct from the LLM simply never being attempted
+     * @param llmUsed      {@code summary} was genuinely produced by the local
+     *                     LLM (see {@code LlmInsightService}), not the
+     *                     deterministic engine — mutually exclusive with
+     *                     {@code fallbackUsed}; both false means the LLM was
+     *                     never attempted (disabled)
+     */
     public record Insight(
             String headline,
             String summary,
@@ -304,7 +322,8 @@ public class DeterministicInsightEngine {
             String confidence,
             List<String> cautions,
             List<String> dataLimitations,
-            boolean fallbackUsed
+            boolean fallbackUsed,
+            boolean llmUsed
     ) {}
 
     public record FactorSummary(
