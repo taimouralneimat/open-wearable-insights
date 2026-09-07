@@ -447,6 +447,30 @@ own commits, not just Cline's.
   score exposes its own uncertainty" principle, row 12) — both
   self-contained, no network/backend dependency, previously untested
   beyond compiling. `flutter test` now runs and passes (7 tests).
+- Follow-up: added widget tests for `LoadingView`/`ErrorView`/`EmptyView`,
+  the shared placeholders nearly every data page renders through (13 tests
+  total).
+
+### Chore — Removed dead dependencies (backend + Flutter)
+- Backend: `testcontainers-junit-jupiter`/`testcontainers-postgresql` were
+  declared test dependencies with zero actual usage anywhere (no
+  `@Testcontainers`, no `PostgreSQLContainer`, no `jdbc:tc:` URL). This
+  project's tests don't boot a real database at all today. Removed;
+  33/33 backend suites still pass.
+- Flutter: `flutter_riverpod`, `riverpod_annotation`, `riverpod_generator`,
+  `freezed_annotation`, `freezed`, `json_annotation`, `json_serializable`,
+  and `build_runner` had zero actual usage — no `@freezed`/
+  `@JsonSerializable`/`@riverpod` annotation, no generated `.g.dart`/
+  `.freezed.dart` file, not even a plain `Provider`/`StateProvider`
+  declaration. Riverpod was wired in only as inert scaffolding
+  (`ProviderScope` in `main.dart`, `ConsumerStatefulWidget` on
+  `DashboardPage`) that nothing ever read from — every page actually
+  manages its own local `State` with `setState` and parses JSON by hand.
+  Removed the scaffolding along with the dependencies (`DashboardPage` is
+  now a plain `StatefulWidget`); `flutter pub get` dropped 47 transitive
+  dependencies. `fl_chart` is kept — genuinely unused today too, but a
+  plausible future chart-widget candidate rather than abandoned
+  scaffolding, so left alone with a comment explaining why.
 
 ### Notes
 - No real health data is used in development or testing. All fixtures are
