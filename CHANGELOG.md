@@ -420,6 +420,33 @@ own commits, not just Cline's.
   the specific missing-data reasons named, never an error or a fabricated
   number — and the workout generator produced a real, fully-formed
   deterministic plan end-to-end.
+- A follow-up pass live-verified four more rows (1 Body Battery factor, 3
+  Sleep, 9 long-term trend rollups, 22 biomarker import) and corrected a
+  stale claim in row 1 ("should activate on the next call") that turned
+  out, on checking, to be untestable right now for an honest reason: this
+  dev account's synced measurement data stops at 2026-08-03, over a month
+  before any 2026-09 check — documented in the matrix's own Notes section
+  rather than left implicit.
+
+### Fixed — Flutter test suite couldn't run at all; added first widget tests
+- `web_download.dart` unconditionally imported `dart:html`, which doesn't
+  exist on the native VM `flutter test` runs on. The one pre-existing
+  Flutter test (a bare app-shell smoke test) failed to even compile the
+  moment it transitively imported `app.dart` → `privacy_page.dart` →
+  `web_download.dart` — meaning it had likely never successfully run via
+  `flutter test` in this project's history, only `flutter analyze`/
+  `flutter build web` (both target web, where `dart:html` exists).
+- Split into the standard Dart conditional-import facade:
+  `web_download_web.dart` (the real implementation, web only) and
+  `web_download_stub.dart` (throws `UnsupportedError` rather than silently
+  no-oping) via `export ... if (dart.library.html)`. No behavior change on
+  the web target this app actually ships to.
+- Added this project's first real widget tests: `LlmBadge` (the one
+  visible signal a piece of coach text was genuinely LLM-rephrased, row 7)
+  and `ConfidenceBanner` (the shared surface behind this app's "every
+  score exposes its own uncertainty" principle, row 12) — both
+  self-contained, no network/backend dependency, previously untested
+  beyond compiling. `flutter test` now runs and passes (7 tests).
 
 ### Notes
 - No real health data is used in development or testing. All fixtures are
