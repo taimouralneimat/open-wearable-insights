@@ -10,6 +10,14 @@ plugins {
 group = "com.openwearableinsights"
 version = "0.1.0-SNAPSHOT"
 
+// Override the embedded Tomcat version the Spring Boot 3.5.16 BOM still
+// manages (10.1.55) — that version carries three real, fixed CRITICAL
+// CVEs (2026-65182, 2026-65905, 2026-68525; access-control/auth-bypass).
+// Found via a Trivy scan of this project's own CycloneDX SBOM. 10.1.58 (the
+// CVEs' cited fixed version) was never published to Maven Central; 10.1.59
+// is the latest available and supersedes it.
+extra["tomcat.version"] = "10.1.59"
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
