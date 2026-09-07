@@ -472,6 +472,25 @@ own commits, not just Cline's.
   plausible future chart-widget candidate rather than abandoned
   scaffolding, so left alone with a comment explaining why.
 
+### Fixed — CRITICAL Spring Security dependency CVE + several others
+- CI's Trivy dependency scan has never actually run against this branch
+  (same root cause as the gitleaks gap above). Ran it manually against
+  this project's own generated CycloneDX SBOM and found real, fixed CVEs
+  including CVE-2026-22732 (CRITICAL — Spring Security policy bypass and
+  information disclosure), directly relevant since Spring Security
+  enforces this app's local API token auth (ADR-0008).
+- Bumped `spring-boot` 3.5.6 -> 3.5.16 (latest patch on the same minor
+  line) — its BOM also fixed Tomcat/Spring Framework/Spring Data
+  versions, resolving several more CVEs at once. Also bumped the
+  postgresql driver and assertj-core (test-only) for their own listed
+  CVEs. The BOM still pinned Tomcat to a version carrying 3 CRITICAL
+  access-control/auth-bypass CVEs; overrode it directly via
+  `ext["tomcat.version"]`.
+- CRITICAL/HIGH unfixed-CVE count on the regenerated SBOM: 20 -> 0.
+  Verified via `./gradlew clean build` (33/33 tests) and live against a
+  throwaway backend instance (auth filter still correctly returns 401
+  without a token, real data with one).
+
 ### Notes
 - No real health data is used in development or testing. All fixtures are
   synthetic or explicitly anonymized.
