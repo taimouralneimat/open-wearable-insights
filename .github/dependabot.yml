@@ -7,6 +7,10 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    # Waits N days after a new version is published before proposing it —
+    # a newly-published package can still be malicious or unstable.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "java"
@@ -23,7 +27,6 @@ updates:
           - "org.junit.jupiter:*"
           - "org.assertj:*"
           - "org.mockito:*"
-          - "org.testcontainers:*"
 
   # Flutter client — pub
   - package-ecosystem: "pub"
@@ -32,6 +35,8 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "flutter"
@@ -45,6 +50,8 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "github-actions"
@@ -58,6 +65,8 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "docker"
