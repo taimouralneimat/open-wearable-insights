@@ -15,6 +15,7 @@ import 'package:open_wearable_insights/features/activities/training_load_page.da
 import 'package:open_wearable_insights/features/activities/vo2max_page.dart';
 import 'package:open_wearable_insights/features/strength/strength_trend_page.dart';
 import 'package:open_wearable_insights/features/strength/strength_log_page.dart';
+import 'package:open_wearable_insights/features/trends/trends_page.dart';
 import 'package:open_wearable_insights/features/settings/data_quality_page.dart';
 import 'package:open_wearable_insights/features/journal/journal_page.dart';
 import 'package:open_wearable_insights/features/profile/profile_page.dart';
@@ -144,6 +145,10 @@ class OpenWearableInsightsApp extends StatelessWidget {
         builder: (context, state) => const DataQualityPage(),
       ),
       GoRoute(
+        path: '/trends',
+        builder: (context, state) => const TrendsPage(),
+      ),
+      GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfilePage(),
       ),
@@ -203,7 +208,10 @@ class AppShell extends StatelessWidget {
 }
 
 /// Overflow menu used on each tab's app bar for the secondary "more" actions
-/// (import, data quality) that don't belong in the primary bottom nav.
+/// (profile, trends overview, import, data quality, privacy) that don't
+/// belong in the primary bottom nav. Trends (parity-matrix row 8) lives
+/// here rather than as a 5th bottom-nav tab — that's a bigger IA change
+/// deliberately left alone this pass.
 class MoreMenuButton extends StatelessWidget {
   const MoreMenuButton({super.key});
 
@@ -219,6 +227,14 @@ class MoreMenuButton extends StatelessWidget {
           child: ListTile(
             leading: Icon(Icons.person_outline),
             title: Text('Profile'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        PopupMenuItem(
+          value: 'trends',
+          child: ListTile(
+            leading: Icon(Icons.trending_up),
+            title: Text('Trends'),
             contentPadding: EdgeInsets.zero,
           ),
         ),
