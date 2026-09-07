@@ -53,8 +53,6 @@ dependencies {
     // Test
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.modulith.starter.test)
-    testImplementation(libs.testcontainers.junit.jupiter)
-    testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito.core)
 }
