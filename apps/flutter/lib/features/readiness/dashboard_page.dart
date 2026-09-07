@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/app.dart';
 import '../../app/theme.dart';
@@ -11,14 +10,14 @@ import '../../widgets/state_views.dart';
 /// Dashboard page — shows readiness score, factor contributions, and daily coach.
 ///
 /// Handles all states: empty, loading, calibration, stale, partial, error, populated.
-class DashboardPage extends ConsumerStatefulWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+  State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends ConsumerState<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage> {
   final _apiClient = ApiClient();
   ReadinessResponse? _readiness;
   ScoreDiffResponse? _scoreDiff;
