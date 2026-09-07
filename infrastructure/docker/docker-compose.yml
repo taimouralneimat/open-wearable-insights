@@ -4,7 +4,21 @@
 
 services:
   postgres:
-    image: timescale/timescaledb:2.17.2-pg16
+    # 2.17.2-pg16 (previously pinned here) carries ~380 CRITICAL/HIGH CVE
+    # findings (19 CRITICAL) across its Alpine base + bundled Go tools —
+    # found via `trivy image` against the actual running image, not just
+    # the fs/SBOM scans this session ran against the app's own code.
+    # 2.29.2-pg16 (current as of 2026-09-07, same PostgreSQL 16 major
+    # version, same TimescaleDB extension family) cuts that to 79 findings
+    # (4 CRITICAL) on the same scan. NOT applied to the running container
+    # by this change alone — bumping requires `docker compose pull &&
+    # docker compose up -d postgres` against the real local dev database,
+    # a state-changing action outside terminal-automated scope this
+    # session; likely also needs `ALTER EXTENSION timescaledb UPDATE;`
+    # once, per TimescaleDB's own upgrade convention for a version jump
+    # this size. Re-scan after bumping again, same reproducibility
+    # reasoning as the ollama image's exact tag below.
+    image: timescale/timescaledb:2.29.2-pg16
     container_name: open-wearable-insights-postgres
     environment:
       POSTGRES_USER: owi
