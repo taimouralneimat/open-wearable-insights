@@ -6,6 +6,7 @@ import com.openwearableinsights.api.journal.application.JournalService;
 import com.openwearableinsights.api.journal.domain.HabitStreak;
 import com.openwearableinsights.api.milestones.domain.Milestone;
 import com.openwearableinsights.api.milestones.domain.MilestonesResponse;
+import com.openwearableinsights.api.readiness.application.ReadinessScoreHistoryRepository;
 import com.openwearableinsights.api.strength.application.StrengthTrainingService;
 import com.openwearableinsights.api.strength.domain.StrengthActivityTrend;
 import com.openwearableinsights.api.strength.domain.StrengthActivityTrendPoint;
@@ -16,9 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -51,10 +54,13 @@ import java.util.Optional;
  * outputs without it, so a first version does not need the extra storage
  * and staleness-tracking complexity.
  *
- * <p><b>Four milestone types, chosen for a clean, honest "this is genuinely
+ * <p><b>Five milestone types, chosen for a clean, honest "this is genuinely
  * a new best" framing (see each check method's own Javadoc for the exact
  * comparison and thresholds):</b>
  * <ul>
+ *   <li><b>Readiness score</b> ({@code readiness_score}) — reuses {@link
+ *   ReadinessScoreHistoryRepository#findScoresByAccountId}, the app's own
+ *   centerpiece metric.</li>
  *   <li><b>Habit streak</b> ({@code habit_streak}) — reuses {@link
  *   JournalService#getStreaks}.</li>
  *   <li><b>Best tracked week of steps</b> ({@code steps_week}) — reuses
@@ -107,6 +113,10 @@ public class MilestoneService {
     // have anything to compare against.
     public static final int MIN_MONTHS_FOR_VO2MAX_MILESTONE = 2;
 
+    // Readiness score: need at least one real prior recorded day plus the
+    // most recent one to have anything to compare against.
+    public static final int MIN_DAYS_FOR_READINESS_MILESTONE = 2;
+
     // Strength: the 6-month window's monthly buckets are used as "any
     // tracked period" — a real, meaningful period, unlike the 7-day/daily
     // or 30-day/weekly windows which would make "the current, still
@@ -117,6 +127,9 @@ public class MilestoneService {
     private static final List<String> BASE_LIMITATIONS = List.of(
             "Every milestone here compares your own real, already-computed values against your own real "
                     + "historical values - never a fabricated or population-based claim, and never LLM-generated.",
+            "The readiness-score milestone compares your most recently RECORDED day's score, not necessarily "
+                    + "today's - a score is only recorded once one of the readiness/coach endpoints has actually "
+                    + "computed one for the day.",
             "The steps milestone compares weekly averages within your last " + STEPS_TREND_WINDOW_DAYS
                     + " days of tracked history (the widest window the existing activity-trends endpoint still "
                     + "buckets weekly) - not necessarily your entire account history if you have more than that.",
@@ -135,34 +148,88 @@ public class MilestoneService {
     private final ActivityInsightService activityInsightService;
     private final Vo2MaxService vo2MaxService;
     private final StrengthTrainingService strengthTrainingService;
+    private final ReadinessScoreHistoryRepository readinessScoreHistoryRepository;
 
     public MilestoneService(
             JournalService journalService,
             ActivityInsightService activityInsightService,
             Vo2MaxService vo2MaxService,
-            StrengthTrainingService strengthTrainingService
+            StrengthTrainingService strengthTrainingService,
+            ReadinessScoreHistoryRepository readinessScoreHistoryRepository
     ) {
         this.journalService = journalService;
         this.activityInsightService = activityInsightService;
         this.vo2MaxService = vo2MaxService;
         this.strengthTrainingService = strengthTrainingService;
+        this.readinessScoreHistoryRepository = readinessScoreHistoryRepository;
     }
 
     /**
      * Every genuine milestone found right now for this account. Honest
      * empty list — never fabricated filler — when nothing is a real new
-     * record. See class Javadoc for exactly which four checks run and why
+     * record. See class Javadoc for exactly which five checks run and why
      * sleep consistency is deliberately excluded.
      */
     public MilestonesResponse computeMilestones(Long accountId) {
         List<Milestone> milestones = new ArrayList<>();
 
+        checkReadinessScoreMilestone(accountId).ifPresent(milestones::add);
         milestones.addAll(checkHabitStreaks(accountId));
         checkStepsMilestone(accountId).ifPresent(milestones::add);
         checkVo2MaxMilestone(accountId).ifPresent(milestones::add);
         checkStrengthMilestone(accountId).ifPresent(milestones::add);
 
         return new MilestonesResponse(milestones, ALGORITHM_VERSION, BASE_LIMITATIONS);
+    }
+
+    /**
+     * A genuine milestone when the most recent real recorded day's
+     * readiness score is at least as high as every other real recorded day
+     * returned by {@link ReadinessScoreHistoryRepository#findScoresByAccountId}
+     * — the account's own highest computed readiness score ever, using the
+     * app's own centerpiece metric. "Most recent" is the latest real
+     * calendar date with a persisted score (see {@code
+     * ReadinessScoreHistoryRepository#upsertToday}, called whenever the
+     * readiness/coach endpoints compute a fresh score), not necessarily
+     * today if the account hasn't triggered a computation yet today.
+     * Requires at least {@value #MIN_DAYS_FOR_READINESS_MILESTONE} real
+     * recorded days so there is a genuine prior day to compare against.
+     */
+    private Optional<Milestone> checkReadinessScoreMilestone(Long accountId) {
+        try {
+            Map<LocalDate, Integer> scores = readinessScoreHistoryRepository.findScoresByAccountId(accountId);
+            if (scores.size() < MIN_DAYS_FOR_READINESS_MILESTONE) {
+                return Optional.empty();
+            }
+
+            LocalDate latestDate = scores.keySet().stream().max(Comparator.naturalOrder()).orElseThrow();
+            int currentScore = scores.get(latestDate);
+            int previousBest = scores.entrySet().stream()
+                    .filter(e -> !e.getKey().equals(latestDate))
+                    .mapToInt(Map.Entry::getValue)
+                    .max().orElse(0);
+
+            if (currentScore < previousBest) {
+                return Optional.empty();
+            }
+
+            return Optional.of(new Milestone(
+                    "readiness_score",
+                    "New readiness high",
+                    String.format(
+                            "Your readiness score reached %d/100 on %s - your highest recorded score across %d "
+                                    + "real tracked days (previous best: %d/100).",
+                            currentScore, latestDate, scores.size(), previousBest),
+                    currentScore,
+                    (double) previousBest,
+                    "score",
+                    latestDate.toString(),
+                    Instant.now()
+            ));
+        } catch (Exception e) {
+            log.warn("Failed to check readiness-score milestone for account {}: {}", accountId, e.getMessage(), e);
+            return Optional.empty();
+        }
     }
 
     /**

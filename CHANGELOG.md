@@ -325,8 +325,10 @@ own commits, not just Cline's.
   is returned when nothing genuinely new happened, never fabricated filler.
   No LLM involvement — plain deterministic templating, same convention as
   `DeterministicInsightEngine`.
-- Four milestone types, chosen for a clean "this is genuinely a new best"
-  comparison from data already computed elsewhere in this app: a habit
+- Five milestone types, chosen for a clean "this is genuinely a new best"
+  comparison from data already computed elsewhere in this app: the app's
+  own centerpiece readiness score reaching a new recorded high
+  (`ReadinessScoreHistoryRepository#findScoresByAccountId`), a habit
   streak reaching its own longest-ever length (`JournalService#getStreaks`,
   minimum 5 days so a 1-day tie isn't treated as meaningful), the most
   recent tracked week's average steps beating every other tracked week
