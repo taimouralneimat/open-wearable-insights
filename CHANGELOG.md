@@ -491,6 +491,34 @@ own commits, not just Cline's.
   throwaway backend instance (auth filter still correctly returns 401
   without a token, real data with one).
 
+### Fixed — CI config hardening, and a second real never-run bug found
+- Ran Semgrep (another SECURITY.md-listed scan that has never actually
+  triggered on this branch) manually. Found: `.github/dependabot.yml`'s
+  four ecosystems had no `cooldown` period (a newly-published package
+  can be proposed before the community has flagged it as malicious or
+  broken) — added `default-days: 7` to all four; and every GitHub
+  Actions step referenced a mutable tag or, for
+  `aquasecurity/trivy-action`, a floating `@master` branch — Semgrep's
+  own rule message cites trivy-action by name as a real historical
+  example of this exact supply-chain risk. Pinned all seven distinct
+  actions to their exact commit SHA (each with a `# vX` comment so
+  Dependabot's existing github-actions entry can still track updates).
+- While pinning, found a second real, previously-invisible CI bug (same
+  root cause as the earlier `flutter test` one): `gitleaks/gitleaks-action@v6`
+  doesn't exist — that repo's latest major tag is v3. The secret-scan
+  job would have failed outright the moment it ever actually ran.
+  Fixed to the real v3.
+- Also found Trivy's `scan-type: fs` step never actually checked a
+  single backend/Java dependency — it only understands lockfiles, and
+  this repo has no Gradle lockfile, so it silently only ever scanned
+  `apps/flutter/pubspec.lock`. Added a second scan step against the
+  backend's own generated CycloneDX SBOM (downloading the artifact the
+  existing `sbom` job already produces) so backend CVEs like the one
+  above would actually be caught going forward. Verified locally
+  against the exact file this job will produce/download; the full
+  multi-job artifact flow itself can't be dry-run outside real CI,
+  since none has triggered on this branch yet.
+
 ### Notes
 - No real health data is used in development or testing. All fixtures are
   synthetic or explicitly anonymized.
