@@ -354,6 +354,72 @@ own commits, not just Cline's.
   `@NamedInterface`s (mirroring the pattern already used by `vo2max`/
   `strength`/`sleep`) so the new module could compose their real,
   already-computed outputs instead of re-querying the same tables.
+- Extended with a sixth check reusing the app's own real recorded-day
+  history: the most recently recorded day's readiness score reaching a new
+  high across every other real recorded day
+  (`ReadinessScoreHistoryRepository#findScoresByAccountId`, minimum 2
+  recorded days so there's a genuine prior day to compare against). Verified
+  against `Map` iteration order — the "most recent" comparison uses the max
+  real date, not insertion/iteration order.
+
+### Added — Local LLM rephrasing wired into all three coach touchpoints (parity-matrix row 7)
+- `LlmInsightService` talks to Ollama's REST API directly via a plain Spring
+  `RestClient`, not Spring AI's `ChatClient` — live testing found Spring AI
+  1.0.1's `OllamaOptions` has no field to express Ollama's real
+  `"think": false` request parameter (confirmed via `javap` inspection of the
+  full field list), and the app's default model (`qwen3:8b`) is unusably
+  slow (18-45+s, frequent timeouts) with its default internal "thinking"
+  left on. The direct REST call with `think: false` set explicitly brought
+  response times to a consistent ~4-7s. The now-fully-unused
+  `spring-ai-ollama-spring-boot-starter` dependency was removed.
+- All three coach endpoints (`/coach/insight`, `/coach/why`,
+  `/coach/habit-cue`) share this one service: only the single piece of free
+  text each returns (summary/answer/reasoning) is optionally rephrased in a
+  warmer voice — every other field (score, factors, cited metrics,
+  confidence) always comes from the deterministic engine, never the LLM,
+  per this app's "LLM explains, never computes" core principle.
+- New `llmUsed` field on `Insight`/`WhyAnswer`/`HabitCue`, mutually exclusive
+  with the existing `fallbackUsed` — closes a real ambiguity where
+  `fallbackUsed=false` alone couldn't distinguish "LLM never attempted" from
+  "LLM attempted and succeeded." Flutter surfaces this honestly as a small
+  "Personalized locally" badge (`widgets/llm_badge.dart`), shown only when a
+  specific piece of text was genuinely LLM-rephrased.
+- Fixed a real, previously-undiscovered version-pinning bug found via live
+  testing: `infrastructure/docker/docker-compose.yml`'s pinned
+  `ollama/ollama:0.5.1` image predates Qwen3 support entirely and can't pull
+  it at all. Bumped to `0.32.15`.
+- Live-verified against a real local Ollama server: `/coach/insight` and
+  `/coach/why` confirmed returning `llmUsed: true` with genuine
+  fact-grounded rephrased text.
+
+### Added — Unified Trends overview page (parity-matrix row 8)
+- New `apps/flutter/lib/features/trends/trends_page.dart`, reachable from
+  the overflow "More" menu (`/trends` route) on every tab rather than a 5th
+  bottom-nav tab — restructuring the four primary tabs (Today/Sleep/
+  Activity/Journal) is a bigger IA decision deliberately left for a
+  dedicated pass, not bundled into this one.
+- One screen gives an honest at-a-glance summary of all four trend types
+  this app tracks (sleep, steps, VO2max, strength training) by reusing the
+  exact same real endpoints their existing detail pages already call — no
+  new backend logic, no duplicated charts/history/methodology. Each section
+  shows the real most-recent value plus a trend direction (first-half vs.
+  second-half of the window, same honest convention `_TrendSummaryRow`
+  already used) and taps through to the existing full detail page.
+- Each of the four sources is fetched independently and best-effort — one
+  missing/failed source never blanks the rest of the overview; honest empty
+  state per section, never a fabricated value.
+
+### Verified — Live end-to-end verification of previously untested rows
+- Six rows (18 VO2max, 20 Sleep Planner strain adjustment, 24 Healthspan,
+  25 Strength trends, 26 Workout generator, 30 Monthly report) had shipped
+  unit-tested but explicitly flagged "not yet live-verified against a
+  running backend." Booted a throwaway backend instance against the real
+  dev database and made read-only requests against each: every one behaved
+  honestly against this account's real (mostly sparse) data — correct
+  `confidence: "none"`/empty-array/`sufficientHistory: false` responses with
+  the specific missing-data reasons named, never an error or a fabricated
+  number — and the workout generator produced a real, fully-formed
+  deterministic plan end-to-end.
 
 ### Notes
 - No real health data is used in development or testing. All fixtures are
