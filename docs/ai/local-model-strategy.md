@@ -6,7 +6,11 @@
 ## Runtime
 
 - **Ollama** bound to `127.0.0.1:11434` only.
-- Integrated via **Spring AI 1.0.1** (GA).
+- Integrated via a direct Spring `RestClient` call to Ollama's `/api/chat`
+  REST endpoint, not Spring AI — see ADR-0003's 2026-09-07 status update for
+  why (Spring AI 1.0.1's `OllamaOptions` can't express Ollama's `think: false`
+  request field, which the default model needs to avoid 18-45+s response
+  times).
 - Model name is **never hard-coded**; configured via `application.yml` and
   environment variables.
 
@@ -36,5 +40,6 @@
 
 ## Versioning
 
-- Spring AI 1.0.1 GA is used. No snapshots, milestones, or RCs.
+- No Spring AI dependency; a plain Spring `RestClient` is used instead (see
+  ADR-0003's status update).
 - Model swaps require a compatibility check and an ADR.

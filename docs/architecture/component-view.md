@@ -14,7 +14,7 @@ graph TB
     Readiness[readiness<br/>versioned · provisional → calibrated]
     Journal[journal<br/>untrusted input]
     Insights[insights<br/>deterministic engine]
-    Coach[coach<br/>Spring AI → Ollama · fallback]
+    Coach[coach<br/>RestClient → Ollama · fallback]
     Privacy[privacy<br/>export · delete · consent]
     Export[export<br/>complete local export]
     Administration[administration<br/>settings · model config]
@@ -60,7 +60,7 @@ graph TB
 | readiness | ✅ implemented | v0.1 provisional |
 | journal | stub | Phase 3 |
 | insights | ✅ implemented | deterministic engine |
-| coach | ✅ implemented | Spring AI + fallback |
+| coach | ✅ implemented | RestClient → Ollama + fallback (ADR-0003 status update) |
 | privacy | partial | export/delete Phase 1–2 |
 | export | partial | Phase 1–2 |
 | administration | stub | settings |

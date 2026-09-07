@@ -30,3 +30,29 @@ Adopt the following pinned Flutter stack:
   Connect may need native code.
 - **Mitigations**: document any chart swap in an ADR; create clean interfaces
   around native integrations; no snapshots/milestones/RCs.
+
+## Status update (2026-09-07): dropped Riverpod, Freezed, and json_serializable
+
+The go_router/Dio/fl_chart/flutter_secure_storage choices above are
+unchanged. Riverpod and the Freezed/json_serializable code-gen toolchain
+were removed after an audit found zero actual usage anywhere in `lib/`: no
+`@freezed`/`@JsonSerializable`/`@riverpod` annotation, no generated
+`.g.dart`/`.freezed.dart` file, and not even a plain `Provider`/
+`StateProvider`/`FutureProvider` declaration. Riverpod had been wired in
+only as inert scaffolding (`ProviderScope` in `main.dart`,
+`ConsumerStatefulWidget` on `DashboardPage`) that nothing ever actually
+read from — every page in this app manages its own local `State` with
+`setState` and parses JSON by hand instead, and always has. Left in place,
+the declared dependencies misled a reader into assuming Riverpod-based
+state management or Freezed data classes were this app's real pattern.
+
+Removed `flutter_riverpod`, `riverpod_annotation`, `riverpod_generator`,
+`freezed_annotation`, `freezed`, `json_annotation`, `json_serializable`, and
+`build_runner` from `pubspec.yaml`; `DashboardPage` is now a plain
+`StatefulWidget`. `flutter pub get` dropped 47 transitive dependencies.
+`fl_chart` is unaffected — still genuinely unused today too, but kept as a
+plausible future chart-widget candidate rather than abandoned scaffolding
+(every trend view currently renders its own custom bars instead). See
+`CHANGELOG.md`'s "Removed dead dependencies" entry for the verification
+this was actually safe (`flutter analyze`/`test`/`build web` all clean
+after removal).
