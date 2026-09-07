@@ -22,7 +22,11 @@
 | Default | `qwen3:8b` | ~8 GB | Balanced quality/speed |
 | Higher-quality | `qwen3:14b` | ~16 GB | Best local quality |
 
-- Profiles are user-selectable in Settings.
+- Profiles are illustrative sizing guidance, not a built feature: there is no
+  Settings-page model picker today. The model is set once via
+  `owi.llm.model` (`application.yml`/env var) — see `LlmInsightService`. The
+  Privacy page shows live, read-only LLM status (enabled/available), not a
+  selector.
 - The app detects Ollama availability and degrades gracefully.
 
 ## Privacy
